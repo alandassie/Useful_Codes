@@ -1,0 +1,33 @@
+2
+Read_MainConfiguration
+no     !mc:yes or no. Main-configuration for nn and pp. Keep only conf. n_1=n_2 and p_1=p_2
+Read_strengths
+pp          !Ti42=Ca40+p+p=-4.7133(-4.836)
+ -62.4182 1.6    !V_se beta_se
+   0.     1.6    !V_to beta_to 
+nn          !Ca42=Ca40+n+n=-19.9498(-19.843)
+ -62.4182 1.6    !V_se beta_se
+   0.     1.6    !V_to beta_to 
+np          !Sc42=Ca40+p+n=-12.5186(-10.411)
+ -62.4182 1.6    !V_se beta_se
+   0.     1.6    !V_to beta_to 
+  -4.4617 1.6    !V_so beta_so
+  -8.7000 1.6    !V_te beta_te
+Number_of_nn_calc,0   !Number of nn-states to be calculated for the strength's fitting
+ 0,+,1,+,2,+,3,+,4,+    !J^pi for each state (all states in a single line)
+Number_of_pp_calc,0   !Number of pp-states to be calculated for the strength's fitting
+ 0,+,1,+,2,+,3,+,4,+    !J^pi for each state (all states in a single line)
+Number_of_np_calc,0   !Number of np-states to be calculated for the strength's fitting
+ 0,+,1,+,2,+,3,+,4,+    !J^pi for each state (all states in a single line)
+ 4.7133 !cutoff in pp excitation energy for the pp basis
+19.9498 !cutoff in nn excitation energy for the nn basis
+nn-pp   !four body J an parity
+0,1     !J, parity
+____________________________________
+Opt Mode = 0 ! Optimization mode, 0: only T=0, 1: Full Vnp
+Chi Seed = 8
+Exp Ener = -33.423
+=================================================
+E_0+(44Ti)=-33.423 MeV Experimental
+E_2+(44Ti)=-32.340 MeV Experimental
+=================================================
