@@ -18,6 +18,13 @@ You have to change the lines 29 and 30 to set the corresponding  filename and sp
 
 Here we present the codes related to the GSMCC code.
 
+### GSM+GSMCC_run.py
+
+Created on August 2024 by Alan D.K. for 11C_Project
+
+This code run GSM and GSMC. The running information must be in a file called GSM+GSMCC_run.in located in the main folder of the GSMCC code (i.e. CC_dir/GSM+GSMCC_run.py).
+An example of the input file can be founded at the end of the code file.
+
 ### BasisTest.py
 
 Created on August 2024 by Alan D.K. for 11C_Project.
@@ -42,7 +49,7 @@ This code Test different shapes of the CC contours
 
 Comment on October 29 2024: Outdated code, can be improved with an independent input file called ContourMod.in when needed!!
 
-### ContourMod.py
+### ThrTest.py
 
 Created on August 2024 by Alan D.K. for 11C_Project
 
