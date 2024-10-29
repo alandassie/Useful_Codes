@@ -25,6 +25,19 @@ Created on August 2024 by Alan D.K. for 11C_Project
 This code run GSM and GSMC. The running information must be in a file called GSM+GSMCC_run.in located in the main folder of the GSMCC code (i.e. CC_dir/GSM+GSMCC_run.py).
 An example of the input file can be founded at the end of the code file.
 
+### GSM+GSMCC_ICF.py
+
+Created on October 2024 by Alan D.K. for 11C_Project
+
+This code run GSM (if needed) and GSMCC and then
+optimize the complex (or not) interaction corrective factor
+to reproduce the experimental data. 
+You have to define the input and output files and put
+the experimental values (energy and width).
+
+An example of the input file "GMS+GSMCC_ICF.in" can be found
+at the end of the code file.
+
 ### BasisTest.py
 
 Created on August 2024 by Alan D.K. for 11C_Project.

@@ -2,21 +2,24 @@
     Created on October 2024 by Alan D.K. for 11C_Project
 
     This code run GSM (if needed) and GSMCC and then
-    optimize the complex interaction corrective factor
+    optimize the complex (or not) interaction corrective factor
     to reproduce the experimental data. 
     You have to define the input and output files and put
-    the experimental values (energy and width) here.
+    the experimental values (energy and width).
+    
+    An example of the input file "GMS+GSMCC_ICF.in" can be found
+    at the end of the code.
 """
 
 import subprocess as sp
 import time
 import os
 import math as m
-from scipy.optimize import least_squares as least
+# from scipy.optimize import least_squares as least
 from scipy.optimize import newton
 
 # LOG FILE
-logfile = os.getcwd() + '/GSM+GSMCC_run.log'
+logfile = os.getcwd() + '/GSM+GSMCC_ICF.log'
 
 # Declaration of funcitons
 def erease_output_file():
@@ -72,7 +75,10 @@ def f(x):
     with open(readfilename_CC,'r') as gsmin:
         inputfile_lines = gsmin.read().split('\n')
     aux = inputfile_lines[icf_line].split()
-    inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " " + str(x[1])
+    if len(x) == 2: # Complex corrective factor
+        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " " + str(x[1])
+    else: # Real corrective factor
+        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0])
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
@@ -80,8 +86,8 @@ def f(x):
     #
     outfilename_CCi = outfilename_CC + str(int(time.time()))
     start_gsmcc = time.time()
-    print_twice('\n mpirun -np 2 ./CC_exe < '+readfilename_CC+' > '+outfilename_CCi)
-    sp.run(['mpirun -np 2 ./CC_exe < '+readfilename_CC+' > '+outfilename_CCi], shell=True)
+    print_twice('\n ' + running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi)
+    sp.run([running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi], shell=True)
     end_gsmcc = time.time()
     time_gsmcc = end_gsmcc-start_gsmcc
     print_twice("Time to calculate: ",time_gsmcc, "s")
@@ -111,11 +117,16 @@ def f(x):
     print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
     print_twice('\n'+20*'-'+'\n')
     #
-    return [res_e,res_w]
+    if len(x) == 2: # Complex corrective factor
+        return_residue = [res_e,res_w]
+    else:
+        return_residue = res_e
+    #
+    return return_residue
 # .-
 
 # INPUT FILE
-readfilename = "GSM+GSMCC_run.in"
+readfilename = "GSM+GSMCC_ICF.in"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # LOGILE
@@ -138,7 +149,25 @@ storage_directory = data[theline+1]
 # if sure.lower() == "no":
 #     print("Change it in python file!")
 #     exit()
-
+# Checking if it is a MPI or OPENMP/secuential calculation
+theline = searchline(readfilename,"PARALLELISM")
+parallelism_type = data[theline+1]
+parallelism_nodes = data[theline+2]
+if parallelism_type == 'MPI':
+    running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
+else:
+    running_prefix = ' '
+# Checking if we need machinefile
+theline = searchline(readfilename,"MACHINEFILE")
+if theline != None:  
+    machinefile_name = data[theline+1]
+    running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
+# Checking if real or complex corrective factors will be used
+theline = searchline(readfilename,"CORRECTIVEFACTORS")
+icf_type = data[theline+1]
+icf_real_seed = float(data[theline+2])
+if icf_type == 'COMPLEX':
+    icf_imag_seed = float(data[theline+3])
 
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files")
@@ -152,6 +181,13 @@ if theline != None:
     gsm_files = len(outfilename_GSM)
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
+        
+# Reading experimental data
+theline = searchline(readfilename,"EXPERIMENTALVALUES")
+expene_read = float(data[theline+1])
+expwid_read = float(data[theline+2])
+index_read = int(data[theline+3])
+
 
 # Start calculation
 start_main = time.time()
@@ -164,8 +200,8 @@ if theline != None:
         inp = readfilename_GSM[i]
         out = outfilename_GSM[i]
         start_gsm = time.time()
-        print_twice('\n mpirun -np 2 ./GSM_exe < '+inp+' > '+out)
-        sp.run(['mpirun -np 2 ./GSM_exe < '+inp+' > '+out], shell=True)
+        print_twice('\n ' + running_prefix + './GSM_exe < '+inp+' > '+out)
+        sp.run([running_prefix + './GSM_exe < '+inp+' > '+out], shell=True)
         end_gsm = time.time()
         time_gsm = end_gsm-start_gsm
         print_twice("Time to calculate: ",time_gsm, "s")
@@ -181,15 +217,19 @@ sp.run(['python3 EditThresholds_alt.py'], shell=True)
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
 # Experimental state to optimize with interaction.corrective.factor
-expene = -36.491 # Energy in MeV
-expwid = 5.0 # Width in keV
-numberindex = 0 
+expene = expene_read # Energy in MeV
+expwid = expwid_read # Width in keV
+numberindex = index_read
 search = 'E(reference frame) :'
 # Line with the corrective factor
 icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
 #
 # opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
-opt = newton(f,[1.048,0],tol=1e-4,maxiter=30, full_output=True)
+if icf_type == 'COMPLEX':
+    opt = newton(f,[icf_real_seed,icf_imag_seed],tol=1e-4,maxiter=30, full_output=True)
+else:
+    opt = newton(f,[icf_real_seed],tol=1e-4,maxiter=30, full_output=True)
+#
 print_twice(opt)
 #
 end_main = time.time()
