@@ -2,6 +2,9 @@
     Created on June 2024 by Alan D.K.
 
     This code Test different shapes of the CC contours
+    
+    Comment on October 29 2024: Outdated code, can be improved with an independent
+    input file called ContourMod.in when needed!!
 """
 
 import numpy as np

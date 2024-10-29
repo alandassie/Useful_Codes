@@ -24,7 +24,7 @@ Created on August 2024 by Alan D.K. for 11C_Project.
 
 This code run multiples GSM and GSMCC calculations in order to calculate the GSMCC spectrum with different Basis.parameters.
 
-Comment on October 29: Outdated code, can be improved with an independent input file called BasisTest.in when needed!!
+Comment on October 29 2024: Outdated code, can be improved with an independent input file called BasisTest.in when needed!!
 
 ### ChannelTest.py
 
@@ -32,4 +32,12 @@ Created on August 2024 by Alan D.K. for 11C_Project
 
 This code increase the number of channels in the CC calculations.
 
-Comment on October 29: Outdated code, can be improved with an independent input file called ChannelTest.in when needed!!
+Comment on October 29 2024: Outdated code, can be improved with an independent input file called ChannelTest.in when needed!!
+
+### ContourMod.py
+
+Created on June 2024 by Alan D.K.
+
+This code Test different shapes of the CC contours
+
+Comment on October 29 2024: Outdated code, can be improved with an independent input file called ContourMod.in when needed!!
