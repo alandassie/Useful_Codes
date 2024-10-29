@@ -2,6 +2,9 @@
     Created on August 2024 by Alan D.K. for 11C_Project
 
     This code increase the number of channels in the CC calculations.
+    
+    Comment on October 29: Outdated code, can be improved with an independent
+    input file called ChannelTest.in when needed!!
 """
 
 import numpy as np
