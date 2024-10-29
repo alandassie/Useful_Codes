@@ -41,3 +41,16 @@ Created on June 2024 by Alan D.K.
 This code Test different shapes of the CC contours
 
 Comment on October 29 2024: Outdated code, can be improved with an independent input file called ContourMod.in when needed!!
+
+### ContourMod.py
+
+Created on August 2024 by Alan D.K. for 11C_Project
+
+This code run GSM and GSMC. You have to define the input and output files.
+This code is used to test the behavoir of the GSMCC eigenvalues respect to the position of the thresholds.
+
+Comment on October 29 2024: Outdated code, can be improved with an independent input file called ThrTest.in when needed!!
+
+
+
+
