@@ -1,7 +1,9 @@
-# Minimization Codes
+# Optimization Codes
 This is a set of python codes used for the minimization and/or optimization of calculated observables to experimental values.
+It originaly started with the FBWF code used on my PhD Thesis, and then continue with the post-doc at GANIL.
+We will present each code separatly by folders. Remember that the code will act on the previously folder, this is, in "../".
 
-## This is the full list of codes
+## PhD. Thesis Codes: FBWF-CODE folder
 
 ### FBWF_Opt.py
 This code optimize the four body energy over a core, by adjusting the potential strengths of the np interaction to get the experimental value. For this matter, it use the least_squares minimization package from the scipy.optimize library.
