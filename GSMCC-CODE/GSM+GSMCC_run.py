@@ -118,7 +118,7 @@ else:
 # Edit thresholds
 print_twice("\nEdit thresholds in %s"% storage_directory)
 os.chdir(storage_directory)
-sp.run(['python3 EditThresholds_alt.py'], shell=True)
+sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 # RUN CC
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
