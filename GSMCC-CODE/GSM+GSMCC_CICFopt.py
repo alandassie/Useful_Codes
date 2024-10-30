@@ -235,3 +235,43 @@ print_twice(opt)
 end_main = time.time()
 time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
+
+"""
+    Example of GSM+GSMCC_ICF.in file:
+    _________________________________
+    GSM-DIRECTORY
+    /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/GSM_dir
+    STORAGE-DIRECTORY
+    /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/storage_11C_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30
+    
+    PARALLELISM
+    MPI
+    2
+    MACHINEFILE
+    machinefile
+    
+    CORRECTIVEFACTORS
+    COMPLEX
+    1.025
+    0.0
+    
+    EXPERIMENTALVALUES
+    -36.491
+    5.0
+    0
+
+    GSMCC-files
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
+
+    GSM-files
+    CLUSPHY_targforCC_10B_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
+    CLUSPHY_targforCC_10B_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    CLUSPHY_targforCC_7Be_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
+    CLUSPHY_targforCC_7Be_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    CLUSPHY_projforCC_protonnocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
+    CLUSPHY_projforCC_protonnocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
+    CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    _________________________________
+"""
