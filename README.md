@@ -38,6 +38,20 @@ the experimental values (energy and width).
 An example of the input file "GMS+GSMCC_ICF.in" can be found
 at the end of the code file.
 
+### EdithThresholds.py
+
+Created on July 2024 by Alan D.K. for 11C_Project.
+
+This code will edit each one of the files created by
+GSM of the form "eigenvector_E_averaged_n_scat_Za_Nb_JPi_i"
+where a, b are the number of protons and neutrons, respectively,
+JPi is the state of the Target and i is the index.
+
+You have to define each tuple (a,b,JPi,i,ExpEner) with the
+experimental energy measured respect to the core in a file
+called "EdithThresholds.in" that must be placed in the workspace.
+An example can be found at the end of the code.
+
 ### BasisTest.py
 
 Created on August 2024 by Alan D.K. for 11C_Project.
