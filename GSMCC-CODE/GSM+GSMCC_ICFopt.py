@@ -168,6 +168,11 @@ icf_type = data[theline+1]
 icf_real_seed = float(data[theline+2])
 if icf_type == 'COMPLEX':
     icf_imag_seed = float(data[theline+3])
+# Reading experimental data
+theline = searchline(readfilename,"EXPERIMENTALVALUES")
+expene_read = float(data[theline+1])
+expwid_read = float(data[theline+2])
+index_read = int(data[theline+3])
 
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files")
@@ -181,13 +186,6 @@ if theline != None:
     gsm_files = len(outfilename_GSM)
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
-        
-# Reading experimental data
-theline = searchline(readfilename,"EXPERIMENTALVALUES")
-expene_read = float(data[theline+1])
-expwid_read = float(data[theline+2])
-index_read = int(data[theline+3])
-
 
 # Start calculation
 start_main = time.time()
