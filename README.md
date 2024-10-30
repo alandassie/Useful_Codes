@@ -1,5 +1,5 @@
-# Optimization Codes
-This is a set of python codes used for the minimization and/or optimization of calculated observables to experimental values.
+# Useful Codes
+This is a set of python codes used for the calculation, minimization and/or optimization of results comming from differents many-body shell model codes.
 It originaly started with the FBWF code used on my PhD Thesis, and then continue with the post-doc at GANIL.
 We will present each code separatly by folders. Remember that the code will act on the previously folder, this is, in "../".
 
