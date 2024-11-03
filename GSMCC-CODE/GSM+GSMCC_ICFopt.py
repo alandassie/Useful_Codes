@@ -224,9 +224,9 @@ icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composit
 #
 # opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
 if icf_type == 'COMPLEX':
-    opt = newton(f,[icf_real_seed,icf_imag_seed],tol=1e-4,maxiter=30, full_output=True)
+    opt = newton(f,[icf_real_seed,icf_imag_seed],tol=5e-5,maxiter=30, full_output=True)
 else:
-    opt = newton(f,[icf_real_seed],tol=1e-4,maxiter=30, full_output=True)
+    opt = newton(f,[icf_real_seed],tol=5e-5,maxiter=30, full_output=True)
 #
 print_twice(opt)
 #
