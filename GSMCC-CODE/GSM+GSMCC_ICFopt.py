@@ -78,7 +78,7 @@ def f(x):
     if len(x) == 2: # Complex corrective factor
         inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " " + str(x[1])
     else: # Real corrective factor
-        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0])
+        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " 0.0 "
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
