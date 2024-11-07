@@ -38,6 +38,22 @@ the experimental values (energy and width).
 An example of the input file "GMS+GSMCC_ICF.in" can be found
 at the end of the code file.
 
+### GSMCC_DCS_ene-ang.py
+
+Created on November 2024 by Alan D.K. for 11C_Project,
+in particular to calculate the alpha elastic dif. cross
+section with different pair (ene,ang) each time, in order
+to compare with the experiment H. Yamaguchi et al., Phys. Rev. C 87, 034303 (2013).
+
+This code run GSMCC multiple times in order to calculate
+the Differential Cross Section with different combinations
+of energies and angles. The data is read from a file called
+"GSMCC_DCS_ene-ang.in". An example can be found at the end of the code.
+
+The code also use the input file "GSM+GSMCC_run.in" of the code
+GSM+GSMCC_run.py as guide of calculations. An example of that file
+can be found at the end of the GSM+GSMCC_run.py code.
+
 ### EdithThresholds.py
 
 Created on July 2024 by Alan D.K. for 11C_Project.
