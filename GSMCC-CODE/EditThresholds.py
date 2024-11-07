@@ -49,7 +49,7 @@ def searchline_all(file,phrase):
 #     exit()
 
 # INPUT FILE
-readfilename = "EdithThresholds.in"
+readfilename = "EditThresholds.in"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 
@@ -141,7 +141,7 @@ for state in targets:
 
 
 """
-    Example of EdithThresholds.in file:
+    Example of EditThresholds.in file:
     _________________________________
     TARGETS
     Z,N,JPi,i,ENE
