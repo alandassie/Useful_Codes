@@ -49,7 +49,7 @@ def searchline_all(file,phrase):
 #     exit()
 
 # INPUT FILE
-readfilename = "EdithThresholds.in"
+readfilename = "EditThresholds.in"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 
