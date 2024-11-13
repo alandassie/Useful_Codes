@@ -69,15 +69,58 @@ def searchlinefinal(file,phrase):
             l_num = None
     return l_num
 # .-
-#
-# Defining the lines of data
-line = searchline(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
-
 # Reading data
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
     #
-    
+#
+# Defining the lines of data
+line = searchline(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
+# Search first occ probabilities
+i = 0
+while i < 1000:
+    aux = data[line+i]
+    finder = aux.find('occupation probability :')
+    if finder == -1:
+        i += 1
+        continue
+    else:
+        line_occprob_i = line+i
+        break
+# Search last occ probabilities
+i = 0
+while i < 1000:
+    aux = data[line_occprob_i+i]
+    finder = aux.find('occupation probability :')
+    if finder != -1:
+        i += 1
+        continue
+    else:
+        line_occprob_f = line_occprob_i+i
+        break
+# Search first partial width
+i = 0
+while i < 1000:
+    aux = data[line_occprob_f+i]
+    finder = aux.find('(alternative current formula)')
+    if finder == -1:
+        i += 1
+        continue
+    else:
+        line_partwidth_i = line_occprob_f+i
+        break
+# Search last partial width
+i = 0
+while i < 1000:
+    aux = data[line_occprob_f+i]
+    finder = aux.find('(alternative current formula)')
+    if finder != -1:
+        i += 1
+        continue
+    else:
+        line_partwidth_f = line_partwidth_i+i
+        break
+
     
     
     
