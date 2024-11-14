@@ -74,11 +74,21 @@ def f(x):
     # Open GSMCC input file
     with open(readfilename_CC,'r') as gsmin:
         inputfile_lines = gsmin.read().split('\n')
-    aux = inputfile_lines[icf_line].split()
-    if len(x) == 2: # Complex corrective factor
-        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " " + str(x[1])
-    else: # Real corrective factor
-        inputfile_lines[icf_line] = "  " + aux[0] + " " + str(x[0]) + " 0.0 "
+    aux1 = inputfile_lines[icf_line].split()
+    if icf_type == 'COMPLEX': # Complex corrective factors
+        if len(x) == 4: # Interaction and cluster corrective factors
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
+            #
+            # CAN BE MORE THAN FOUR!!
+        else: # Only interaction corrective factor
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
+    elif icf_type == 'REAL': # Real interaction corrective factor
+        if len(x) == 2: # Interaction and cluster corrective factors
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
+            #
+            # CAN BE MORE THAN FOUR!!
+        else: # Only interaction corrective factor
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
@@ -162,17 +172,44 @@ theline = searchline(readfilename,"MACHINEFILE")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
-# Checking if real or complex corrective factors will be used
+#
+# Checking if real or complex interaction corrective factors will be used
 theline = searchline(readfilename,"CORRECTIVEFACTORS")
 icf_type = data[theline+1]
 icf_real_seed = float(data[theline+2])
 if icf_type == 'COMPLEX':
     icf_imag_seed = float(data[theline+3])
+#
+# Checking if real or complex clusters corrective factors will be used
+used_ccf = 0
+theline = searchline(readfilename,"CLUSTERCORRFACTORS")
+if theline != None:
+    used_ccf = 1
+    ccf_numberofcluster = int(data[theline+1])
+    ccf_clusters = np.zeros(ccf_numberofcluster) # NUMPY CANNOT BE STR ARRAY!!!
+    ccf_real_seed = np.zeros(ccf_numberofcluster)
+    if icf_type == 'COMPLEX':
+        ccf_imag_seed = np.zeros(ccf_numberofcluster)
+    #
+    for i in range(0,ccf_numberofcluster):
+        if icf_type == 'COMPLEX':
+            factor == i*3
+            ccf_imag_seed[i] = float(data[theline+4+factor])
+        else:
+            factor == i*2
+        ccf_clusters[i] = data[theline+2+factor]
+        ccf_real_seed[i] = float(data[theline+3+factor])
+#
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES")
-expene_read = float(data[theline+1])
-expwid_read = float(data[theline+2])
-index_read = int(data[theline+3])
+numberofstates = int(data[theline+1])
+expene_read = np.zeros(numberofstates)
+expwid_read = np.zeros(numberofstates)
+index_read = np.zeros(numberofstates)
+for i in range(0,numberofstates):
+    expene_read[i] = float(data[theline+2+i*3])
+    expwid_read[i] = float(data[theline+3+i*3])
+    index_read[i] = float(data[theline+4+i*3]) # Must be converted to int later
 
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files")
@@ -214,18 +251,24 @@ sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
+#
+# Defining optimization part
 # Experimental state to optimize with interaction.corrective.factor
 expene = expene_read # Energy in MeV
 expwid = expwid_read # Width in keV
 numberindex = index_read
 search = 'E(reference frame) :'
-# Line with the corrective factor
+# Line with the interaction corrective factor
 icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
+# Lines with the cluster corrective factor
+ccf_lines = np.zeros(ccf_numberofcluster)
+for i in range(0,ccf_numberofcluster):
+    ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
 # opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
-if icf_type == 'COMPLEX':
+if icf_type == 'COMPLEX' and used_ccf == 0:
     opt = newton(f,[icf_real_seed,icf_imag_seed],tol=5e-5,maxiter=30, full_output=True)
-else:
+elif icf_type != 'COMPLEX' and used_ccf == 0:
     opt = newton(f,[icf_real_seed],tol=5e-5,maxiter=30, full_output=True)
 #
 print_twice(opt)
