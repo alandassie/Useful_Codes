@@ -133,13 +133,13 @@ print_twice("\nEdit thresholds in %s"% storage_directory)
 os.chdir(storage_directory)
 sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
-# Line with energy, angle
-energy_line = searchline(readfilename_CC,"MeV(E.kinetic.total.system.CM)")
-angle_line = energy_line+3
-#
 # Run GSMCC for each pair ene-ang, and move the files to different folders
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
+#
+# Line with energy, angle
+energy_line = searchline(readfilename_CC,"MeV(E.kinetic.total.system.CM)")
+angle_line = energy_line+3
 for i in range(0,nene):
     energy_i = energy[i]
     angle_i = angle[i]
