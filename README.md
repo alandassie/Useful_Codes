@@ -101,6 +101,17 @@ This code is used to test the behavoir of the GSMCC eigenvalues respect to the p
 
 Comment on October 29 2024: Outdated code, can be improved with an independent input file called ThrTest.in when needed!!
 
+### DATA_ANALYSIS/DataAnalysis_complete.py
 
+Created on June 2024 by Alan D.K.
 
+This is a multitask code used for the analysis of the GSMCC outputs.
+The analysis done by the code are the followings:
++ sum up the partial widths for each mass partition.
++ sum up the occ prob for each mass partition 
+and shown those greater than 5% of the total.
++ shows the calculated spectroscopic factors in Table format
+
+The name of the file to be analyzed must be defined in the 
+file "Data_Analysis.in". An example of the input file is at the end of the code.
 
