@@ -3,6 +3,7 @@
 
     This code run GSM (if needed) and GSMCC and then
     optimize the complex (or not) interaction corrective factor
+    and/or cluster corrective factor in order
     to reproduce the experimental data. 
     You have to define the input and output files and put
     the experimental values (energy and width).
@@ -69,26 +70,32 @@ def searchlinefinal(file,phrase):
 # .-
 def f(x):
     # Print input array
-    print_twice('\n Correction factors:')
+    print_twice('\n All the corrective factors:')
     print_twice(x)
     # Open GSMCC input file
     with open(readfilename_CC,'r') as gsmin:
         inputfile_lines = gsmin.read().split('\n')
     aux1 = inputfile_lines[icf_line].split()
     if icf_type == 'COMPLEX': # Complex corrective factors
-        if len(x) == 4: # Interaction and cluster corrective factors
+        if used_ccf == 0: # Only interaction corrective factors
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
-            #
-            # CAN BE MORE THAN FOUR!!
-        else: # Only interaction corrective factor
+        elif used_ccf == 1: # Intercation and cluster corrective factors
+            # First edit the icf
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
-    elif icf_type == 'REAL': # Real interaction corrective factor
-        if len(x) == 2: # Interaction and cluster corrective factors
+            # Now edit each ccf for all the clusters
+            for i in range(0,ccf_numberofcluster):
+                aux2 = inputfile_lines[ccf_lines[i]].split()
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[2+i*2]) + " " + str(x[3+i*2])
+    elif icf_type == 'REAL': # Real corrective factor
+        if used_ccf == 0: # Only interaction corrective factors
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
-            #
-            # CAN BE MORE THAN FOUR!!
-        else: # Only interaction corrective factor
+        elif used_ccf == 1: # Intercation and cluster corrective factors
+            # First edit the icf
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
+            # Now edit each ccf for all the clusters
+            for i in range(0,ccf_numberofcluster):
+                aux2 = inputfile_lines[ccf_lines[i]].split()
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[1+i]) + " 0.0 "
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
@@ -116,19 +123,29 @@ def f(x):
         energy.append( ene )
         width.append( wid )
     #
-    auxiliar  = list(zip(energy,width))
+    auxiliar = list(zip(energy,width))
     auxiliar.sort()
     print_twice('Calculated energies and widths:')
     print_twice(auxiliar)
-    res_e = expene - float(auxiliar[numberindex][0])
-    res_w = expwid - float(auxiliar[numberindex][1])
-    print_twice('E Residue = {0:7.3f}, W Residue = {1:10.6f}'.format(res_e,res_w))
-    res = m.sqrt(res_e**2 + res_w**2)
+    # Compare with all the experimental energies
+    res_e = np.zeros(numberofstates)
+    res_w = np.zeros(numberofstates)
+    for i in range(0,numberofstates):
+        expene = expene_read[i]
+        expwid = expwid_read[i]
+        numberindex = index_read[i]
+        res_e[i] = expene - float(auxiliar[numberindex][0])
+        res_w[i] = expwid - float(auxiliar[numberindex][1])
+        print_twice('State Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
+    res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
     print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
     print_twice('\n'+20*'-'+'\n')
     #
-    if len(x) == 2: # Complex corrective factor
-        return_residue = [res_e,res_w]
+    if icf_type == 'COMPLEX':
+        aux = list(res_e) + list(res_w)
+        aux[::2] = list(res_e)
+        aux[1::2] = list(res_w)
+        return_residue = aux
     else:
         return_residue = res_e
     #
@@ -186,7 +203,7 @@ theline = searchline(readfilename,"CLUSTERCORRFACTORS")
 if theline != None:
     used_ccf = 1
     ccf_numberofcluster = int(data[theline+1])
-    ccf_clusters = np.zeros(ccf_numberofcluster) # NUMPY CANNOT BE STR ARRAY!!!
+    ccf_clusters = ccf_numberofcluster*['0']
     ccf_real_seed = np.zeros(ccf_numberofcluster)
     if icf_type == 'COMPLEX':
         ccf_imag_seed = np.zeros(ccf_numberofcluster)
@@ -205,11 +222,11 @@ theline = searchline(readfilename,"EXPERIMENTALVALUES")
 numberofstates = int(data[theline+1])
 expene_read = np.zeros(numberofstates)
 expwid_read = np.zeros(numberofstates)
-index_read = np.zeros(numberofstates)
+index_read = np.zeros(numberofstates, dtype=int)
 for i in range(0,numberofstates):
     expene_read[i] = float(data[theline+2+i*3])
     expwid_read[i] = float(data[theline+3+i*3])
-    index_read[i] = float(data[theline+4+i*3]) # Must be converted to int later
+    index_read[i] = int(data[theline+4+i*3])
 
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files")
@@ -253,10 +270,6 @@ print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
 #
 # Defining optimization part
-# Experimental state to optimize with interaction.corrective.factor
-expene = expene_read # Energy in MeV
-expwid = expwid_read # Width in keV
-numberindex = index_read
 search = 'E(reference frame) :'
 # Line with the interaction corrective factor
 icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
@@ -266,10 +279,32 @@ for i in range(0,ccf_numberofcluster):
     ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
 # opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
-if icf_type == 'COMPLEX' and used_ccf == 0:
-    opt = newton(f,[icf_real_seed,icf_imag_seed],tol=5e-5,maxiter=30, full_output=True)
-elif icf_type != 'COMPLEX' and used_ccf == 0:
-    opt = newton(f,[icf_real_seed],tol=5e-5,maxiter=30, full_output=True)
+if icf_type == 'COMPLEX':
+    # Define seed value first
+    if used_ccf == 0:
+        seeds = [icf_real_seed,icf_imag_seed]
+    elif used_ccf == 1:
+        # The first two seeds are always the real and imaginary part of the interaction corrective factors
+        seeds_aux1 = [icf_real_seed,icf_imag_seed]
+        # Then, we define pairs of ccf for all the clusters
+        # Idea from https://www.geeksforgeeks.org/python-interleave-multiple-lists-of-same-length/
+        seeds_aux2 = ccf_real_seed + ccf_imag_seed 
+        seeds_aux2[::2] = ccf_real_seed
+        seeds_aux2[1::2] = ccf_imag_seed
+        #
+        seeds = seeds_aux1 + seeds_aux2
+    # Then calculation
+    opt = newton(f,seeds,tol=5e-5,maxiter=30, full_output=True)
+elif icf_type != 'COMPLEX':
+    # Define seed value first
+    if used_ccf == 0:
+        seeds = [icf_real_seed]
+    elif used_ccf == 1:
+        # The first seed is always the real interaction corrective factor
+        seeds_aux1 = [icf_real_seed]
+        # Then, we add all the clusters cf
+        seeds = seeds_aux1 + ccf_real_seed
+    opt = newton(f,seed,tol=5e-5,maxiter=30, full_output=True)
 #
 print_twice(opt)
 #
@@ -295,11 +330,21 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     COMPLEX
     1.025
     0.0
-    
+
+    CLUSTERCORRFACTORS
+    1
+    alpha
+    1.0
+    0.0
+
     EXPERIMENTALVALUES
-    -36.491
-    5.0
-    0
+    2
+    -36.446
+    15.0
+    1
+    -36.908
+    12.
+    2
 
     GSMCC-files
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
