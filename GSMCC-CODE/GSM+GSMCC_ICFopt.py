@@ -305,7 +305,7 @@ elif icf_type != 'COMPLEX':
         seeds_aux1 = [icf_real_seed]
         # Then, we add all the clusters cf
         seeds = seeds_aux1 + ccf_real_seed
-    opt = newton(f,seed,tol=5e-5,maxiter=30, full_output=True)
+    opt = newton(f,seeds,tol=5e-5,maxiter=30, full_output=True)
 #
 print_twice(opt)
 #
