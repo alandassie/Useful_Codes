@@ -205,9 +205,9 @@ if theline != None:
     used_ccf = 1
     ccf_numberofcluster = int(data[theline+1])
     ccf_clusters = ccf_numberofcluster*['0']
-    ccf_real_seed = np.zeros(ccf_numberofcluster)
+    ccf_real_seed = ccf_numberofcluster*[0]
     if icf_type == 'COMPLEX':
-        ccf_imag_seed = np.zeros(ccf_numberofcluster)
+        ccf_imag_seed = ccf_numberofcluster*[0]
     #
     for i in range(0,ccf_numberofcluster):
         if icf_type == 'COMPLEX':
@@ -228,7 +228,7 @@ for i in range(0,numberofstates):
     expene_read[i] = float(data[theline+2+i*3])
     expwid_read[i] = float(data[theline+3+i*3])
     index_read[i] = int(data[theline+4+i*3])
-
+#
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files")
 readfilename_CC = data[theline+1]
@@ -241,7 +241,7 @@ if theline != None:
     gsm_files = len(outfilename_GSM)
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
-
+#
 # Start calculation
 start_main = time.time()
 # RUN GSM
@@ -275,7 +275,7 @@ search = 'E(reference frame) :'
 # Line with the interaction corrective factor
 icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
 # Lines with the cluster corrective factor
-ccf_lines = np.zeros(ccf_numberofcluster)
+ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
 for i in range(0,ccf_numberofcluster):
     ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
