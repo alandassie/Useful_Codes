@@ -211,10 +211,10 @@ if theline != None:
     #
     for i in range(0,ccf_numberofcluster):
         if icf_type == 'COMPLEX':
-            factor == i*3
+            factor = i*3
             ccf_imag_seed[i] = float(data[theline+4+factor])
         else:
-            factor == i*2
+            factor = i*2
         ccf_clusters[i] = data[theline+2+factor]
         ccf_real_seed[i] = float(data[theline+3+factor])
 #
