@@ -18,6 +18,7 @@ import os
 import math as m
 # from scipy.optimize import least_squares as least
 from scipy.optimize import newton
+import numpy as np
 
 # LOG FILE
 logfile = os.getcwd() + '/GSM+GSMCC_ICF.log'
