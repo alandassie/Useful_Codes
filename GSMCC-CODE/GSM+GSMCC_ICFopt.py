@@ -129,14 +129,27 @@ def f(x):
     print_twice('Calculated energies and widths:')
     print_twice(auxiliar)
     # Compare with all the experimental energies
+    # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
     for i in range(0,numberofstates):
         expene = expene_read[i]
         expwid = expwid_read[i]
         numberindex = index_read[i]
-        res_e[i] = expene - float(auxiliar[numberindex][0])
-        res_w[i] = expwid - float(auxiliar[numberindex][1])
+        # Test with the index and index\pm1 states 
+        if numberindex >= 1:
+            index0_res_e = expene - float(auxiliar[numberindex-1][0])
+            index1_res_e = expene - float(auxiliar[numberindex][0])
+            index2_res_e = expene - float(auxiliar[numberindex+1][0])
+            #
+            indexmin_res_e = np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+        else:
+            index1_res_e = expene - float(auxiliar[numberindex][0])
+            index2_res_e = expene - float(auxiliar[numberindex+1][0])
+            #
+            indexmin_res_e = np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+        res_e[i] = expene - float(auxiliar[numberindex + indexmin_res_e][0])
+        res_w[i] = expwid - float(auxiliar[numberindex + indexmin_res_e][1])
         print_twice('State Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
     res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
     print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
