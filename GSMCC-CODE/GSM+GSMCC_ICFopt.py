@@ -275,9 +275,10 @@ search = 'E(reference frame) :'
 # Line with the interaction corrective factor
 icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
 # Lines with the cluster corrective factor
-ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
-for i in range(0,ccf_numberofcluster):
-    ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
+if used_ccf == 1:
+    ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
+    for i in range(0,ccf_numberofcluster):
+        ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
 # opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
 if icf_type == 'COMPLEX':

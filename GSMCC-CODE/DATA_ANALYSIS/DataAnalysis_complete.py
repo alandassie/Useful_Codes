@@ -21,7 +21,7 @@ index_state = dataaux[5]
 calc_sf = dataaux[7]
 # Output file
 jpi_state_write = jpi_state.replace('/','I')
-outputfile = namefile[:-4] + '.DataAnalysis-' + jpi_state_write + '_' + index_state
+outputfile = namefile[:-4] + '.DataAnalysis-' + jpi_state_write
 #
 # Declaration of funcitons
 # def erease_output_file():
