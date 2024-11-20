@@ -132,6 +132,7 @@ def f(x):
     # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
+    indexmin_res_e = np.array(3*[-100])
     for i in range(0,numberofstates):
         expene = expene_read[i]
         expwid = expwid_read[i]
@@ -142,15 +143,24 @@ def f(x):
             index1_res_e = expene - float(auxiliar[numberindex][0])
             index2_res_e = expene - float(auxiliar[numberindex+1][0])
             #
-            indexmin_res_e = np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+            aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+            if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
+                indexmin_res_e[i] = aux
+            else:
+                # Second minimum to avoid two states assigned to a same eigenvalue
+                aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
+                indexmin_res_e[i] = numberindex + aux2
         else:
             index1_res_e = expene - float(auxiliar[numberindex][0])
             index2_res_e = expene - float(auxiliar[numberindex+1][0])
             #
-            indexmin_res_e = np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
-        res_e[i] = expene - float(auxiliar[numberindex + indexmin_res_e][0])
-        res_w[i] = expwid - float(auxiliar[numberindex + indexmin_res_e][1])
-        print_twice('State Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
+            aux = [ abs(index1_res_e), abs(index2_res_e) ]
+            indexmin_res_e[i] = numberindex + np.argmin( aux ) - 1
+        #
+
+        res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
+        res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
+        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
     res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
     print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
     print_twice('\n'+20*'-'+'\n')
@@ -309,7 +319,7 @@ if icf_type == 'COMPLEX':
         #
         seeds = seeds_aux1 + seeds_aux2
     # Then calculation
-    opt = newton(f,seeds,tol=5e-5,maxiter=30, full_output=True)
+    opt = newton(f,seeds,tol=5e-5,maxiter=6, full_output=True)
 elif icf_type != 'COMPLEX':
     # Define seed value first
     if used_ccf == 0:
@@ -319,7 +329,7 @@ elif icf_type != 'COMPLEX':
         seeds_aux1 = [icf_real_seed]
         # Then, we add all the clusters cf
         seeds = seeds_aux1 + ccf_real_seed
-    opt = newton(f,seeds,tol=5e-5,maxiter=30, full_output=True)
+    opt = newton(f,seeds,tol=5e-5,maxiter=6, full_output=True)
 #
 print_twice(opt)
 #
