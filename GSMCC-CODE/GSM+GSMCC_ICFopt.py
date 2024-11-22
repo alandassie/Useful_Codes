@@ -18,6 +18,7 @@ import os
 import math as m
 # from scipy.optimize import least_squares as least
 from scipy.optimize import newton
+from scipy.optimize import minimize
 import numpy as np
 
 # LOG FILE
@@ -76,27 +77,27 @@ def f(x):
     # Open GSMCC input file
     with open(readfilename_CC,'r') as gsmin:
         inputfile_lines = gsmin.read().split('\n')
-    aux1 = inputfile_lines[icf_line].split()
-    if icf_type == 'COMPLEX': # Complex corrective factors
-        if used_ccf == 0: # Only interaction corrective factors
+    # 
+    start_value = 0
+    if used_icf == 1: # Using interaction corrective factors
+        aux1 = inputfile_lines[icf_line].split()
+        if icf_type == 'COMPLEX': # Complex interaction corrective factors
+            start_value = 2
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
-        elif used_ccf == 1: # Intercation and cluster corrective factors
-            # First edit the icf
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
+        elif icf_type == 'REAL': # Real interaction corrective factor
+            start_value = 1
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
+    if used_ccf == 1: # Using Cluster corrective factors
+        if ccf_type == 'COMPLEX':
             # Now edit each ccf for all the clusters
             for i in range(0,ccf_numberofcluster):
                 aux2 = inputfile_lines[ccf_lines[i]].split()
-                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[2+i*2]) + " " + str(x[3+i*2])
-    elif icf_type == 'REAL': # Real corrective factor
-        if used_ccf == 0: # Only interaction corrective factors
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
-        elif used_ccf == 1: # Intercation and cluster corrective factors
-            # First edit the icf
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[start_value+i*2]) + " " + str(x[start_value+1+i*2])
+        elif ccf_type == 'REAL':
             # Now edit each ccf for all the clusters
             for i in range(0,ccf_numberofcluster):
                 aux2 = inputfile_lines[ccf_lines[i]].split()
-                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[1+i]) + " 0.0 "
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[start_value+i]) + " 0.0 "
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
@@ -129,6 +130,10 @@ def f(x):
     print_twice('Calculated energies and widths:')
     print_twice(auxiliar)
     # Compare with all the experimental energies
+    adjusting_width = 0
+    if ccf_type == 'COMPLEX' or icf_type == 'COMPLEX':
+        print_twice('Using complex CF, then adjusting widths:')
+        adjusting_width = 1
     # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
@@ -138,42 +143,57 @@ def f(x):
         expwid = expwid_read[i]
         numberindex = index_read[i]
         # Test with the index and index\pm1 states 
-        if numberindex >= 1:
-            index0_res_e = expene - float(auxiliar[numberindex-1][0])
-            index1_res_e = expene - float(auxiliar[numberindex][0])
-            index2_res_e = expene - float(auxiliar[numberindex+1][0])
-            #
-            aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
-            if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
-                indexmin_res_e[i] = aux
-            else:
-                # Second minimum to avoid two states assigned to a same eigenvalue
-                aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
-                indexmin_res_e[i] = numberindex + aux2
-        else:
-            index1_res_e = expene - float(auxiliar[numberindex][0])
-            index2_res_e = expene - float(auxiliar[numberindex+1][0])
-            #
-            aux = [ abs(index1_res_e), abs(index2_res_e) ]
-            indexmin_res_e[i] = numberindex + np.argmin( aux ) - 1
-        #
+        # if numberindex >= 1:
+        #     index0_res_e = expene - float(auxiliar[numberindex-1][0])
+        #     index1_res_e = expene - float(auxiliar[numberindex][0])
+        #     index2_res_e = expene - float(auxiliar[numberindex+1][0])
+        #     #
+        #     aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+        #     if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
+        #         indexmin_res_e[i] = aux
+        #     else:
+        #         # Second minimum to avoid two states assigned to a same eigenvalue
+        #         aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
+        #         indexmin_res_e[i] = numberindex + aux2
+        # else:
+        #     if len(line_numbers) > 1:
+        #         index1_res_e = expene - float(auxiliar[numberindex][0])
+        #         index2_res_e = expene - float(auxiliar[numberindex+1][0])
+        #         #
+        #         aux = [ abs(index1_res_e), abs(index2_res_e) ]
+        #         indexmin_res_e[i] = numberindex + np.argmin( aux ) - 1
+        #     else:
+        #         indexmin_res_e[i] = numberindex
+        # #
 
-        res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
-        res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
-        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
-    res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
+        # res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
+        # res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
+        res_e[i] = expene - float(auxiliar[numberindex][0])
+        res_w[i] = expwid - float(auxiliar[numberindex][1])
+        # print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
+        print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
+    if adjusting_width == 1:
+        res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
+    else:
+        res = m.sqrt( np.sum(res_e**2) )
     print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
-    print_twice('\n'+20*'-'+'\n')
     #
-    if icf_type == 'COMPLEX':
+    if adjusting_width == 1:
         aux = list(res_e) + list(res_w)
         aux[::2] = list(res_e)
         aux[1::2] = list(res_w)
         return_residue = aux
     else:
         return_residue = res_e
-    #
-    return return_residue
+    # Check which optimizator we are using
+    if len(return_residue) == len(x):
+        print_twice('Finish iteration of Newton optimizer')
+        print_twice('\n'+20*'-'+'\n')
+        return return_residue
+    else:
+        print_twice('Finish iteration of TNC optimizer')
+        print_twice('\n'+20*'-'+'\n')
+        return res
 # .-
 
 # INPUT FILE
@@ -206,40 +226,54 @@ parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
-else:
+elif parallelism_type == 'OPENMP':
     running_prefix = ' '
+else:
+    print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
 #
+# Looking up the optimization code to use
+theline = searchline(readfilename,"OPTIMIZATIONMETHOD")
+method =  data[theline+1].split(';')[0]
+if method == 'MINIMIZATION':
+    mini_method = data[theline+1].split(';')[1]
+#
 # Checking if real or complex interaction corrective factors will be used
+used_icf = 0
+icf_type = 'NONE'
 theline = searchline(readfilename,"CORRECTIVEFACTORS")
-icf_type = data[theline+1]
-icf_real_seed = float(data[theline+2])
-if icf_type == 'COMPLEX':
-    icf_imag_seed = float(data[theline+3])
+if theline != None:
+    used_icf = 1
+    icf_type = data[theline+1]
+    icf_real_seed = float(data[theline+2])
+    if icf_type == 'COMPLEX':
+        icf_imag_seed = float(data[theline+3])
 #
 # Checking if real or complex clusters corrective factors will be used
 used_ccf = 0
+ccf_type = 'NONE'
 theline = searchline(readfilename,"CLUSTERCORRFACTORS")
 if theline != None:
     used_ccf = 1
-    ccf_numberofcluster = int(data[theline+1])
+    ccf_type = data[theline+1]
+    ccf_numberofcluster = int(data[theline+2])
     ccf_clusters = ccf_numberofcluster*['0']
     ccf_real_seed = ccf_numberofcluster*[0]
-    if icf_type == 'COMPLEX':
+    if ccf_type == 'COMPLEX':
         ccf_imag_seed = ccf_numberofcluster*[0]
     #
     for i in range(0,ccf_numberofcluster):
-        if icf_type == 'COMPLEX':
+        if ccf_type == 'COMPLEX':
             factor = i*3
-            ccf_imag_seed[i] = float(data[theline+4+factor])
+            ccf_imag_seed[i] = float(data[theline+5+factor])
         else:
             factor = i*2
-        ccf_clusters[i] = data[theline+2+factor]
-        ccf_real_seed[i] = float(data[theline+3+factor])
+        ccf_clusters[i] = data[theline+3+factor]
+        ccf_real_seed[i] = float(data[theline+4+factor])
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES")
@@ -296,40 +330,59 @@ os.chdir(gsmcc_directory)
 # Defining optimization part
 search = 'E(reference frame) :'
 # Line with the interaction corrective factor
-icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
+if used_icf == 1:
+    icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
 # Lines with the cluster corrective factor
 if used_ccf == 1:
     ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
     for i in range(0,ccf_numberofcluster):
         ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
-# opt = least(f,[1.048,0],diff_step=[0.02,0.001],gtol=1e-3,max_nfev=30, bounds=([0.8,1.2],[-0.1,0.1]))
-if icf_type == 'COMPLEX':
-    # Define seed value first
-    if used_ccf == 0:
+# if icf_type == 'COMPLEX' and ccf_type == 'COMPLEX':
+# Define seed value first
+if used_ccf == 0 and used_icf == 1:
+    if icf_type == 'COMPLEX':
         seeds = [icf_real_seed,icf_imag_seed]
-    elif used_ccf == 1:
-        # The first two seeds are always the real and imaginary part of the interaction corrective factors
-        seeds_aux1 = [icf_real_seed,icf_imag_seed]
+    elif icf_type == 'REAL':
+        seeds = [icf_real_seed]
+    else:
+        print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL OR COMPLEX')
+        exit()
+elif used_ccf == 1:
+    if used_icf == 1:
+        if icf_type == 'COMPLEX':
+            # The first two seeds are always the real and imaginary part of the interaction corrective factors
+            seeds_aux1 = [icf_real_seed,icf_imag_seed]
+        elif icf_type == 'REAL':
+            seeds_aux1 = [icf_real_seed]
+        else:
+            print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL OR COMPLEX')
+            exit()
+    else:
+        seeds_aux1 = []
+    if ccf_type == 'COMPLEX':
         # Then, we define pairs of ccf for all the clusters
         # Idea from https://www.geeksforgeeks.org/python-interleave-multiple-lists-of-same-length/
         seeds_aux2 = ccf_real_seed + ccf_imag_seed 
         seeds_aux2[::2] = ccf_real_seed
         seeds_aux2[1::2] = ccf_imag_seed
-        #
-        seeds = seeds_aux1 + seeds_aux2
-    # Then calculation
-    opt = newton(f,seeds,tol=5e-5,maxiter=6, full_output=True)
-elif icf_type != 'COMPLEX':
-    # Define seed value first
-    if used_ccf == 0:
-        seeds = [icf_real_seed]
-    elif used_ccf == 1:
-        # The first seed is always the real interaction corrective factor
-        seeds_aux1 = [icf_real_seed]
-        # Then, we add all the clusters cf
-        seeds = seeds_aux1 + ccf_real_seed
-    opt = newton(f,seeds,tol=5e-5,maxiter=6, full_output=True)
+    elif ccf_type == 'REAL':
+        seeds_aux2 = ccf_real_seed
+    else:
+        print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL OR COMPLEX')
+        exit()
+    #
+    seeds = seeds_aux1 + seeds_aux2
+# Then calculation
+if method == 'NEWTON':
+    print_twice('Using Newton optimizer')
+    opt = newton(f, seeds, tol=1e-10, maxiter=6, full_output=True)
+elif method == 'MINIMIZATION':
+    print_twice('Using %s optimizer'% mini_method)
+    opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
+else:
+    print_twice('METHOD must be NEWTON or MINIMIZATION!')
+    exit()
 #
 print_twice(opt)
 #
@@ -345,24 +398,28 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     STORAGE-DIRECTORY
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/storage_11C_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30
     
-    PARALLELISM
+    PARALLELISM : 1 - MPI or OPENMP; 2 - NUMBER OF NODES
     MPI
     2
-    MACHINEFILE
+    MACHINEFILE : DEFINE THE FILE FOR THE EXECUTION, IF NEEDED
     machinefile
     
-    CORRECTIVEFACTORS
+    OPTIMIZATIONMETHOD :  NEWTON or (MINIMIZATION + ; + TNC for the moment)
+    MINIMIZATION;TNC
+    
+    CORRECTIVEFACTORS : 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED
     COMPLEX
     1.025
     0.0
 
-    CLUSTERCORRFACTORS
+    CLUSTERCORRFACTORS : 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED
+    COMPLEX
     1
     alpha
     1.0
     0.0
 
-    EXPERIMENTALVALUES
+    EXPERIMENTALVALUES : 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - ENERGY (MeV); 3 - WIDTH (keV); 4 - ENERGY ORDERED INDEX
     2
     -36.446
     15.0
