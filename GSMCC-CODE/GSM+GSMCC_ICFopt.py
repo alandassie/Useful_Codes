@@ -143,35 +143,35 @@ def f(x):
         expwid = expwid_read[i]
         numberindex = index_read[i]
         # Test with the index and index\pm1 states 
-        # if numberindex >= 1:
-        #     index0_res_e = expene - float(auxiliar[numberindex-1][0])
-        #     index1_res_e = expene - float(auxiliar[numberindex][0])
-        #     index2_res_e = expene - float(auxiliar[numberindex+1][0])
-        #     #
-        #     aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
-        #     if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
-        #         indexmin_res_e[i] = aux
-        #     else:
-        #         # Second minimum to avoid two states assigned to a same eigenvalue
-        #         aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
-        #         indexmin_res_e[i] = numberindex + aux2
-        # else:
-        #     if len(line_numbers) > 1:
-        #         index1_res_e = expene - float(auxiliar[numberindex][0])
-        #         index2_res_e = expene - float(auxiliar[numberindex+1][0])
-        #         #
-        #         aux = [ abs(index1_res_e), abs(index2_res_e) ]
-        #         indexmin_res_e[i] = numberindex + np.argmin( aux ) - 1
-        #     else:
-        #         indexmin_res_e[i] = numberindex
-        # #
+        if numberindex >= 1:
+            index0_res_e = expene - float(auxiliar[numberindex-1][0])
+            index1_res_e = expene - float(auxiliar[numberindex][0])
+            index2_res_e = expene - float(auxiliar[numberindex+1][0])
+            #
+            aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+            if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
+                indexmin_res_e[i] = aux
+            else:
+                # Second minimum to avoid two states assigned to a same eigenvalue
+                aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
+                indexmin_res_e[i] = numberindex + aux2
+        else:
+            if len(line_numbers) > 1:
+                index1_res_e = expene - float(auxiliar[numberindex][0])
+                index2_res_e = expene - float(auxiliar[numberindex+1][0])
+                #
+                aux = [ abs(index1_res_e), abs(index2_res_e) ]
+                indexmin_res_e[i] = numberindex + np.argmin( aux )
+            else:
+                indexmin_res_e[i] = numberindex
+        #
 
-        # res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
-        # res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
-        res_e[i] = expene - float(auxiliar[numberindex][0])
-        res_w[i] = expwid - float(auxiliar[numberindex][1])
-        # print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
-        print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
+        res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
+        res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
+        # res_e[i] = expene - float(auxiliar[numberindex][0])
+        # res_w[i] = expwid - float(auxiliar[numberindex][1])
+        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
+        # print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
     if adjusting_width == 1:
         res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
     else:
@@ -186,14 +186,17 @@ def f(x):
     else:
         return_residue = res_e
     # Check which optimizator we are using
-    if len(return_residue) == len(x):
+    if method == 'NEWTON':
         print_twice('Finish iteration of Newton optimizer')
         print_twice('\n'+20*'-'+'\n')
         return return_residue
-    else:
+    elif method == 'MINIMIZATION':
         print_twice('Finish iteration of TNC optimizer')
         print_twice('\n'+20*'-'+'\n')
         return res
+    else:
+        print_twice('METHOD must be NEWTON or MINIMIZATION;TNC')
+        exit()
 # .-
 
 # INPUT FILE
