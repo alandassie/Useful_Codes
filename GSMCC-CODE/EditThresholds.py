@@ -52,6 +52,7 @@ def searchline_all(file,phrase):
 readfilename = "EditThresholds.in"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
+data = data[:-1]
 
 # Define the array of tuples for each state
 # Define one array for each target and projectile, and then sum up in a final array
@@ -75,15 +76,16 @@ while i < len(data)-3:
 
 # PROJECTILES
 theline = searchline(readfilename,"PROJECTILES")
-if theline != None:  
+if theline == None:
     projectiles = []
 else:
     projectiles = []
     i = 0
     while i < len(data)-3:
-        if theline+2+i >= len(data):
+        try:
+            aux = data[theline+2+i]
+        except:
             break
-        aux = data[theline+2+i]
         projectiles.append( ( int(aux.split(",")[0]),
                             int(aux.split(",")[1]),
                             str(aux.split(",")[2]),
