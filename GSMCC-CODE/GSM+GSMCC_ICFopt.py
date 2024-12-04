@@ -22,7 +22,7 @@ from scipy.optimize import minimize
 import numpy as np
 
 # LOG FILE
-logfile = os.getcwd() + '/GSM+GSMCC_ICF.log'
+logfile = os.getcwd() + '/GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
@@ -103,7 +103,8 @@ def f(x):
     with open(readfilename_CC,'w') as gsmin:
         gsmin.write(inputfile_aux)
     #
-    outfilename_CCi = outfilename_CC + str(int(time.time()))
+    aux = time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+    outfilename_CCi = outfilename_CC + '-' + aux
     start_gsmcc = time.time()
     print_twice('\n ' + running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi)
     sp.run([running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi], shell=True)
@@ -168,9 +169,9 @@ def f(x):
 
         res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
         res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
+        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
         # res_e[i] = expene - float(auxiliar[numberindex][0])
         # res_w[i] = expwid - float(auxiliar[numberindex][1])
-        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
         # print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
     if adjusting_width == 1:
         res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )

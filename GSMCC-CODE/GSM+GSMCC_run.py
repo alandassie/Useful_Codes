@@ -12,7 +12,7 @@ import time
 import os
 
 # LOG FILE
-logfile = os.getcwd() + '/GSM+GSMCC_run.log'
+logfile = os.getcwd() + '/GSM+GSMCC_run_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
