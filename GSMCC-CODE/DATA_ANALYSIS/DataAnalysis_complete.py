@@ -19,6 +19,7 @@ namefile = dataaux[1]
 jpi_state = dataaux[3]
 index_state = dataaux[5]
 calc_sf = dataaux[7]
+print_info = dataaux[9]
 # Output file
 jpi_state_write = jpi_state.replace('/','I')
 outputfile = namefile[:-4] + '.DataAnalysis-' + jpi_state_write
@@ -169,11 +170,14 @@ print_twice('Number of calculations for this state %s'% (len(energies)))
 k = -1
 for energy, width in zip(energies,widths):
     k += 1
-    print_twice(10*'-')
-    print_twice('%s)  Energy : %s \n  Width  : %s'% (k+1,energy,width))
+    print_twice(10*'-')  if print_info == 'ALL'
+    if print_info == 'ALL':
+        print_twice('{0:s})  Energy : {1:.10f} \n  Width  : {2:.10f}'.format(k+1,energy,width))
+    else:
+        print_twice('{0:s})  {1:.10f} {2:.10f}'.format(k+1,energy,width))
     # .-
     # Occupation probabilities
-    print_twice('Occupation probabilities:\n')
+    print_twice('Occupation probabilities:\n') if print_info == 'ALL'
     #
     # Build two arrays
     channels = []
@@ -229,23 +233,24 @@ for energy, width in zip(energies,widths):
     occprob_real.append(occprob_real_aux)
     occprob_imag.append(occprob_imag_aux)
     
-    for i in range(0,len(projectile_array)):
-        print_twice('Projectile mass partition : {0:s}'.format(projectile_array[i]))
-        print_twice('Total Occupation Probability : ({0:.5f},{1:.5f})'.format(occprob_real[i],occprob_imag[i]))
-        print_twice('Max real Occupation Probability : {0:.5f}'.format(max(partial_occprob_real[i])))
-        index_max = max(range(len(partial_occprob_real[i])), key=partial_occprob_real[i].__getitem__)
-        print_twice('With the channel : %s'% channels[i][index_max])
-        print_twice('  +Occupation probabilities greater than 5%:')
-        for j in range(0,len(partial_occprob_real[i])):
-            if abs(partial_occprob_real[i][j]) > 0.05:
-                print_twice('    {0:s} -> ({1:.5f},{2:.5f})'.format(channels[i][j],partial_occprob_real[i][j],partial_occprob_imag[i][j]))
-        print_twice(10*'-')
-        print_twice(' ')
+    if print_info == 'ALL':
+        for i in range(0,len(projectile_array)):
+            print_twice('Projectile mass partition : {0:s}'.format(projectile_array[i])) 
+            print_twice('Total Occupation Probability : ({0:.5f},{1:.5f})'.format(occprob_real[i],occprob_imag[i]))
+            print_twice('Max real Occupation Probability : {0:.5f}'.format(max(partial_occprob_real[i])))
+            index_max = max(range(len(partial_occprob_real[i])), key=partial_occprob_real[i].__getitem__)
+            print_twice('With the channel : %s'% channels[i][index_max])
+            print_twice('  +Occupation probabilities greater than 5%:')
+            for j in range(0,len(partial_occprob_real[i])):
+                if abs(partial_occprob_real[i][j]) > 0.05:
+                    print_twice('    {0:s} -> ({1:.5f},{2:.5f})'.format(channels[i][j],partial_occprob_real[i][j],partial_occprob_imag[i][j]))
+            print_twice(10*'-')
+            print_twice(' ')
     # .-
-    print_twice(20*'-')
+    print_twice(20*'-') if print_info == 'ALL'
     # .-
     # Partial Widths
-    print_twice('Partial Widths:\n')
+    print_twice('Partial Widths:\n') if print_info == 'ALL'
     #
     # Build arrays
     channels = []
@@ -301,27 +306,27 @@ for energy, width in zip(energies,widths):
     current_width.append(current_width_aux)
     altcurrent_width.append(altcurrent_width_aux)
 
-                
-    for i in range(0,len(projectile_width)):
-        print_twice('Projectile mass partition : {0:s}'.format(projectile_width[i]))
-        print_twice('Total current width (keV) : {0:.5g}'.format(current_width[i]))
-        print_twice('Max partial current width (keV) : {0:.5g}'.format(max(partial_current_width[i])))
-        index_max = max(range(len(partial_current_width[i])), key=partial_current_width[i].__getitem__)
-        print_twice('  With the channel : %s'% channels[i][index_max])
-        print_twice('Total alt current width (keV) : {0:.5g}'.format(altcurrent_width[i]))
-        print_twice('Max partial alt current width (keV) : {0:.5g}'.format(max(partial_altcurrent_width[i])))
-        index_max = max(range(len(partial_altcurrent_width[i])), key=partial_altcurrent_width[i].__getitem__)
-        print_twice('  With the channel : %s'% channels[i][index_max])
-        print_twice(10*'-')
-        print_twice(' ')
+    if print_info == 'ALL':     
+        for i in range(0,len(projectile_width)):
+            print_twice('Projectile mass partition : {0:s}'.format(projectile_width[i]))
+            print_twice('Total current width (keV) : {0:.5g}'.format(current_width[i]))
+            print_twice('Max partial current width (keV) : {0:.5g}'.format(max(partial_current_width[i])))
+            index_max = max(range(len(partial_current_width[i])), key=partial_current_width[i].__getitem__)
+            print_twice('  With the channel : %s'% channels[i][index_max])
+            print_twice('Total alt current width (keV) : {0:.5g}'.format(altcurrent_width[i]))
+            print_twice('Max partial alt current width (keV) : {0:.5g}'.format(max(partial_altcurrent_width[i])))
+            index_max = max(range(len(partial_altcurrent_width[i])), key=partial_altcurrent_width[i].__getitem__)
+            print_twice('  With the channel : %s'% channels[i][index_max])
+            print_twice(10*'-')
+            print_twice(' ')
     # .-
     # .-
     # Spectroscopic factors:
     if calc_sf == 'YES':
-        print_twice(20*'-')
+        print_twice(20*'-') if print_info == 'ALL'
         # .-
         # Partial Widths
-        print_twice('Spectroscopic factors:\n')
+        print_twice('Spectroscopic factors:\n') if print_info == 'ALL'
         #
         headers = ['Projectile', 'P state', 'T state', 'Non-Anti S',' ','Anti S',' ']
         projectile = []
@@ -344,23 +349,24 @@ for energy, width in zip(energies,widths):
         max_p_state = len(max(max(p_state,key=len),headers[1],key=len))
         max_t_state = len(max(max(t_state,key=len),headers[2],key=len))
         lista = [max_p,max_p_state,max_t_state,7,7,7,7]
-        for i in range(0,len(headers)):
-            col = headers[i]
-            print_twice(col.ljust(lista[i]), end="")
-            print_twice('  ', end = "")
-        print_twice()
-        for i in range(0,len(projectile)):
-            print_twice(projectile[i].ljust(lista[0]), end="")
-            print_twice('  ', end = "")
-            print_twice(p_state[i].ljust(lista[1]), end="")
-            print_twice('  ', end = "")
-            print_twice(t_state[i].ljust(lista[2]), end="")
-            print_twice('  ', end = "")
-            print_twice('{0:7.5f} '.format(nonanti_s_r[i]), end="")
-            print_twice('{0:8.5f} '.format(nonanti_s_i[i]), end="")
-            print_twice('    ', end = "")
-            print_twice('{0:7.5f} '.format(anti_s_r[i]), end="")
-            print_twice('{0:8.5f} '.format(anti_s_i[i]))
+        if print_info == 'ALL':
+            for i in range(0,len(headers)):
+                col = headers[i]
+                print_twice(col.ljust(lista[i]), end="")
+                print_twice('  ', end = "")
+            print_twice()
+            for i in range(0,len(projectile)):
+                print_twice(projectile[i].ljust(lista[0]), end="")
+                print_twice('  ', end = "")
+                print_twice(p_state[i].ljust(lista[1]), end="")
+                print_twice('  ', end = "")
+                print_twice(t_state[i].ljust(lista[2]), end="")
+                print_twice('  ', end = "")
+                print_twice('{0:7.5f} '.format(nonanti_s_r[i]), end="")
+                print_twice('{0:8.5f} '.format(nonanti_s_i[i]), end="")
+                print_twice('    ', end = "")
+                print_twice('{0:7.5f} '.format(anti_s_r[i]), end="")
+                print_twice('{0:8.5f} '.format(anti_s_i[i]))
         
 print_twice(' ')
 print_twice(30*'-')
@@ -375,6 +381,8 @@ print_twice(30*'-')
     3
     SF-CALC:
     YES
+    PRINT: ALL or ENERGIES
+    ENERGIES
     _________________________________
     
 """
