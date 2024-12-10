@@ -170,14 +170,14 @@ print_twice('Number of calculations for this state %s'% (len(energies)))
 k = -1
 for energy, width in zip(energies,widths):
     k += 1
-    print_twice(10*'-')  if print_info == 'ALL'
+    if print_info == 'ALL': print_twice(10*'-')
     if print_info == 'ALL':
-        print_twice('{0:s})  Energy : {1:.10f} \n  Width  : {2:.10f}'.format(k+1,energy,width))
+        print_twice('{0:2d}  Energy : {1:<.10f} \n  Width  : {2:<.10f}'.format(k+1,float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     else:
-        print_twice('{0:s})  {1:.10f} {2:.10f}'.format(k+1,energy,width))
+        print_twice('{0:2d}  {1:>14.8f} {2:>14.8f}'.format(k+1,float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     # .-
     # Occupation probabilities
-    print_twice('Occupation probabilities:\n') if print_info == 'ALL'
+    if print_info == 'ALL': print_twice('Occupation probabilities:\n')
     #
     # Build two arrays
     channels = []
@@ -247,10 +247,10 @@ for energy, width in zip(energies,widths):
             print_twice(10*'-')
             print_twice(' ')
     # .-
-    print_twice(20*'-') if print_info == 'ALL'
+    if print_info == 'ALL': print_twice(20*'-')
     # .-
     # Partial Widths
-    print_twice('Partial Widths:\n') if print_info == 'ALL'
+    if print_info == 'ALL': print_twice('Partial Widths:\n')
     #
     # Build arrays
     channels = []
@@ -323,10 +323,10 @@ for energy, width in zip(energies,widths):
     # .-
     # Spectroscopic factors:
     if calc_sf == 'YES':
-        print_twice(20*'-') if print_info == 'ALL'
+        if print_info == 'ALL': print_twice(20*'-')
         # .-
         # Partial Widths
-        print_twice('Spectroscopic factors:\n') if print_info == 'ALL'
+        if print_info == 'ALL': print_twice('Spectroscopic factors:\n')
         #
         headers = ['Projectile', 'P state', 'T state', 'Non-Anti S',' ','Anti S',' ']
         projectile = []
