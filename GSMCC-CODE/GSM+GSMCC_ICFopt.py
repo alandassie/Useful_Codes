@@ -106,8 +106,8 @@ def f(x):
     aux = time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
     outfilename_CCi = outfilename_CC + '-' + aux
     start_gsmcc = time.time()
-    print_twice('\n ' + running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi)
-    sp.run([running_prefix + './CC_exe < '+readfilename_CC+' > '+outfilename_CCi], shell=True)
+    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi)
+    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi], shell=True)
     end_gsmcc = time.time()
     time_gsmcc = end_gsmcc-start_gsmcc
     print_twice("Time to calculate: ",time_gsmcc, "s")
@@ -211,21 +211,21 @@ print_twice("Be sure that you are using the correct directories!")
 # GSMCC directory
 gsmcc_directory = os.getcwd()
 # GSM directory
-theline = searchline(readfilename,"GSM-DIRECTORY")
+theline = searchline(readfilename,"GSM-DIRECTORY:")
 gsm_directory = data[theline+1]
 # sure = input("Is %s the GSM working directory?\n YES or NO: "% gsm_directory)
 # if sure.lower() == "no":
 #     print("Change it in python file!")
 #     exit()
 # storage directory
-theline = searchline(readfilename,"STORAGE-DIRECTORY")
+theline = searchline(readfilename,"STORAGE-DIRECTORY:")
 storage_directory = data[theline+1]
 # sure = input("Is %s the storage directory?\n YES or NO: "% storage_directory)
 # if sure.lower() == "no":
 #     print("Change it in python file!")
 #     exit()
 # Checking if it is a MPI or OPENMP/secuential calculation
-theline = searchline(readfilename,"PARALLELISM")
+theline = searchline(readfilename,"PARALLELISM:")
 parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
@@ -235,13 +235,13 @@ elif parallelism_type == 'OPENMP':
 else:
     print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile
-theline = searchline(readfilename,"MACHINEFILE")
+theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
 #
 # Looking up the optimization code to use
-theline = searchline(readfilename,"OPTIMIZATIONMETHOD")
+theline = searchline(readfilename,"OPTIMIZATIONMETHOD:")
 method =  data[theline+1].split(';')[0]
 if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
@@ -249,7 +249,7 @@ if method == 'MINIMIZATION':
 # Checking if real or complex interaction corrective factors will be used
 used_icf = 0
 icf_type = 'NONE'
-theline = searchline(readfilename,"CORRECTIVEFACTORS")
+theline = searchline(readfilename,"CORRECTIVEFACTORS:")
 if theline != None:
     used_icf = 1
     icf_type = data[theline+1]
@@ -260,7 +260,7 @@ if theline != None:
 # Checking if real or complex clusters corrective factors will be used
 used_ccf = 0
 ccf_type = 'NONE'
-theline = searchline(readfilename,"CLUSTERCORRFACTORS")
+theline = searchline(readfilename,"CLUSTERCORRFACTORS:")
 if theline != None:
     used_ccf = 1
     ccf_type = data[theline+1]
@@ -280,7 +280,7 @@ if theline != None:
         ccf_real_seed[i] = float(data[theline+4+factor])
 #
 # Reading experimental data
-theline = searchline(readfilename,"EXPERIMENTALVALUES")
+theline = searchline(readfilename,"EXPERIMENTALVALUES:")
 numberofstates = int(data[theline+1])
 expene_read = np.zeros(numberofstates)
 expwid_read = np.zeros(numberofstates)
@@ -290,16 +290,29 @@ for i in range(0,numberofstates):
     expwid_read[i] = float(data[theline+3+i*3])
     index_read[i] = int(data[theline+4+i*3])
 #
+
+# Executable GSMCC file
+theline = searchline(readfilename,"GSMCC-exe:")
+running_cc = data[theline+1]
 # Read-Out file name CC
-theline = searchline(readfilename,"GSMCC-files")
+theline = searchline(readfilename,"GSMCC-files:")
 readfilename_CC = data[theline+1]
 outfilename_CC = data[theline+2]
-# Read-Out file name GSM
-theline = searchline(readfilename,"GSM-files")
+cc_write_aux = int(data[theline+3])
+cc_write = ' ' + cc_write_aux*'>' + ' '
+
+# Executable GSM file
+theline = searchline(readfilename,"GSM-exe:")
 if theline != None:  
-    readfilename_GSM = data[theline+1::2]
-    outfilename_GSM = data[theline+2::2]
-    gsm_files = len(outfilename_GSM)
+    running_gsm = data[theline+1]
+# Read-Out file name GSM
+theline = searchline(readfilename,"GSM-files:")
+if theline != None:  
+    gsm_files = int(data[theline+1])
+    gsm_write_aux = int(data[theline+2])
+    gsm_write = ' ' + gsm_write_aux*'>' + ' '
+    readfilename_GSM = data[theline+3:(theline+3)+2*n_gsmfiles:2]
+    outfilename_GSM = data[theline+4:(theline+4)+2*n_gsmfiles:2]
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
 #
@@ -314,8 +327,8 @@ if theline != None:
         inp = readfilename_GSM[i]
         out = outfilename_GSM[i]
         start_gsm = time.time()
-        print_twice('\n ' + running_prefix + './GSM_exe < '+inp+' > '+out)
-        sp.run([running_prefix + './GSM_exe < '+inp+' > '+out], shell=True)
+        print_twice('\n ' + running_prefix + running_gsm  + ' < ' + inp + gsm_write + out)
+        sp.run([running_prefix + running_gsm + ' < ' + inp + gsm_write + out], shell=True)
         end_gsm = time.time()
         time_gsm = end_gsm-start_gsm
         print_twice("Time to calculate: ",time_gsm, "s")
@@ -397,33 +410,33 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
 """
     Example of GSM+GSMCC_ICF.in file:
     _________________________________
-    GSM-DIRECTORY
+    GSM-DIRECTORY:
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/GSM_dir
-    STORAGE-DIRECTORY
+    STORAGE-DIRECTORY:
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/storage_11C_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30
     
-    PARALLELISM : 1 - MPI or OPENMP; 2 - NUMBER OF NODES
+    PARALLELISM: 1 - MPI or OPENMP; 2 - NUMBER OF NODES
     MPI
     2
-    MACHINEFILE : DEFINE THE FILE FOR THE EXECUTION, IF NEEDED
+    MACHINEFILE: DEFINE THE FILE FOR THE EXECUTION, IF NEEDED
     machinefile
     
-    OPTIMIZATIONMETHOD :  NEWTON or (MINIMIZATION + ; + TNC for the moment)
+    OPTIMIZATIONMETHOD:  NEWTON or (MINIMIZATION + ; + TNC for the moment)
     MINIMIZATION;TNC
     
-    CORRECTIVEFACTORS : 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED
+    CORRECTIVEFACTORS: 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED
     COMPLEX
     1.025
     0.0
 
-    CLUSTERCORRFACTORS : 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED
+    CLUSTERCORRFACTORS: 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED
     COMPLEX
     1
     alpha
     1.0
     0.0
 
-    EXPERIMENTALVALUES : 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - ENERGY (MeV); 3 - WIDTH (keV); 4 - ENERGY ORDERED INDEX
+    EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - ENERGY (MeV); 3 - WIDTH (keV); 4 - ENERGY ORDERED INDEX
     2
     -36.446
     15.0
@@ -432,11 +445,18 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     12.
     2
 
-    GSMCC-files
+    GSMCC-exe:
+    CC-24.11.20-MPI.x
+    GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
-
-    GSM-files
+    2
+    
+    GSM-exe:
+    GSM-24.11.20-MPI.x
+    GSM-files: 1-n input files; 2-1 for overwrite or 2 for append; 3,n-input and output names
+    4
+    1
     CLUSPHY_targforCC_10B_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
     CLUSPHY_targforCC_10B_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
     CLUSPHY_targforCC_7Be_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in

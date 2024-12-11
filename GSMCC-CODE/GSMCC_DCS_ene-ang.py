@@ -90,21 +90,21 @@ print_twice("Be sure that you are using the correct directories!")
 # GSMCC directory
 gsmcc_directory = os.getcwd()
 # GSM directory
-theline = searchline(readfilename,"GSM-DIRECTORY")
+theline = searchline(readfilename,"GSM-DIRECTORY:")
 gsm_directory = data[theline+1]
 # sure = input("Is %s the GSM working directory?\n YES or NO: "% gsm_directory)
 # if sure.lower() == "no":
 #     print("Change it in python file!")
 #     exit()
 # storage directory
-theline = searchline(readfilename,"STORAGE-DIRECTORY")
+theline = searchline(readfilename,"STORAGE-DIRECTORY:")
 storage_directory = data[theline+1]
 # sure = input("Is %s the storage directory?\n YES or NO: "% storage_directory)
 # if sure.lower() == "no":
 #     print("Change it in python file!")
 #     exit()
 # Checking if it is a MPI or OPENMP/secuential calculation
-theline = searchline(readfilename,"PARALLELISM")
+theline = searchline(readfilename,"PARALLELISM:")
 parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
@@ -112,15 +112,20 @@ if parallelism_type == 'MPI':
 else:
     running_prefix = ' '
 # Checking if we need machinefile
-theline = searchline(readfilename,"MACHINEFILE")
+theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
 
+# Executable GSMCC file
+theline = searchline(readfilename,"GSMCC-exe:")
+running_cc = data[theline+1]
 # Read-Out file name CC
-theline = searchline(readfilename,"GSMCC-files")
+theline = searchline(readfilename,"GSMCC-files:")
 readfilename_CC = data[theline+1]
 outfilename_CC = data[theline+2]
+cc_write_aux = int(data[theline+3])
+cc_write = ' ' + cc_write_aux*'>' + ' '
 #
 logfolder = os.getcwd() + '/' + outfilename_CC[:-4]
 if not os.path.exists(logfolder):
@@ -154,8 +159,8 @@ for i in range(0,nene):
         gsmin.write(inputfile_aux)
     #
     start_gsmcc = time.time()
-    print_twice('\n ' + running_prefix + './CC_exe < '+readfilename_CC+' >> '+outfilename_CC)
-    sp.run([running_prefix + './CC_exe < '+readfilename_CC+' >> '+outfilename_CC], shell=True)
+    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
+    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
     end_gsmcc = time.time()
     time_gsmcc = end_gsmcc-start_gsmcc
     print_twice("Time to calculate: ",time_gsmcc, "s")
