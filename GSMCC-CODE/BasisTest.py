@@ -235,6 +235,8 @@ print_twice("\nEdit thresholds in %s"% storage_directory)
 os.chdir(storage_directory)
 sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
+print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
+os.chdir(gsmcc_directory)
 # Calculating neutron WS
 theline = searchline(calcfilename,"NEUTRONWS")
 if theline != None:
@@ -249,12 +251,12 @@ if theline != None:
             with open(readfilename_CC,'r') as gsmin:
                 inputfile_lines = gsmin.read().split('\n')
             # Find the basis.parameters line
-            theline = searchline(calcfilename,"Basis.WS.parameters")
+            theline = searchline(readfilename_CC,"Basis.WS.parameters")
             i = 0
             k = 0
             while i == 0:
                 aux = inputfile_lines[theline + 11 + k].split()
-                inputfile_lines[theline + 11 + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+vo+'  '+aux[4]
+                inputfile_lines[theline + 11 + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
                 k += 1
                 if inputfile_lines[theline + 11 + k].split() == []:
                     i = 1
