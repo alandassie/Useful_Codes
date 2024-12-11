@@ -2,7 +2,7 @@
     Created on July 2024 by Alan D.K. for 11C_Project.
 
     This code will edit each one of the files created by
-    GSM of the form "eigenvector_E_averaged_n_scat_Za_Nb_JPi_i"
+    GSM of the form "eigenvector_E_averaged_n_scat_Z_a_N_b_JPi_i"
     where a, b are the number of protons and neutrons, respectively,
     JPi is the state of the Target and i is the index.
     
@@ -75,7 +75,7 @@ while i < len(data)-3:
 
 # PROJECTILES
 theline = searchline(readfilename,"PROJECTILES")
-if theline == None:  
+if theline == None:
     projectiles = []
 else:
     projectiles = []
@@ -96,8 +96,8 @@ keyname = "eigenvector_E_averaged_n_scat_"
 
 # print("...BackUp the GSM calculated version...\n")
 for state in targets + projectiles:
-    readfile = keyname+"Z%s_N%s_%s_%s"% state[0:4]
-    savefile = keyname+"Z%s_N%s_%s_%s_backup"% state[0:4]
+    readfile = keyname+"Z_%s_N_%s_%s_%s"% state[0:4]
+    savefile = keyname+"Z_%s_N_%s_%s_%s_backup"% state[0:4]
     # Check if the state was calculated before
     try:
         with open(readfile,'r') as f:
@@ -112,7 +112,7 @@ for state in targets + projectiles:
 # print("...Change threshold files with experimental values...")
 # print("\n...Change projectile binding energy...")
 for proj in projectiles:
-    readfile = keyname+"Z%s_N%s_%s_%s"% proj[0:4]
+    readfile = keyname+"Z_%s_N_%s_%s_%s"% proj[0:4]
     try:
         with open(readfile,'r') as f:
             line = f.read().split('\n')
@@ -126,7 +126,7 @@ for proj in projectiles:
         f.write(line[0])
 # print("\n...Change target binding energy...\n")
 for state in targets:
-    readfile = keyname+"Z%s_N%s_%s_%s"% state[0:4]
+    readfile = keyname+"Z_%s_N_%s_%s_%s"% state[0:4]
     try:
         with open(readfile,'r') as f:
             line = f.read().split('\n')
