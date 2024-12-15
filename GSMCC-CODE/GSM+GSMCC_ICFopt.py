@@ -21,8 +21,18 @@ from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
 
+# LOG NAME
+logname = 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FILE
-logfile = os.getcwd() + '/GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logfile = os.getcwd() + '/' + logname
+# LOG FOLDER
+logfolder = os.getcwd() + '/' + logname
+if not os.path.exists(logfolder):
+    os.makedirs(logfolder)
+else:
+    for filename in os.listdir(logfolder):
+        # remove the files inside
+        os.remove(f"{logfolder}/{filename}")
 
 # Declaration of funcitons
 def erease_output_file():
@@ -103,8 +113,8 @@ def f(x):
     with open(readfilename_CC,'w') as gsmin:
         gsmin.write(inputfile_aux)
     #
-    aux = time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
-    outfilename_CCi = outfilename_CC + '-' + aux
+    aux = time.strftime( "%y.%m.%d-%H.%M.%S", time.localtime() )
+    outfilename_CCi = logname + '/' + outfilename_CC + '-' + aux
     start_gsmcc = time.time()
     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi)
     sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi], shell=True)
@@ -200,7 +210,7 @@ def f(x):
         print_twice('\n'+20*'-'+'\n')
         return return_residue
     elif method == 'MINIMIZATION':
-        print_twice('Finish iteration of TNC optimizer')
+        print_twice('Finish iteration of TNC or Nelder-Mead optimizer')
         print_twice('\n'+20*'-'+'\n')
         return res
     else:
@@ -257,6 +267,7 @@ if method == 'MINIMIZATION':
 # Checking if real or complex interaction corrective factors will be used
 used_icf = 0
 icf_type = 'NONE'
+icf_bounds = ''
 theline = searchline(readfilename,"CORRECTIVEFACTORS:")
 if theline != None:
     used_icf = 1
@@ -264,10 +275,12 @@ if theline != None:
     icf_real_seed = float(data[theline+2])
     if icf_type == 'COMPLEX':
         icf_imag_seed = float(data[theline+3])
+    icf_bounds = data[theline+4]
 #
 # Checking if real or complex clusters corrective factors will be used
 used_ccf = 0
 ccf_type = 'NONE'
+ccf_bounds = ''
 theline = searchline(readfilename,"CLUSTERCORRFACTORS:")
 if theline != None:
     used_ccf = 1
@@ -279,13 +292,15 @@ if theline != None:
         ccf_imag_seed = ccf_numberofcluster*[0]
     #
     for i in range(0,ccf_numberofcluster):
+        factor = i*4
         if ccf_type == 'COMPLEX':
-            factor = i*3
             ccf_imag_seed[i] = float(data[theline+5+factor])
-        else:
-            factor = i*2
         ccf_clusters[i] = data[theline+3+factor]
         ccf_real_seed[i] = float(data[theline+4+factor])
+        if i == 0:
+            ccf_bounds = ccf_bounds + data[theline+6+factor]
+        else:
+            ccf_bounds = ccf_bounds + ',' + data[theline+6+factor]
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
@@ -399,7 +414,6 @@ elif used_ccf == 1:
         exit()
     #
     seeds = seeds_aux1 + seeds_aux2
-    bounds_opt = ((0.9,1.1),(0,10))
 # Then calculation
 if method == 'NEWTON':
     print_twice('Using Newton optimizer')
@@ -409,7 +423,8 @@ elif method == 'MINIMIZATION':
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
     elif mini_method == 'Nelder-Mead':
-        print(seeds,bounds_opt)
+        bounds_opt = (eval(icf_bounds + ',' + ccf_bounds))
+        print(bounds_opt)
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
@@ -438,17 +453,19 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPTIMIZATIONMETHOD:  NEWTON or ('MINIMIZATION;' + 'TNC' or 'Nelder-Mead' for the moment)
     MINIMIZATION;TNC
     
-    CORRECTIVEFACTORS: 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED
-    COMPLEX
+    CORRECTIVEFACTORS: 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED; 4 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
+    REAL
     1.025
     0.0
+    (0.5,1.5)
 
-    CLUSTERCORRFACTORS: 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED
+    CLUSTERCORRFACTORS: 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED; 6 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
     COMPLEX
     1
     alpha
     1.0
     0.0
+    (0,8),(-1,1)
 
     EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; 2 - "YES" FOR SEARCH INDEX OR "NO" FOR NOT; for each state -> 3 - ENERGY (MeV); 4 - WIDTH (keV); 5 - ESTIMATED ENERGY ORDERED INDEX
     2
