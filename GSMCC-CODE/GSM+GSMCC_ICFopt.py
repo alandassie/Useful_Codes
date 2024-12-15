@@ -143,7 +143,7 @@ def f(x):
         expene = expene_read[i]
         expwid = expwid_read[i]
         numberindex = index_read[i]
-        if index_search == 'YES'
+        if index_search == 'YES':
             # Test with the index and index\pm1 states 
             if numberindex >= 1:
                 index0_res_e = expene - float(auxiliar[numberindex-1][0])
