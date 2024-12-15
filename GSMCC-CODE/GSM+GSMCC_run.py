@@ -102,8 +102,8 @@ if theline != None:
     gsm_files = int(data[theline+1])
     gsm_write_aux = int(data[theline+2])
     gsm_write = ' ' + gsm_write_aux*'>' + ' '
-    readfilename_GSM = data[theline+3:(theline+3)+2*n_gsmfiles:2]
-    outfilename_GSM = data[theline+4:(theline+4)+2*n_gsmfiles:2]
+    readfilename_GSM = data[theline+3:(theline+3)+2*gsm_files:2]
+    outfilename_GSM = data[theline+4:(theline+4)+2*gsm_files:2]
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
 

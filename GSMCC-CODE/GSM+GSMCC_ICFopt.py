@@ -167,17 +167,19 @@ def f(x):
                 indexmin_res_e[i] = numberindex
         #
 
-        res_e[i] = expene - float(auxiliar[indexmin_res_e[i]][0])
-        res_w[i] = expwid - float(auxiliar[indexmin_res_e[i]][1])
-        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:7.3f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e[i],res_w[i]))
+        res_e_aux = expene - float(auxiliar[indexmin_res_e[i]][0])
+        res_e[i] = ( res_e_aux )**2 / abs(expene)
+        res_w_aux = expwid - float(auxiliar[indexmin_res_e[i]][1])
+        res_w[i] = ( res_w_aux )**2 / abs(expwid)
+        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
         # res_e[i] = expene - float(auxiliar[numberindex][0])
         # res_w[i] = expwid - float(auxiliar[numberindex][1])
         # print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
     if adjusting_width == 1:
-        res = m.sqrt( np.sum(res_e**2) + np.sum(res_w**2) )
+        res = np.sum(res_e) + np.sum(res_w)
     else:
-        res = m.sqrt( np.sum(res_e**2) )
-    print_twice('Sum^2 Residue = {0:7.3f}'.format(res))
+        res = np.sum(res_e)
+    print_twice('X^2 = {0:10.6f}'.format(res))
     #
     if adjusting_width == 1:
         aux = list(res_e) + list(res_w)
@@ -231,7 +233,7 @@ parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
 elif parallelism_type == 'OPENMP':
-    running_prefix = ' '
+    running_prefix = ' ./'
 else:
     print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile
@@ -311,8 +313,8 @@ if theline != None:
     gsm_files = int(data[theline+1])
     gsm_write_aux = int(data[theline+2])
     gsm_write = ' ' + gsm_write_aux*'>' + ' '
-    readfilename_GSM = data[theline+3:(theline+3)+2*n_gsmfiles:2]
-    outfilename_GSM = data[theline+4:(theline+4)+2*n_gsmfiles:2]
+    readfilename_GSM = data[theline+3:(theline+3)+2*gsm_files:2]
+    outfilename_GSM = data[theline+4:(theline+4)+2*gsm_files:2]
     if len(readfilename_GSM) > gsm_files:
         readfilename_GSM = readfilename_GSM[:-1]
 #
@@ -390,13 +392,18 @@ elif used_ccf == 1:
         exit()
     #
     seeds = seeds_aux1 + seeds_aux2
+    bounds_opt = ((0.9,1.1),(0,10))
 # Then calculation
 if method == 'NEWTON':
     print_twice('Using Newton optimizer')
     opt = newton(f, seeds, tol=1e-10, maxiter=6, full_output=True)
 elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
-    opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
+    if mini_method == 'TNC':
+        opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
+    elif mini_method == 'Nelder-Mead':
+        print(seeds,bounds_opt)
+        opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
     exit()
@@ -421,7 +428,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MACHINEFILE: DEFINE THE FILE FOR THE EXECUTION, IF NEEDED
     machinefile
     
-    OPTIMIZATIONMETHOD:  NEWTON or (MINIMIZATION + ; + TNC for the moment)
+    OPTIMIZATIONMETHOD:  NEWTON or ('MINIMIZATION;' + 'TNC' or 'Nelder-Mead' for the moment)
     MINIMIZATION;TNC
     
     CORRECTIVEFACTORS: 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED
