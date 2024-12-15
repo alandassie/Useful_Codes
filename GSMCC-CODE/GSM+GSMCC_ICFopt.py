@@ -21,12 +21,12 @@ from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
 
-# LOG NAME
-logname = 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FILE
-logfile = os.getcwd() + '/' + logname
+logfile = os.getcwd() + '/' + 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+# LOG NAME
+logname = 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() ) + '_WD'
 # LOG FOLDER
-logfolder = os.getcwd() + '/' + logname
+logfolder = os.getcwd() + '/' + logname 
 if not os.path.exists(logfolder):
     os.makedirs(logfolder)
 else:
@@ -180,13 +180,19 @@ def f(x):
             res_e_aux = expene - float(auxiliar[indexmin_res_e[i]][0])
             res_e[i] = ( res_e_aux )**2 / abs(expene)
             res_w_aux = expwid - float(auxiliar[indexmin_res_e[i]][1])
-            res_w[i] = ( res_w_aux )**2 / abs(expwid)
+            if expwid < 1e-10: # Zero widht!
+                res_w[i] = ( res_w_aux )**2
+            else:
+                res_w[i] = ( res_w_aux )**2 / abs(expwid)
             print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
         elif index_search == 'NO':
             res_e_aux = expene - float(auxiliar[numberindex][0])
             res_e[i] = ( res_e_aux )**2 / abs(expene)
             res_w_aux = expwid - float(auxiliar[numberindex][1])
-            res_w[i] = ( res_w_aux )**2 / abs(expwid)
+            if expwid < 1e-10: # Zero widht!
+                res_w[i] = ( res_w_aux )**2
+            else:
+                res_w[i] = ( res_w_aux )**2 / abs(expwid)
             print_twice('State selected Index : {0:d}\n  E Residue = {1:10.6f}, W Residue = {2:10.6f}'.format(numberindex,res_e_aux,res_w_aux))
         else:
             print_twice('YES OR NO FOR INDEX SEARCHING!')
