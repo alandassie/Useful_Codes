@@ -143,38 +143,44 @@ def f(x):
         expene = expene_read[i]
         expwid = expwid_read[i]
         numberindex = index_read[i]
-        # Test with the index and index\pm1 states 
-        if numberindex >= 1:
-            index0_res_e = expene - float(auxiliar[numberindex-1][0])
-            index1_res_e = expene - float(auxiliar[numberindex][0])
-            index2_res_e = expene - float(auxiliar[numberindex+1][0])
-            #
-            aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
-            if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
-                indexmin_res_e[i] = aux
-            else:
-                # Second minimum to avoid two states assigned to a same eigenvalue
-                aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
-                indexmin_res_e[i] = numberindex + aux2
-        else:
-            if len(line_numbers) > 1:
+        if index_search == 'YES'
+            # Test with the index and index\pm1 states 
+            if numberindex >= 1:
+                index0_res_e = expene - float(auxiliar[numberindex-1][0])
                 index1_res_e = expene - float(auxiliar[numberindex][0])
                 index2_res_e = expene - float(auxiliar[numberindex+1][0])
                 #
-                aux = [ abs(index1_res_e), abs(index2_res_e) ]
-                indexmin_res_e[i] = numberindex + np.argmin( aux )
+                aux = numberindex + np.argmin( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] ) - 1
+                if np.size(np.argwhere(indexmin_res_e == aux)) == 0:
+                    indexmin_res_e[i] = aux
+                else:
+                    # Second minimum to avoid two states assigned to a same eigenvalue
+                    aux2 = np.argsort( [ abs(index0_res_e), abs(index1_res_e), abs(index2_res_e) ] )[1] - 1
+                    indexmin_res_e[i] = numberindex + aux2
             else:
-                indexmin_res_e[i] = numberindex
-        #
-
-        res_e_aux = expene - float(auxiliar[indexmin_res_e[i]][0])
-        res_e[i] = ( res_e_aux )**2 / abs(expene)
-        res_w_aux = expwid - float(auxiliar[indexmin_res_e[i]][1])
-        res_w[i] = ( res_w_aux )**2 / abs(expwid)
-        print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
-        # res_e[i] = expene - float(auxiliar[numberindex][0])
-        # res_w[i] = expwid - float(auxiliar[numberindex][1])
-        # print_twice('State selected Index : {0:d}\n  E Residue = {1:7.3f}, W Residue = {2:10.6f}'.format(numberindex,res_e[i],res_w[i]))
+                if len(line_numbers) > 1:
+                    index1_res_e = expene - float(auxiliar[numberindex][0])
+                    index2_res_e = expene - float(auxiliar[numberindex+1][0])
+                    #
+                    aux = [ abs(index1_res_e), abs(index2_res_e) ]
+                    indexmin_res_e[i] = numberindex + np.argmin( aux )
+                else:
+                    indexmin_res_e[i] = numberindex
+            
+            res_e_aux = expene - float(auxiliar[indexmin_res_e[i]][0])
+            res_e[i] = ( res_e_aux )**2 / abs(expene)
+            res_w_aux = expwid - float(auxiliar[indexmin_res_e[i]][1])
+            res_w[i] = ( res_w_aux )**2 / abs(expwid)
+            print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
+        elif index_search == 'NO':
+            res_e_aux = expene - float(auxiliar[numberindex][0])
+            res_e[i] = ( res_e_aux )**2 / abs(expene)
+            res_w_aux = expwid - float(auxiliar[numberindex][1])
+            res_w[i] = ( res_w_aux )**2 / abs(expwid)
+            print_twice('State selected Index : {0:d}\n  E Residue = {1:10.6f}, W Residue = {2:10.6f}'.format(numberindex,res_e_aux,res_w_aux))
+        else:
+            print_twice('YES OR NO FOR INDEX SEARCHING!')
+            exit()
     if adjusting_width == 1:
         res = np.sum(res_e) + np.sum(res_w)
     else:
@@ -284,13 +290,14 @@ if theline != None:
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
 numberofstates = int(data[theline+1])
+index_search = data[theline+2]
 expene_read = np.zeros(numberofstates)
 expwid_read = np.zeros(numberofstates)
 index_read = np.zeros(numberofstates, dtype=int)
 for i in range(0,numberofstates):
-    expene_read[i] = float(data[theline+2+i*3])
-    expwid_read[i] = float(data[theline+3+i*3])
-    index_read[i] = int(data[theline+4+i*3])
+    expene_read[i] = float(data[theline+3+i*3])
+    expwid_read[i] = float(data[theline+4+i*3])
+    index_read[i] = int(data[theline+5+i*3])
 #
 
 # Executable GSMCC file
@@ -443,8 +450,9 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     1.0
     0.0
 
-    EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - ENERGY (MeV); 3 - WIDTH (keV); 4 - ENERGY ORDERED INDEX
+    EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; 2 - "YES" FOR SEARCH INDEX OR "NO" FOR NOT; for each state -> 3 - ENERGY (MeV); 4 - WIDTH (keV); 5 - ESTIMATED ENERGY ORDERED INDEX
     2
+    NO
     -36.446
     15.0
     1
