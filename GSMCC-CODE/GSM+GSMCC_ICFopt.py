@@ -423,14 +423,16 @@ elif used_ccf == 1:
 # Then calculation
 if method == 'NEWTON':
     print_twice('Using Newton optimizer')
-    opt = newton(f, seeds, tol=1e-10, maxiter=6, full_output=True)
+    opt = newton(f, seeds, tol=1e-10, maxiter=20, full_output=True)
 elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
     elif mini_method == 'Nelder-Mead':
-        bounds_opt = (eval(icf_bounds + ',' + ccf_bounds))
-        print(bounds_opt)
+        if used_icf == 1:
+            bounds_opt = (eval(icf_bounds + ',' + ccf_bounds))
+        else:
+            bounds_opt = (eval(ccf_bounds))
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
