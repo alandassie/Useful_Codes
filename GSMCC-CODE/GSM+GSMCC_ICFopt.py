@@ -432,7 +432,7 @@ elif method == 'MINIMIZATION':
         if used_icf == 1:
             bounds_opt = (eval(icf_bounds + ',' + ccf_bounds))
         else:
-            bounds_opt = (eval(ccf_bounds))
+            bounds_opt = ( eval(ccf_bounds + ',') )
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
