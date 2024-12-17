@@ -96,7 +96,10 @@ def f(x):
             inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
         elif icf_type == 'REAL': # Real interaction corrective factor
             start_value = 1
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " 0.0 "
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(icf_imag_seed)
+        elif icf_type == 'IMAG': # Imag interaction corrective factor
+            start_value = 1
+            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(icf_real_seed) + " " + str(x[1])
     if used_ccf == 1: # Using Cluster corrective factors
         if ccf_type == 'COMPLEX':
             # Now edit each ccf for all the clusters
@@ -279,8 +282,7 @@ if theline != None:
     used_icf = 1
     icf_type = data[theline+1]
     icf_real_seed = float(data[theline+2])
-    if icf_type == 'COMPLEX':
-        icf_imag_seed = float(data[theline+3])
+    icf_imag_seed = float(data[theline+3])
     icf_bounds = data[theline+4]
 #
 # Checking if real or complex clusters corrective factors will be used
@@ -294,15 +296,13 @@ if theline != None:
     ccf_numberofcluster = int(data[theline+2])
     ccf_clusters = ccf_numberofcluster*['0']
     ccf_real_seed = ccf_numberofcluster*[0]
-    if ccf_type == 'COMPLEX':
-        ccf_imag_seed = ccf_numberofcluster*[0]
+    ccf_imag_seed = ccf_numberofcluster*[0]
     #
     for i in range(0,ccf_numberofcluster):
         factor = i*4
-        if ccf_type == 'COMPLEX':
-            ccf_imag_seed[i] = float(data[theline+5+factor])
         ccf_clusters[i] = data[theline+3+factor]
         ccf_real_seed[i] = float(data[theline+4+factor])
+        ccf_imag_seed[i] = float(data[theline+5+factor])
         if i == 0:
             ccf_bounds = ccf_bounds + data[theline+6+factor]
         else:
@@ -392,18 +392,22 @@ if used_ccf == 0 and used_icf == 1:
         seeds = [icf_real_seed,icf_imag_seed]
     elif icf_type == 'REAL':
         seeds = [icf_real_seed]
+    elif icf_type == 'IMAG':
+        seeds = [icf_imag_seed]
     else:
-        print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL OR COMPLEX')
+        print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
         exit()
 elif used_ccf == 1:
     if used_icf == 1:
         if icf_type == 'COMPLEX':
-            # The first two seeds are always the real and imaginary part of the interaction corrective factors
+            # The first two seeds are always the real and/or imaginary part of the interaction corrective factors
             seeds_aux1 = [icf_real_seed,icf_imag_seed]
         elif icf_type == 'REAL':
             seeds_aux1 = [icf_real_seed]
+        elif icf_type == 'IMAG':
+            seeds_aux1 = [icf_imag_seed]
         else:
-            print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL OR COMPLEX')
+            print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
             exit()
     else:
         seeds_aux1 = []
@@ -415,8 +419,10 @@ elif used_ccf == 1:
         seeds_aux2[1::2] = ccf_imag_seed
     elif ccf_type == 'REAL':
         seeds_aux2 = ccf_real_seed
+    elif ccf_type == 'IMAG':
+        seeds_aux2 = ccf_imag_seed
     else:
-        print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL OR COMPLEX')
+        print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
         exit()
     #
     seeds = seeds_aux1 + seeds_aux2
