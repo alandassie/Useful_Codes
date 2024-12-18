@@ -24,7 +24,7 @@ import numpy as np
 # LOG FILE
 logfile = os.getcwd() + '/' + 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
-logname = 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() ) + '_WD'
+logname = 'WD_GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
 logfolder = os.getcwd() + '/' + logname 
 if not os.path.exists(logfolder):
