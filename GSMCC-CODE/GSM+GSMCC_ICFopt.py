@@ -345,7 +345,7 @@ for i in range(0,numberofstates):
     expene_read[i] = float(data[theline+3+i*4])
     expwid_read[i] = float(data[theline+4+i*4])
     index_read[i] = int(data[theline+5+i*4])
-    stweig_read[i] = int(data[theline+6+i*4])
+    stweig_read[i] = float(data[theline+6+i*4])
 #
 
 # Executable GSMCC file
