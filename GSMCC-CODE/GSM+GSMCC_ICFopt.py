@@ -93,13 +93,21 @@ def f(x):
         aux1 = inputfile_lines[icf_line].split()
         if icf_type == 'COMPLEX': # Complex interaction corrective factors
             start_value = 2
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(x[1])
-        elif icf_type == 'REAL': # Real interaction corrective factor
+            aux2 = str(x[0])
+            aux3 = str(x[1])
+        elif icf_type == 'REAL': # Only real part optimization
             start_value = 1
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(x[0]) + " " + str(icf_imag_seed)
-        elif icf_type == 'IMAG': # Imag interaction corrective factor
+            aux2 = str(x[0])
+            aux3 = str(icf_imag_seed)
+        elif icf_type == 'IMAG': # Only imag part optimization
             start_value = 1
-            inputfile_lines[icf_line] = "  " + aux1[0] + " " + str(icf_real_seed) + " " + str(x[1])
+            aux2 = str(icf_real_seed)
+            aux3 = str(x[0])
+        else:
+            print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
+            exit()
+        # 
+        inputfile_lines[icf_line] = "  " + aux1[0] + " " + aux2 + " " + aux3
     if used_ccf == 1: # Using Cluster corrective factors
         if ccf_type == 'COMPLEX':
             # Now edit each ccf for all the clusters
@@ -110,7 +118,15 @@ def f(x):
             # Now edit each ccf for all the clusters
             for i in range(0,ccf_numberofcluster):
                 aux2 = inputfile_lines[ccf_lines[i]].split()
-                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[start_value+i]) + " 0.0 "
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(x[start_value+i]) + " " + str(ccf_imag_seed[i])
+        elif ccf_type == 'IMAG':
+            # Now edit each ccf for all the clusters
+            for i in range(0,ccf_numberofcluster):
+                aux2 = inputfile_lines[ccf_lines[i]].split()
+                inputfile_lines[ccf_lines[i]] = "      " + aux2[0] + " " + str(ccf_real_seed[i]) + " " + str(x[start_value+i])
+        else:
+            print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
+            exit()
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
     with open(readfilename_CC,'w') as gsmin:
@@ -144,10 +160,14 @@ def f(x):
     print_twice('Calculated energies and widths:')
     print_twice(auxiliar)
     # Compare with all the experimental energies
-    adjusting_width = 0
-    if ccf_type == 'COMPLEX' or icf_type == 'COMPLEX':
-        print_twice('Using complex CF, then adjusting widths:')
-        adjusting_width = 1
+    adjusting_energy = 1
+    adjusting_width = 1
+    if ccf_type == 'REAL' and icf_type == 'REAL':
+        print_twice('Only adjusting energies:')
+        adjusting_width = 0
+    elif ccf_type == 'IMAG' and icf_type == 'IMAG':
+        print_twice('Only adjusting widths:')
+        adjusting_energy = 0
     # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
@@ -200,22 +220,26 @@ def f(x):
         else:
             print_twice('YES OR NO FOR INDEX SEARCHING!')
             exit()
-    if adjusting_width == 1:
-        res = np.sum(res_e) + np.sum(res_w)
-    else:
+    if adjusting_width == 0:
         res = np.sum(res_e)
+    elif adjusting_energy == 0:
+        res = np.sum(res_w)
+    else:
+        res = np.sum(res_e) + np.sum(res_w)
     print_twice('X^2 = {0:10.6f}'.format(res))
     #
-    if adjusting_width == 1:
-        aux = list(res_e) + list(res_w)
-        aux[::2] = list(res_e)
-        aux[1::2] = list(res_w)
-        return_residue = aux
-    else:
-        return_residue = res_e
     # Check which optimizator we are using
     if method == 'NEWTON':
-        print_twice('Finish iteration of Newton optimizer')
+        print_twice('Finish iteration of Newton optimizer, x and f(x) must be of the same size!')
+        if adjusting_width == 0:
+            return_residue = res_e
+        elif adjusting_energy == 0:
+            return_residue == res_w
+        else:
+            aux = list(res_e) + list(res_w)
+            aux[::2] = list(res_e)
+            aux[1::2] = list(res_w)
+            return_residue = aux
         print_twice('\n'+20*'-'+'\n')
         return return_residue
     elif method == 'MINIMIZATION':
@@ -223,7 +247,7 @@ def f(x):
         print_twice('\n'+20*'-'+'\n')
         return res
     else:
-        print_twice('METHOD must be NEWTON or MINIMIZATION;TNC')
+        print_twice('METHOD must be NEWTON or MINIMIZATION;(TNC or Nelder-Mead)')
         exit()
 # .-
 
@@ -428,7 +452,7 @@ elif used_ccf == 1:
     seeds = seeds_aux1 + seeds_aux2
 # Then calculation
 if method == 'NEWTON':
-    print_twice('Using Newton optimizer')
+    print_twice('Using Newton optimizer, x and f(x) must be of the same size!')
     opt = newton(f, seeds, tol=1e-10, maxiter=20, full_output=True)
 elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
@@ -467,13 +491,13 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPTIMIZATIONMETHOD:  NEWTON or ('MINIMIZATION;' + 'TNC' or 'Nelder-Mead' for the moment)
     MINIMIZATION;TNC
     
-    CORRECTIVEFACTORS: 1 - COMPLEX or REAL; 2 - REAL SEED; 3 - IMAG SEED; 4 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
+    CORRECTIVEFACTORS: 1 - COMPLEX, REAL or IMAG; 2 - REAL SEED; 3 - IMAG SEED; 4 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
     REAL
     1.025
     0.0
     (0.5,1.5)
 
-    CLUSTERCORRFACTORS: 1 - COMPLEX or REAL; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED; 6 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
+    CLUSTERCORRFACTORS: 1 - COMPLEX, REAL or IMAG; 2 - NUMBER OF CLUSTERS; for each cluster -> 3 - NAME OF THE CLUSTER; 4 - REAL SEED; 5 - IMAG SEED; 6 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
     COMPLEX
     1
     alpha
