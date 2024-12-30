@@ -150,10 +150,18 @@ def f(x):
     for line in line_numbers:
         auxe = outputfile_lines[line]
         ene = float(auxe.split(':')[1].split(' ')[1])
+        auxe_pole = outputfile_lines[line-4]
+        ene_pole = float(auxe.split(':')[1].split(' ')[1])
         auxw = outputfile_lines[line+1]
         wid = float(auxw.split(':')[1].split(' ')[1])
-        energy.append( ene )
-        width.append( wid )
+        # Only append when ene and ene_pole are close
+        if abs(ene - ene_pole) < 8: # Limit on 8 MeV
+            energy.append( ene )
+            width.append( wid )
+        else:
+            print_twice('OBS! The state with index %s differs from the pole approx more than 8 MeV!')
+            print_twice('E_pole = {0:10.6f}, E = {1:10.6f}'.format(auxe_pole,auxe))
+            print_twice('It will be discarded!')
     #
     auxiliar = list(zip(energy,width))
     auxiliar.sort()
@@ -417,10 +425,13 @@ if used_ccf == 1:
 if used_ccf == 0 and used_icf == 1:
     if icf_type == 'COMPLEX':
         seeds = [icf_real_seed,icf_imag_seed]
+        print_twice('Optimizing real and imaginary parts of ICF')
     elif icf_type == 'REAL':
         seeds = [icf_real_seed]
+        print_twice('Optimizing real part of ICF')
     elif icf_type == 'IMAG':
         seeds = [icf_imag_seed]
+        print_twice('Optimizing imaginary part of ICF')
     else:
         print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
         exit()
@@ -429,10 +440,13 @@ elif used_ccf == 1:
         if icf_type == 'COMPLEX':
             # The first two seeds are always the real and/or imaginary part of the interaction corrective factors
             seeds_aux1 = [icf_real_seed,icf_imag_seed]
+            print_twice('Optimizing real and imaginary parts of ICF')
         elif icf_type == 'REAL':
             seeds_aux1 = [icf_real_seed]
+            print_twice('Optimizing real part of ICF')
         elif icf_type == 'IMAG':
             seeds_aux1 = [icf_imag_seed]
+            print_twice('Optimizing imaginary part of ICF')
         else:
             print_twice('PROBLEM WITH ICF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
             exit()
@@ -444,10 +458,13 @@ elif used_ccf == 1:
         seeds_aux2 = ccf_real_seed + ccf_imag_seed 
         seeds_aux2[::2] = ccf_real_seed
         seeds_aux2[1::2] = ccf_imag_seed
+        print_twice('Optimizing real and imaginary parts of CCF')
     elif ccf_type == 'REAL':
         seeds_aux2 = ccf_real_seed
+        print_twice('Optimizing real part of CCF')
     elif ccf_type == 'IMAG':
         seeds_aux2 = ccf_imag_seed
+        print_twice('Optimizing imaginary part of CCF')
     else:
         print_twice('PROBLEM WITH CCF_TYPE, MUST BE REAL, IMAG OR COMPLEX')
         exit()
