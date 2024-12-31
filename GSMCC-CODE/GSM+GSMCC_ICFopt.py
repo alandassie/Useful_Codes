@@ -151,7 +151,7 @@ def f(x):
         auxe = outputfile_lines[line]
         ene = float(auxe.split(':')[1].split(' ')[1])
         auxe_pole = outputfile_lines[line-4]
-        ene_pole = float(auxe.split(':')[1].split(' ')[1])
+        ene_pole = float(auxe_pole.split(':')[1].split(' ')[1])
         auxw = outputfile_lines[line+1]
         wid = float(auxw.split(':')[1].split(' ')[1])
         # Only append when ene and ene_pole are close
