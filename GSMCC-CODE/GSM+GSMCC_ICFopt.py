@@ -147,6 +147,7 @@ def f(x):
     line_numbers = searchline_all(outfilename_CCi,search)
     energy = []
     width = []
+    j = 0
     for line in line_numbers:
         auxe = outputfile_lines[line]
         ene = float(auxe.split(':')[1].split(' ')[1])
@@ -159,9 +160,10 @@ def f(x):
             energy.append( ene )
             width.append( wid )
         else:
-            print_twice('OBS! The state with index %s differs from the pole approx more than 8 MeV!')
-            print_twice('E_pole = {0:10.6f}, E = {1:10.6f}'.format(auxe_pole,auxe))
+            print_twice('OBS! The state with index %s differs from the pole approx more than 8 MeV!'% j)
+            print_twice('E_pole = {0:10.6f}, E = {1:10.6f}'.format(ene_pole,ene))
             print_twice('It will be discarded!')
+        j += 1
     #
     auxiliar = list(zip(energy,width))
     auxiliar.sort()
