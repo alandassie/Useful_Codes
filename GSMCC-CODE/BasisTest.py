@@ -6,7 +6,7 @@
     
     For reading file, the information about working directories and files
     is the same as in the code GSM+GSMCC_run.py.
-    A particular file called BasisTest.in is used to define the parameters to
+    A particular file called BasisTest_alt.in is used to define the parameters to
     test, the range of test and the step for each one. An example can be found at the end of the code.
 """
 
@@ -120,107 +120,10 @@ if theline != None:
         readfilename_GSM = readfilename_GSM[:-1]
 
 # CALCULATING FILE
-calcfilename = os.getcwd() + '/BasisTest.in'
+calcfilename = os.getcwd() + '/BasisTest_alt.in'
 with open(calcfilename, 'r') as readfile:
     data = readfile.read().split('\n')
-
-# Preparing proton WS
-theline = searchline(calcfilename,"PROTONWS")
-if theline != None:
-    print_twice('Doing Woods-Saxon proton test')
-    proton_type = data[theline+1]
-    if proton_type == 'ALL':
-        print_twice('All WS partial waves equal')
-        theline = searchline(calcfilename,"PROTONSTRENGTHWS")
-        protonws_lwave_n = 0
-        protonws_starting_point = [float(data[theline+1])]
-        protonws_step = [float(data[theline+2])]
-        protonws_n = [int(data[theline+3])]
-    else:
-        print_twice('Selected partial waves with different discretization')
-        protonws_lwave = json.loads(proton_type)
-        protonws_lwave_n = len(protonws_lwave)
-        theline = searchline(calcfilename,"PROTONSTRENGTHWS")
-        protonws_starting_point = []
-        protonws_step = []
-        protonws_n = []
-        for i in range(0,protonws_lwave_n):
-            protonws_starting_point = [float(data[theline+1+i*3])]
-            protonws_step = [float(data[theline+2+i*3])]
-            protonws_n = [int(data[theline+3+i*3])]
-# Preparing proton SO 
-theline = searchline(calcfilename,"PROTONSO")
-if theline != None:
-    print_twice('Doing spin-orbit proton test')
-    proton_type = data[theline+1]
-    if proton_type == 'ALL':
-        print_twice('All SO partial waves equal')
-        theline = searchline(calcfilename,"PROTONSTRENGTHSO")
-        protonso_lwave_n = 0
-        protonso_starting_point = [float(data[theline+1])]
-        protonso_step = [float(data[theline+2])]
-        protonso_n = [int(data[theline+3])]
-    else:
-        print_twice('Selected partial waves with different discretization')
-        protonso_lwave = json.loads(proton_type)
-        protonso_lwave_n = len(protonso_lwave)
-        theline = searchline(calcfilename,"PROTONSTRENGTHSO")
-        protonso_starting_point = []
-        protonso_step = []
-        protonso_n = []
-        for i in range(0,protonso_lwave_n):
-            protonso_starting_point = [float(data[theline+1+i*3])]
-            protonso_step = [float(data[theline+2+i*3])]
-            protonso_n = [int(data[theline+3+i*3])]
-
-# Preparing neutron WS
-theline = searchline(calcfilename,"NEUTRONWS")
-if theline != None:
-    print_twice('Doing Woods-Saxon neutron test')
-    neutron_type = data[theline+1]
-    if neutron_type == 'ALL':
-        print_twice('All WS partial waves equal')
-        theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
-        neutronws_lwave_n = 0
-        neutronws_starting_point = [float(data[theline+1])]
-        neutronws_step = [float(data[theline+2])]
-        neutronws_n = [int(data[theline+3])]
-    else:
-        print_twice('Selected partial waves with different discretization')
-        neutronws_lwave = json.loads(neutron_type)
-        neutronws_lwave_n = len(neutronws_lwave)
-        theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
-        neutronws_starting_point = []
-        neutronws_step = []
-        neutronws_n = []
-        for i in range(0,neutronws_lwave_n):
-            neutronws_starting_point = [float(data[theline+1+i*3])]
-            neutronws_step = [float(data[theline+2+i*3])]
-            neutronws_n = [int(data[theline+3+i*3])]
-# Preparing neutron SO 
-theline = searchline(calcfilename,"NEUTRONSO")
-if theline != None:
-    print_twice('Doing spin-orbit neutron test')
-    neutron_type = data[theline+1]
-    if neutron_type == 'ALL':
-        print_twice('All SO partial waves equal')
-        theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
-        neutronso_lwave_n = 0
-        neutronso_starting_point = [float(data[theline+1])]
-        neutronso_step = [float(data[theline+2])]
-        neutronso_n = [int(data[theline+3])]
-    else:
-        print_twice('Selected partial waves with different discretization')
-        neutronso_lwave = json.loads(neutron_type)
-        neutronso_lwave_n = len(neutronso_lwave)
-        theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
-        neutronso_starting_point = []
-        neutronso_step = []
-        neutronso_n = []
-        for i in range(0,neutronso_lwave_n):
-            neutronso_starting_point = [float(data[theline+1+i*3])]
-            neutronso_step = [float(data[theline+2+i*3])]
-            neutronso_n = [int(data[theline+3+i*3])]
+numfile = int(data[1])
 
 # Start calculation
 start_main = time.time()
@@ -250,42 +153,31 @@ sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
-# Calculating neutron WS
-theline = searchline(calcfilename,"NEUTRONWS")
-if theline != None:
-    print_twice('Start neutron WS calculations')
-    neutron_type = data[theline+1]
-    if neutron_type == 'ALL':
-        # Define the array of values
-        neutronws_intensities = neutronws_starting_point[0] + np.arange(neutronws_n[0]+1)*neutronws_step[0]
-        # Start calculations
-        for vo in neutronws_intensities:
-            # Open GSMCC input file
-            with open(readfilename_CC,'r') as gsmin:
-                inputfile_lines = gsmin.read().split('\n')
-            # Find the basis.parameters line
-            theline = searchline(readfilename_CC,"Basis.WS.parameters")
-            i = 0
-            k = 0
-            while i == 0:
-                aux = inputfile_lines[theline + 11 + k].split()
-                inputfile_lines[theline + 11 + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + 11 + k].split() == []:
-                    i = 1
-            # Save and close GSMCC input file
-            inputfile_aux = '\n'.join(inputfile_lines)
-            with open(readfilename_CC,'w') as gsmin:
-                gsmin.write(inputfile_aux)
-            #
-            # Runnning the code
-            start_gsmcc = time.time()
-            print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
-            sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
-            end_gsmcc = time.time()
-            time_gsmcc = end_gsmcc-start_gsmcc
-            print_twice("Time to calculate: ",time_gsmcc, "s")
-
+# Calculating
+print_twice('Start calculations')
+# Start calculations
+for j in range(0,numfile):
+    # Open GSMCC input file
+    readfilename_CC_j = readfilename_CC[:-3] + '_%s.in'% (j+10)
+    outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% (j+10)
+    # Runnning the code
+    start_gsmcc = time.time()
+    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
+    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j], shell=True)
+    end_gsmcc = time.time()
+    time_gsmcc = end_gsmcc-start_gsmcc
+    print_twice("Time to calculate: ",time_gsmcc, "s")
+    # if j == 16 or j == 17 or j == 18:
+    #     readfilename_CC_j = readfilename_CC[:-3] + '_%sr.in'% (j+10)
+    #     outfilename_CC_j = outfilename_CC[:-4] + '_%sr.out'% (j+10)
+    #     # Runnning the code
+    #     start_gsmcc = time.time()
+    #     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
+    #     sp.run([running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j], shell=True)
+    #     end_gsmcc = time.time()
+    #     time_gsmcc = end_gsmcc-start_gsmcc
+    #     print_twice("Time to calculate: ",time_gsmcc, "s")
+        
 
 #
 end_main = time.time()
@@ -296,33 +188,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Example of BasisTest.in file:
     _________________________________
     # Remove the lines that you are not using, this example is with the complete test
-    PROTONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
-    ALL
-    PROTONSTRENGTHWS: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    54
-    0.2
-    10
-    PROTONSO: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
-    [0,2]
-    PROTONSTRENGTHSO: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    6
-    0.1
-    3
-    5
-    0.05
-    2
-    
-    NEUTRONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
-    ALL
-    NEUTRONSTRENGTHWS: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    54
-    0.2
-    10
-    NEUTRONSO: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
-    ALL
-    NEUTRONSTRENGTHSO: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    6
-    0.1
-    3
+    # Number of input files to use
+    40
     _________________________________
 """
