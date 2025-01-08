@@ -1,37 +1,21 @@
 """
     Created on June 2024 by Alan D.K.
 
-    This is a multitask code used for the analysis of the GSMCC outputs.
-    The analysis done by the code are the followings:
-    + sum up the partial widths for each mass partition.
-    + sum up the occ prob for each mass partition 
-    and shown those greater than 5% of the total.
+    This code search for energies of the GSMCC outputs.
+    The code search on each files for the JPi, pole.energies
+    and complete.energies and then save them in a one single
+    file ordered by input file and JPi.
     
     The name of the file to be analyzed must be defined in the 
-    file "Data_Analysis.in". An example of the input file is at the end of the code.
+    file "Data_Analysis_Energies.in". 
+    An example of the input file is at the end of the code.
 """
 
-# Input file
-inputfile = 'Data_Analysis.in' 
-with open(inputfile, 'r') as readfile:
-    dataaux = readfile.read().split('\n')
-namefile = dataaux[1]
-jpi_state = dataaux[3]
-index_state = dataaux[5]
-calc_sf = dataaux[7]
-print_info = dataaux[9]
-# Output file
-jpi_state_write = jpi_state.replace('/','I')
-outputfile = namefile[:-4] + '.DataAnalysis-' + jpi_state_write
 #
 # Declaration of funcitons
 # def erease_output_file():
 #     with open(logfile,'w') as output:
 #         pass
-def print_twice(*args,**kwargs): # Allow to print in file and in terminal at the same line
-    print(*args,**kwargs)
-    with open(outputfile,"a") as f:  # appends to file and closes it when finished
-        print(file=f,*args,**kwargs)
 # .-
 # Idea from https://stackoverflow.com/questions/3961265/get-line-number-of-certain-phrase-in-text-file
 def searchline(file,phrase):
@@ -70,6 +54,29 @@ def searchlinefinal(file,phrase):
             l_num = None
     return l_num
 # .-
+# FILES
+# Input file
+inputfile = 'Data_Analysis_Energies.in' 
+with open(inputfile, 'r') as readfile:
+    dataaux = readfile.read().split('\n')
+aux_l = searchline(inputfile, "GSMCC-NFILES:")
+numberfiles = int(dataaux[aux_l+1])
+aux_l = searchline(inputfile, "GSMCC-FILE:")
+namefiles = []
+for j in range(aux_l+1,aux_l+1+numberfiles):
+    namefiles.append( dataaux[j] )
+aux_l = searchline(inputfile, "OUTPUT-FILE:")
+outputfile = dataaux[aux_l+1]
+#
+# CONTINUE FUNDEF
+def print_twice(*args,**kwargs): # Allow to print in file and in terminal at the same line
+    print(*args,**kwargs)
+    with open(outputfile,"a") as f:  # appends to file and closes it when finished
+        print(file=f,*args,**kwargs)
+# .-
+# .-
+# Start data aquisition
+data_complete = [[],[],[],[]]
 # Reading data
 with open(namefile, 'r') as readfile:
     data = readfile.read().split('\n')
@@ -373,16 +380,15 @@ print_twice(30*'-')
 """
     Example of Data_Analysis.in file:
     _________________________________
-    GSMCC-FILE:
+    GSMCC-NFILES: # Number of files
+    2
+    
+    GSMCC-FILE: # Name of each file
     IN2P3_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.30-15.00_ICF-24.11.04-16.30.out
-    JPi-STATE:
-    3/2-
-    INDEX:
-    3
-    SF-CALC:
-    YES
-    PRINT: ALL or ENERGIES
-    ENERGIES
+    IN2P3_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.30-15.00_ICF-24.11.04-19.30.out
+    
+    OUTPUT-FILE:
+    IN2P3_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.30-15.00.Energies
     _________________________________
     
 """
