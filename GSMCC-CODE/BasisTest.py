@@ -157,9 +157,11 @@ os.chdir(gsmcc_directory)
 print_twice('Start calculations')
 # Start calculations
 for j in range(0,numfile):
+    if j == 6 :
+        continue
     # Open GSMCC input file
-    readfilename_CC_j = readfilename_CC[:-3] + '_%s.in'% (j+10)
-    outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% (j+10)
+    readfilename_CC_j = readfilename_CC[:-3] + '_%s.in'% (j+14)
+    outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% (j+14)
     # Runnning the code
     start_gsmcc = time.time()
     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
@@ -167,16 +169,16 @@ for j in range(0,numfile):
     end_gsmcc = time.time()
     time_gsmcc = end_gsmcc-start_gsmcc
     print_twice("Time to calculate: ",time_gsmcc, "s")
-    # if j == 16 or j == 17 or j == 18:
-    #     readfilename_CC_j = readfilename_CC[:-3] + '_%sr.in'% (j+10)
-    #     outfilename_CC_j = outfilename_CC[:-4] + '_%sr.out'% (j+10)
-    #     # Runnning the code
-    #     start_gsmcc = time.time()
-    #     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
-    #     sp.run([running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j], shell=True)
-    #     end_gsmcc = time.time()
-    #     time_gsmcc = end_gsmcc-start_gsmcc
-    #     print_twice("Time to calculate: ",time_gsmcc, "s")
+    if j == 16 :
+        readfilename_CC_j = readfilename_CC[:-3] + '_%sa.in'% (j+10)
+        outfilename_CC_j = outfilename_CC[:-4] + '_%sa.out'% (j+10)
+        # Runnning the code
+        start_gsmcc = time.time()
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
         
 
 #
