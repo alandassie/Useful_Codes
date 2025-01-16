@@ -87,7 +87,7 @@ parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
 else:
-    running_prefix = ' '
+    running_prefix = './'
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
@@ -265,11 +265,12 @@ if theline != None:
                 inputfile_lines = gsmin.read().split('\n')
             # Find the basis.parameters line
             theline = searchline(readfilename_CC,"Basis.WS.parameters")
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
-                aux = inputfile_lines[theline + 11 + k].split()
-                inputfile_lines[theline + 11 + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
+                aux = inputfile_lines[theline + shif + k].split()
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
                 k += 1
                 if inputfile_lines[theline + 11 + k].split() == []:
                     i = 1
@@ -282,6 +283,46 @@ if theline != None:
             start_gsmcc = time.time()
             print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
             sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
+            end_gsmcc = time.time()
+            time_gsmcc = end_gsmcc-start_gsmcc
+            print_twice("Time to calculate: ",time_gsmcc, "s")
+#
+# Calculating proton WS
+theline = searchline(calcfilename,"PROTONWS")
+if theline != None:
+    print_twice('Start proton WS calculations')
+    proton_type = data[theline+1]
+    if proton_type == 'ALL':
+        # Define the array of values
+        protonws_intensities = protonws_starting_point[0] + np.arange(protonws_n[0]+1)*protonws_step[0]
+        # Start calculations
+        j = 0
+        for vo in protonws_intensities:
+            j += 1
+            # Open GSMCC input file
+            with open(readfilename_CC,'r') as gsmin:
+                inputfile_lines = gsmin.read().split('\n')
+            # Find the basis.parameters line
+            theline = searchline(readfilename_CC,"Basis.WS.parameters")
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
+            i = 0
+            k = 0
+            while i == 0:
+                aux = inputfile_lines[theline + shift + k].split()
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            # Save and close GSMCC input file
+            inputfile_aux = '\n'.join(inputfile_lines)
+            with open(readfilename_CC,'w') as gsmin:
+                gsmin.write(inputfile_aux)
+            #
+            # Runnning the code
+            start_gsmcc = time.time()
+            outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% j
+            print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+            sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
             end_gsmcc = time.time()
             time_gsmcc = end_gsmcc-start_gsmcc
             print_twice("Time to calculate: ",time_gsmcc, "s")
