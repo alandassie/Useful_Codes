@@ -162,7 +162,9 @@ def f(x):
         else:
             print_twice('OBS! The state with index %s differs from the pole approx more than 8 MeV!'% j)
             print_twice('E_pole = {0:10.6f}, E = {1:10.6f}'.format(ene_pole,ene))
-            print_twice('It will be discarded!')
+            energy.append( ene )
+            width.append( wid )
+            # print_twice('It will be discarded!')
         j += 1
     #
     auxiliar = list(zip(energy,width))
