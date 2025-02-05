@@ -158,8 +158,8 @@ print_twice('Start calculations')
 # Start calculations
 for j in range(0,numfile):
     # Open GSMCC input file
-    readfilename_CC_j = readfilename_CC[:-3] + '_%s.in'% (j+10)
-    outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% (j+10)
+    readfilename_CC_j = readfilename_CC[:-3] + '-%s.in'% (j+1)
+    outfilename_CC_j = outfilename_CC[:-4] + '-%s.out'% (j+1)
     # Runnning the code
     start_gsmcc = time.time()
     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC_j + cc_write+outfilename_CC_j)
