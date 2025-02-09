@@ -133,9 +133,9 @@ if theline != None:
         print_twice('All WS partial waves equal')
         theline = searchline(calcfilename,"PROTONSTRENGTHWS")
         protonws_lwave_n = 0
-        protonws_starting_point = [float(data[theline+1])]
-        protonws_step = [float(data[theline+2])]
-        protonws_n = [int(data[theline+3])]
+        # protonws_starting_point = [float(data[theline+1])] # Read from the input file
+        protonws_step = [float(data[theline+1])]
+        protonws_n = [int(data[theline+2])]
     else:
         print_twice('Selected partial waves with different discretization')
         protonws_lwave = json.loads(proton_type)
@@ -145,9 +145,9 @@ if theline != None:
         protonws_step = []
         protonws_n = []
         for i in range(0,protonws_lwave_n):
-            protonws_starting_point = [float(data[theline+1+i*3])]
-            protonws_step = [float(data[theline+2+i*3])]
-            protonws_n = [int(data[theline+3+i*3])]
+            # protonws_starting_point = [float(data[theline+1+i*3])] # Read from the input file
+            protonws_step = [float(data[theline+1+i*2])]
+            protonws_n = [int(data[theline+2+i*2])]
 # Preparing proton SO 
 theline = searchline(calcfilename,"PROTONSO")
 if theline != None:
@@ -157,9 +157,9 @@ if theline != None:
         print_twice('All SO partial waves equal')
         theline = searchline(calcfilename,"PROTONSTRENGTHSO")
         protonso_lwave_n = 0
-        protonso_starting_point = [float(data[theline+1])]
-        protonso_step = [float(data[theline+2])]
-        protonso_n = [int(data[theline+3])]
+        # protonso_starting_point = [float(data[theline+1])] # Read from the input file
+        protonso_step = [float(data[theline+1])]
+        protonso_n = [int(data[theline+2])]
     else:
         print_twice('Selected partial waves with different discretization')
         protonso_lwave = json.loads(proton_type)
@@ -169,9 +169,9 @@ if theline != None:
         protonso_step = []
         protonso_n = []
         for i in range(0,protonso_lwave_n):
-            protonso_starting_point = [float(data[theline+1+i*3])]
-            protonso_step = [float(data[theline+2+i*3])]
-            protonso_n = [int(data[theline+3+i*3])]
+            # protonso_starting_point = [float(data[theline+1+i*3])] # Read from the input file
+            protonso_step = [float(data[theline+1+i*2])]
+            protonso_n = [int(data[theline+1+i*2])]
 
 # Preparing neutron WS
 theline = searchline(calcfilename,"NEUTRONWS")
@@ -182,9 +182,9 @@ if theline != None:
         print_twice('All WS partial waves equal')
         theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
         neutronws_lwave_n = 0
-        neutronws_starting_point = [float(data[theline+1])]
-        neutronws_step = [float(data[theline+2])]
-        neutronws_n = [int(data[theline+3])]
+        # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
+        neutronws_step = [float(data[theline+1])]
+        neutronws_n = [int(data[theline+2])]
     else:
         print_twice('Selected partial waves with different discretization')
         neutronws_lwave = json.loads(neutron_type)
@@ -194,9 +194,9 @@ if theline != None:
         neutronws_step = []
         neutronws_n = []
         for i in range(0,neutronws_lwave_n):
-            neutronws_starting_point = [float(data[theline+1+i*3])]
-            neutronws_step = [float(data[theline+2+i*3])]
-            neutronws_n = [int(data[theline+3+i*3])]
+            # neutronws_starting_point = [float(data[theline+1+i*3])] # Read from the input file
+            neutronws_step = [float(data[theline+1+i*2])]
+            neutronws_n = [int(data[theline+2+i*2])]
 # Preparing neutron SO 
 theline = searchline(calcfilename,"NEUTRONSO")
 if theline != None:
@@ -206,9 +206,9 @@ if theline != None:
         print_twice('All SO partial waves equal')
         theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
         neutronso_lwave_n = 0
-        neutronso_starting_point = [float(data[theline+1])]
-        neutronso_step = [float(data[theline+2])]
-        neutronso_n = [int(data[theline+3])]
+        # neutronso_starting_point = [float(data[theline+1])] # Read from the input file
+        neutronso_step = [float(data[theline+1])]
+        neutronso_n = [int(data[theline+2])]
     else:
         print_twice('Selected partial waves with different discretization')
         neutronso_lwave = json.loads(neutron_type)
@@ -218,9 +218,9 @@ if theline != None:
         neutronso_step = []
         neutronso_n = []
         for i in range(0,neutronso_lwave_n):
-            neutronso_starting_point = [float(data[theline+1+i*3])]
-            neutronso_step = [float(data[theline+2+i*3])]
-            neutronso_n = [int(data[theline+3+i*3])]
+            # neutronso_starting_point = [float(data[theline+1+i*3])] # Read from the input file
+            neutronso_step = [float(data[theline+1+i*2])]
+            neutronso_n = [int(data[theline+2+i*2])]
 
 # Start calculation
 start_main = time.time()
@@ -326,6 +326,24 @@ if theline != None:
             end_gsmcc = time.time()
             time_gsmcc = end_gsmcc-start_gsmcc
             print_twice("Time to calculate: ",time_gsmcc, "s")
+    #     
+    else:
+        # Read and edit the strengths from the file
+        # Open GSMCC input file
+        with open(readfilename_CC,'r') as gsmin:
+            inputfile_lines = gsmin.read().split('\n')
+        # Find the basis.parameters line
+        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
+        
 
 
 #
