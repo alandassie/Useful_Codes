@@ -14,7 +14,7 @@ import numpy as np
 import subprocess as sp
 import os
 import time
-import json
+import ast
 
 
 # LOG FILE
@@ -137,8 +137,8 @@ if theline != None:
         protonws_step = [float(data[theline+1])]
         protonws_n = [int(data[theline+2])]
     else:
-        print_twice('Selected partial waves with different discretization')
-        protonws_lwave = json.loads(proton_type)
+        print_twice('Selected specific partial waves')
+        protonws_lwave = ast.literal_eval(proton_type)
         protonws_lwave_n = len(protonws_lwave)
         theline = searchline(calcfilename,"PROTONSTRENGTHWS")
         protonws_starting_point = []
@@ -161,8 +161,8 @@ if theline != None:
         protonso_step = [float(data[theline+1])]
         protonso_n = [int(data[theline+2])]
     else:
-        print_twice('Selected partial waves with different discretization')
-        protonso_lwave = json.loads(proton_type)
+        print_twice('Selected specific partial waves')
+        protonso_lwave = ast.literal_eval(proton_type)
         protonso_lwave_n = len(protonso_lwave)
         theline = searchline(calcfilename,"PROTONSTRENGTHSO")
         protonso_starting_point = []
@@ -186,8 +186,8 @@ if theline != None:
         neutronws_step = [float(data[theline+1])]
         neutronws_n = [int(data[theline+2])]
     else:
-        print_twice('Selected partial waves with different discretization')
-        neutronws_lwave = json.loads(neutron_type)
+        print_twice('Selected specific partial waves')
+        neutronws_lwave = ast.literal_eval(neutron_type)
         neutronws_lwave_n = len(neutronws_lwave)
         theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
         neutronws_starting_point = []
@@ -210,8 +210,8 @@ if theline != None:
         neutronso_step = [float(data[theline+1])]
         neutronso_n = [int(data[theline+2])]
     else:
-        print_twice('Selected partial waves with different discretization')
-        neutronso_lwave = json.loads(neutron_type)
+        print_twice('Selected specific partial waves')
+        neutronso_lwave = ast.literal_eval(neutron_type)
         neutronso_lwave_n = len(neutronso_lwave)
         theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
         neutronso_starting_point = []
@@ -255,80 +255,56 @@ theline = searchline(calcfilename,"NEUTRONWS")
 if theline != None:
     print_twice('Start neutron WS calculations')
     neutron_type = data[theline+1]
-    if neutron_type == 'ALL':
-        # Define the array of values
-        neutronws_intensities = neutronws_starting_point[0] + np.arange(neutronws_n[0]+1)*neutronws_step[0]
-        # Start calculations
-        for vo in neutronws_intensities:
-            # Open GSMCC input file
-            with open(readfilename_CC,'r') as gsmin:
-                inputfile_lines = gsmin.read().split('\n')
-            # Find the basis.parameters line
-            theline = searchline(readfilename_CC,"Basis.WS.parameters")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
-            i = 0
-            k = 0
-            while i == 0:
-                aux = inputfile_lines[theline + shif + k].split()
-                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
+    # Define the array of values
+    neutronws_intensities = np.arange(neutronws_n[0]+1)*neutronws_step[0]
+    # Start calculations
+    for deltavo in neutronws_intensities:
+        # Open GSMCC input file
+        with open(readfilename_CC,'r') as gsmin:
+            inputfile_lines = gsmin.read().split('\n')
+        # Find the basis.parameters line
+        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            if neutron_type == 'ALL':
+                aux_vo = float(aux[3]) + deltavo
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
                 k += 1
-                if inputfile_lines[theline + 11 + k].split() == []:
+                if inputfile_lines[theline + shift + k].split() == []:
                     i = 1
-            # Save and close GSMCC input file
-            inputfile_aux = '\n'.join(inputfile_lines)
-            with open(readfilename_CC,'w') as gsmin:
-                gsmin.write(inputfile_aux)
-            #
-            # Runnning the code
-            start_gsmcc = time.time()
-            print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
-            sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
-            end_gsmcc = time.time()
-            time_gsmcc = end_gsmcc-start_gsmcc
-            print_twice("Time to calculate: ",time_gsmcc, "s")
+            elif int(aux[0]) in neutronws_lwave:
+                aux_vo = float(aux[3]) + deltavo
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+        # Save and close GSMCC input file
+        inputfile_aux = '\n'.join(inputfile_lines)
+        with open(readfilename_CC,'w') as gsmin:
+            gsmin.write(inputfile_aux)
+        #
+        # Runnning the code
+        start_gsmcc = time.time()
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
 #
 # Calculating proton WS
 theline = searchline(calcfilename,"PROTONWS")
 if theline != None:
     print_twice('Start proton WS calculations')
     proton_type = data[theline+1]
-    if proton_type == 'ALL':
-        # Define the array of values
-        protonws_intensities = protonws_starting_point[0] + np.arange(protonws_n[0]+1)*protonws_step[0]
-        # Start calculations
-        j = 0
-        for vo in protonws_intensities:
-            j += 1
-            # Open GSMCC input file
-            with open(readfilename_CC,'r') as gsmin:
-                inputfile_lines = gsmin.read().split('\n')
-            # Find the basis.parameters line
-            theline = searchline(readfilename_CC,"Basis.WS.parameters")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
-            i = 0
-            k = 0
-            while i == 0:
-                aux = inputfile_lines[theline + shift + k].split()
-                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
-            # Save and close GSMCC input file
-            inputfile_aux = '\n'.join(inputfile_lines)
-            with open(readfilename_CC,'w') as gsmin:
-                gsmin.write(inputfile_aux)
-            #
-            # Runnning the code
-            start_gsmcc = time.time()
-            outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% j
-            print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
-            sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
-            end_gsmcc = time.time()
-            time_gsmcc = end_gsmcc-start_gsmcc
-            print_twice("Time to calculate: ",time_gsmcc, "s")
-    #     
-    else:
-        # Read and edit the strengths from the file
+    # Define the array of values
+    protonws_intensities = np.arange(protonws_n[0]+1)*protonws_step[0]
+    # Start calculations
+    j = 0
+    for deltavo in protonws_intensities:
+        j += 1
         # Open GSMCC input file
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
@@ -339,10 +315,31 @@ if theline != None:
         k = 0
         while i == 0:
             aux = inputfile_lines[theline + shift + k].split()
-            inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(vo)+'  '+aux[4]
-            k += 1
-            if inputfile_lines[theline + shift + k].split() == []:
-                i = 1
+            if proton_type == 'ALL':
+                aux_vo = float(aux[3]) + deltavo
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            elif int(aux[0]) in protonws_lwave:
+                aux_vo = float(aux[3]) + deltavo
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+        # Save and close GSMCC input file
+        inputfile_aux = '\n'.join(inputfile_lines)
+        with open(readfilename_CC,'w') as gsmin:
+            gsmin.write(inputfile_aux)
+        #
+        # Runnning the code
+        start_gsmcc = time.time()
+        outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% j
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
         
 
 
