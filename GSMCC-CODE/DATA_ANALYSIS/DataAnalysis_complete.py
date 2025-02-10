@@ -10,6 +10,7 @@
     The name of the file to be analyzed must be defined in the 
     file "Data_Analysis.in". An example of the input file is at the end of the code.
 """
+import ast
 
 # Input file
 inputfile = 'Data_Analysis.in' 
@@ -77,14 +78,46 @@ with open(namefile, 'r') as readfile:
 #
 # Defining the lines of data
 if calc_sf == 'YES':
-    aux = searchline(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
-    line_all = [aux]
+    if index_state == 'ALL':
+        print('ERROR! INDEX CANNOT BE ALL FOR SF CALCULATIONS')
+        exit()
+    else:
+        index_values = ast.literal_eval(index_state)
+        if type(index_values) == list:
+            line_all = []
+            for i in index_values:
+                aux = searchline(namefile,"%s (%s) resonant state"% (jpi_state,i))
+                line_all += aux
+        else:
+            aux = searchline(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
+            line_all = [aux]
 else:
-    line_all = searchline_all(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
-# Identify energy and with of the state:
+    if index_state == 'ALL':
+        aux = searchline_all(namefile,"resonant state")
+        line_all = aux
+    else:
+        index_values = ast.literal_eval(index_state)
+        if type(index_values) == list:
+            line_all = []
+            for i in index_values:
+                aux = searchline_all(namefile,"%s (%s) resonant state"% (jpi_state,i))
+                if type(line_all) == list:
+                    line_all += aux
+                else:
+                    line_all.append(aux)
+        else:
+            line_all = []
+            aux = searchline_all(namefile,"%s (%s) resonant state"% (jpi_state,index_state))
+            if type(aux) == list:
+                line_all += aux
+            else:
+                line_all = [aux]
+# Identify index, energy and with of the state:
+indexes = []
 energies = []
 widths = []
 for line in line_all:
+    indexes.append( data[line].split('(')[1].split(')')[0] )
     energies.append( data[line+10].split(' : ')[1] )
     widths.append( data[line+11].split(' : ')[1] )
 #
@@ -168,11 +201,11 @@ print_twice(20*'-')
 print_twice('Start the data analysis for the state %s with index %s'% (jpi_state,index_state))
 print_twice('Number of calculations for this state %s'% (len(energies)))
 k = -1
-for energy, width in zip(energies,widths):
+for index, energy, width in zip(indexes,energies,widths):
     k += 1
-    if print_info == 'ALL': print_twice(10*'-')
     if print_info == 'ALL':
-        print_twice('{0:2d}  Energy : {1:<.10f} \n  Width  : {2:<.10f}'.format(k+1,float(energy.split('MeV')[0]),float(width.split('keV')[0])))
+        print_twice(160*'-')
+        print_twice('{0:2d}  Energy : {1:<.10f} \n    Width  : {2:<.10f}'.format(int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     else:
         print_twice('{0:2d}  {1:>14.8f} {2:>14.8f}'.format(k+1,float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     # .-
@@ -377,7 +410,7 @@ print_twice(30*'-')
     IN2P3_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.30-15.00_ICF-24.11.04-16.30.out
     JPi-STATE:
     3/2-
-    INDEX:
+    INDEX: # SHOULD BE A NUMBER (ex. "2"), A LIST OF NUMBERS (ex. "[0,2,3]") OR "ALL"
     3
     SF-CALC:
     YES

@@ -241,7 +241,7 @@ if theline != None:
     print_twice('Start neutron WS calculations')
     neutron_type = data[theline+1]
     # Start calculations
-    for j in range(neurtronws_n+1):
+    for j in range(neutronws_n+1):
         # Open GSMCC input file
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
