@@ -84,14 +84,14 @@ def f(x):
     if opt_onehyperon_ws == 1: # Optimizing WS part
         print_twice('Optimizing 1Y WS part')
         start_value = len(onehyperon_ws_l)
-        for i in range(0,hyperon_names):
+        for i in range(0,hyperon_n):
             onehyperon_ws_line = onehyperon_ws_lines[i]
             for j in range(0,len(onehyperon_ws_l)):
                 l = onehyperon_ws_l[j]
                 aux1 = inputfile_lines[onehyperon_ws_line+l].split()
                 aux2 = str(x[j])
-                # 
-                inputfile_lines[onehyperon_ws_line+l] = "    " + str(l) + "  " + aux1[1] + "  " + aux1[2] + aux2 + "  " + aux1[4]
+                #  
+                inputfile_lines[onehyperon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
     if opt_yn == 1: # Optimizing YN interactions
         print_twice('Optimizing YN interactions')
         for i in range(0,yn_n):
@@ -221,9 +221,9 @@ used_icf = 0
 icf_type = 'NONE'
 icf_bounds = ''
 theline = searchline(readfilename,"OPTIMIZEDHYPERONS:")
-hyeron_n = int(data[theline+1])
+hyperon_n = int(data[theline+1])
 hyperon_names = []
-for i in range(0,hyeron_n):
+for i in range(0,hyperon_n):
     hyperon_names.append(data[theline+2+i])
 #
 # Checking if one-hyperon WS interaction will be optimized
@@ -300,15 +300,19 @@ search = 'Spectrum'
 if opt_onehyperon_ws == 1:
     theline = searchline(readfilename_GSM,"core.potential")
     onehyperon_ws_lines = []
-    for i in range(0,hyeron_n):
+    for i in range(0,hyperon_n):
         shift = [x.strip(' ') for x in inputfile_lines[theline:theline+30]].index(hyperon_names[i]) + 2
         onehyperon_ws_lines.append(theline+shift)
 # Lines with the YN interactions
 if opt_yn == 1:
     theline = searchline(readfilename_GSM,"Hamiltonian.interaction")
+    aux = [x.strip(' ') for x in inputfile_lines[theline:theline+20]]
     yn_lines = []
     for i in range(0,yn_n):
-        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index(yn_names[i])
+        for j in range(20):
+            if yn_names[i] in aux[j]:
+                shift = j
+                break
         yn_lines.append(theline+shift)
 #
 #
