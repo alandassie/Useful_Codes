@@ -363,15 +363,19 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MINIMIZATION;Nelder-Mead
 
     OPTIMIZEDHYPERONS: 1 - NUMBER OF HYPERONS TO OPTIMIZE; 2,N - NAME OF EACH HYPERON
+    3
     Lambda
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: 1 - REAL SEED; 2 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - l PARTIAL WAVE; 3 - REAL SEED; 4 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    1
+    0
     40
     (30,60)
 
-    YNOPTIMIZATION: for each YN interaction -> 1 - NAME; 2 - SEED; 3 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    2
     V8a.SU3.f
     -0.2
     (-1,1)
@@ -379,18 +383,20 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     -0.25
     (-1,1)
 
-    EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - JPi; 3 - ENERGY (MeV); 4 - WEIGHT BETWEEN (0,1)
+    EXPERIMENTALVALUES: 1 - NUMBER OF EXPERIMENTAL STATES; for each state -> 2 - JPi; 3 - index; 4 - ENERGY (MeV); 5 - WEIGHT BETWEEN (0,1)
     2
     0+
-    -36.446
+    0
+    -134.500
     1
     2+
-    -35.945
+    0
+    -135.705
     1
 
     GSM-exe:
     GSM-24.11.20-MPI.x
-    GSM-file: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
+    GSM-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
     IN2P3-HTC-25.01.11_40CaLambda-COSM_GSMOpt-25.01.20-20.00.in
     IN2P3-HTC-25.01.11_40CaLambda-COSM_GSMOpt-25.01.20-20.00.out
     2
