@@ -79,9 +79,6 @@ def searchlinefinal(file,phrase):
     return l_num
 # .-
 def f(x):
-    # Open GSM input file
-    with open(readfilename_GSM,'r') as gsmin:
-        inputfile_lines = gsmin.read().split('\n')
     # 
     start_value = 0
     if opt_onehyperon_ws == 1: # Optimizing WS part
@@ -269,14 +266,18 @@ if theline != None:
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
 numberofstates = int(data[theline+1])
+state_read = []
 jpi_read = []
+index_read = []
 expene_read = np.zeros(numberofstates)
 stweig_read = np.zeros(numberofstates)
 for i in range(0,numberofstates):
-    factor = i*2
-    jpi_read.append(data[theline+2+factor])
-    expene_read[i] = float(data[theline+3+factor])
-    stweig_read[i] = float(data[theline+4+factor])
+    factor = i*3
+    jpi_read.append(data[theline+2+factor].split())
+    index_read.append(data[theline+3+factor].split())
+    state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
+    expene_read[i] = float(data[theline+4+factor])
+    stweig_read[i] = float(data[theline+5+factor])
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
@@ -288,6 +289,10 @@ readfilename_GSM = data[theline+1]
 outfilename_GSM = data[theline+2]
 gsm_write_aux = int(data[theline+3])
 gsm_write = ' ' + gsm_write_aux*'>' + ' '
+#
+# Open GSM input file
+with open(readfilename_GSM,'r') as gsmin:
+    inputfile_lines = gsmin.read().split('\n')
 #
 # Defining optimization part
 search = 'Spectrum'
