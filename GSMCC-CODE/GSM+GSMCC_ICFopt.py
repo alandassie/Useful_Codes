@@ -174,12 +174,14 @@ def f(x):
     # Compare with all the experimental energies
     adjusting_energy = 1
     adjusting_width = 1
-    if ccf_type == 'REAL' and icf_type == 'REAL':
+    if (ccf_type == 'REAL' or ccf_type == 'NONE') and (icf_type == 'REAL' or icf_type == 'NONE'):
         print_twice('Only adjusting energies:')
         adjusting_width = 0
-    elif ccf_type == 'IMAG' and icf_type == 'IMAG':
+    elif (ccf_type == 'IMAG' or ccf_type == 'NONE') and (icf_type == 'IMAG' or icf_type == 'NONE'):
         print_twice('Only adjusting widths:')
         adjusting_energy = 0
+    else:
+        print_twice('Adjusting energies and widths:')
     # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
