@@ -219,19 +219,19 @@ def f(x):
             res_e[i] = ( res_e_aux )**2 / abs(expene) * stweig
             res_w_aux = expwid - float(auxiliar[indexmin_res_e[i]][1])
             if expwid < 1e-10: # Zero widht!
-                res_w[i] = ( res_w_aux )**2 * stweig
+                res_w[i] = ( res_w_aux )**2 * stweig / 1000
             else:
-                res_w[i] = ( res_w_aux )**2 / abs(expwid) * stweig
-            print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f}, W Residue = {3:10.6f}'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
+                res_w[i] = ( res_w_aux )**2 / abs(expwid) * stweig / 1000
+            print_twice('State selected Index : {0:d}, Real index : {1:d}\n  E Residue = {2:10.6f} MeV, W Residue = {3:10.6f} keV'.format(numberindex,indexmin_res_e[i],res_e_aux,res_w_aux))
         elif index_search == 'NO':
             res_e_aux = expene - float(auxiliar[numberindex][0])
             res_e[i] = ( res_e_aux )**2 / abs(expene) * stweig
             res_w_aux = expwid - float(auxiliar[numberindex][1])
             if expwid < 1e-10: # Zero widht!
-                res_w[i] = ( res_w_aux )**2 * stweig
+                res_w[i] = ( res_w_aux )**2 * stweig / 1000
             else:
-                res_w[i] = ( res_w_aux )**2 / abs(expwid) * stweig
-            print_twice('State selected Index : {0:d}\n  E Residue = {1:10.6f}, W Residue = {2:10.6f}'.format(numberindex,res_e_aux,res_w_aux))
+                res_w[i] = ( res_w_aux )**2 / abs(expwid) * stweig / 1000
+            print_twice('State selected Index : {0:d}\n  E Residue = {1:10.6f} MeV, W Residue = {2:10.6f} keV'.format(numberindex,res_e_aux,res_w_aux))
         else:
             print_twice('YES OR NO FOR INDEX SEARCHING!')
             exit()
