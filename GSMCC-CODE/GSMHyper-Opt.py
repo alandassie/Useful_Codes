@@ -120,7 +120,7 @@ def f(x):
     with open(outfilename_GSMi,'r') as gsmout:
         outputfile_lines = gsmout.read().split('\n')
     line_numbers = searchline_all(outfilename_GSMi,search)
-    line = line_numbers[1] + 3
+    line = line_numbers[0] + 3
     state = []
     jpi = []
     index = []
@@ -135,12 +135,13 @@ def f(x):
         auxjpi = outputfile_lines[line+j].split()[3].split('(')[0]
         auxindex = outputfile_lines[line+j].split()[3].split('(')[1].split(')')[0]
         aux_state = '%s(%s)'% (auxjpi,auxindex)
+        print(auxjpi,auxindex,aux_state,state_read)
         if aux_state in state_read:
             state.append(aux_state)
             jpi.append(auxjpi)
             index.append(auxindex)
             auxenergy = outputfile_lines[line+j].split()[4].split(':')[1]
-            energy.appen(float(auxenergy))
+            energy.append(float(auxenergy))
         j += 1
     #
     auxiliar = list(zip(state,energy))
@@ -154,7 +155,7 @@ def f(x):
         for j in range(0,numberofstates):
             if state[j] == expstate:
                 res_e[i] = ( expene - energy[j] )**2 / abs(expene) * stweig_read[i]
-                print_twice('State {0:s}, E Residue = {2:10.6f}'.format(expstate,res_e[i]))
+                print_twice('State {0:s}, E Residue = {1:10.6f}'.format(expstate,res_e[i]))
     res = np.sum(res_e)
     print_twice('X^2 = {0:10.6f}'.format(res))
     #
@@ -217,9 +218,6 @@ if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
 #
 # Look for optimized hyperons
-used_icf = 0
-icf_type = 'NONE'
-icf_bounds = ''
 theline = searchline(readfilename,"OPTIMIZEDHYPERONS:")
 hyperon_n = int(data[theline+1])
 hyperon_names = []
@@ -272,9 +270,9 @@ index_read = []
 expene_read = np.zeros(numberofstates)
 stweig_read = np.zeros(numberofstates)
 for i in range(0,numberofstates):
-    factor = i*3
-    jpi_read.append(data[theline+2+factor].split())
-    index_read.append(data[theline+3+factor].split())
+    factor = i*4
+    jpi_read.append(data[theline+2+factor].split()[0])
+    index_read.append(data[theline+3+factor].split()[0])
     state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
     expene_read[i] = float(data[theline+4+factor])
     stweig_read[i] = float(data[theline+5+factor])
