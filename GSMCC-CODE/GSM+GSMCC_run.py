@@ -2,7 +2,7 @@
     Created on August 2024 by Alan D.K. for 11C_Project
 
     This code run GSM and GSMC. The running information must be in
-    a file called GSM+GSMCC_run.in located in the main folder of the
+    a file called input.GSM+GSMCC_run located in the main folder of the
     GSMCC code (i.e. CC_dir/GSM+GSMCC_run.py).
     An example of the input file can be founded at the end of this code.
 """
@@ -12,7 +12,7 @@ import time
 import os
 
 # LOG FILE
-logfile = os.getcwd() + '/GSM+GSMCC_run_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logfile = os.getcwd() + '/log.GSM+GSMCC_run.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
@@ -45,7 +45,7 @@ def searchlinefinal(file,phrase):
 # .-
 
 # INPUT FILE
-readfilename = os.getcwd() + '/GSM+GSMCC_run.in'
+readfilename = os.getcwd() + '/input.GSM+GSMCC_run'
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # LOGILE
@@ -73,14 +73,14 @@ theline = searchline(readfilename,"PARALLELISM:")
 parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
-    running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
+    running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
 else:
-    running_prefix = ' '
+    running_prefix = ' ./'
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
-    running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
+    running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' ./'
 
 # Executable GSMCC file
 theline = searchline(readfilename,"GSMCC-exe:")
@@ -147,7 +147,7 @@ time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 """
-    Example of GSM+GSMCC_run.in file:
+    Example of input.GSM+GSMCC_run file:
     _________________________________
     GSM-DIRECTORY:
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/GSM_dir

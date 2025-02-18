@@ -8,7 +8,7 @@
     You have to define the input and output files and put
     the experimental values (energy and width).
     
-    An example of the input file "GMS+GSMCC_ICF.in" can be found
+    An example of the input file "input.GMS+GSMCC_ICF" can be found
     at the end of the code.
 """
 
@@ -267,7 +267,7 @@ def f(x):
 # .-
 
 # INPUT FILE
-readfilename = "GSM+GSMCC_ICF.in"
+readfilename = "input.GSM+GSMCC_ICF"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # LOGILE
@@ -295,7 +295,7 @@ theline = searchline(readfilename,"PARALLELISM:")
 parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
-    running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
+    running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
 elif parallelism_type == 'OPENMP':
     running_prefix = ' ./'
 else:
@@ -304,7 +304,7 @@ else:
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
-    running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
+    running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' '
 #
 # Looking up the optimization code to use
 theline = searchline(readfilename,"OPTIMIZATIONMETHOD:")
@@ -501,7 +501,7 @@ time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 """
-    Example of GSM+GSMCC_ICF.in file:
+    Example of input.GSM+GSMCC_ICF file:
     _________________________________
     GSM-DIRECTORY:
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/GSM_dir

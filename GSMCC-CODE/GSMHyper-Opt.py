@@ -6,7 +6,7 @@
     You have to define the input and output files and put
     the experimental energies.
     
-    An example of the input file "GMSHyper_Opt.in" can be found
+    An example of the input file "input.GMSHyper_Opt" can be found
     at the end of the code.
 """
 
@@ -20,9 +20,9 @@ from scipy.optimize import minimize
 import numpy as np
 
 # LOG FILE
-logfile = os.getcwd() + '/' + 'GSMHyper_Opt_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logfile = os.getcwd() + '/' + 'log.GSMHyper_Opt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
-logname = 'WD_GSMHyper_Opt_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logname = 'log.WD_GSMHyper_Opt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
 logfolder = os.getcwd() + '/' + logname 
 if not os.path.exists(logfolder):
@@ -174,7 +174,7 @@ def f(x):
 # .-
 
 # INPUT FILE
-readfilename = "GSMHyper_Opt.in"
+readfilename = "input.GSMHyper_Opt"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # LOGILE
@@ -349,7 +349,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 
 """
-    Example of GSMHyper_Opt.in file:
+    Example of input.GSMHyper_Opt file:
     _________________________________
     STORAGE-DIRECTORY:
     /pbs/throng/ganil/adassie/Carbon-11_Project/storage_4MPI-24.11.20_GSMOpt-24.08.26-11.00_Basis-24.12.10-13.00

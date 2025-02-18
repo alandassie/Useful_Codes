@@ -7,9 +7,9 @@
     This code run GSMCC multiple times in order to calculate
     the Differential Cross Section with different combinations
     of energies and angles. The data is read from a file called
-    "GSMCC_DCS_ene-ang.in". An example can be found at the end of the code.
+    "input.GSMCC_DCS_ene-ang". An example can be found at the end of the code.
     
-    The code also use the input file "GSM+GSMCC_run.in" of the code
+    The code also use the input file "input.GSM+GSMCC_run" of the code
     GSM+GSMCC_run.py as guide of calculations. An example of that file
     can be found at the end of the GSM+GSMCC_run.py code.
 """
@@ -21,7 +21,7 @@ import math as m
 import numpy as np
 
 # LOG FILE
-logfile = os.getcwd() + '/GSMCC_DCS_ene-ang.log'
+logfile = os.getcwd() + '/log.GSMCC_DCS_ene-ang'
 
 # Declaration of funcitons
 def erease_output_file():
@@ -71,11 +71,11 @@ def searchlinefinal(file,phrase):
 # .-
 
 # CALCULATION INPUT FILE
-readfilename = "GSM+GSMCC_run.in"
+readfilename = "input.GSM+GSMCC_run"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # DATA INPUT FILE
-readexpername = "GSMCC_DCS_ene-ang.in"
+readexpername = "input.GSMCC_DCS_ene-ang"
 exp_data = np.genfromtxt(readexpername,skip_header=3,skip_footer=1)
 energy = exp_data[:,0]
 angle = exp_data[:,2]
@@ -178,7 +178,7 @@ time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 """
-    Example of GSMCC_DCS_ene-ang.in file:
+    Example of input.GSMCC_DCS_ene-ang file:
     _________________________________
     DATA                 5        135
     EN-CM      EN-ERR    ANG-CM  DATA-CM    DATA-ERR

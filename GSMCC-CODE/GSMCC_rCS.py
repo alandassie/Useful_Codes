@@ -5,10 +5,10 @@
 
     Then, the code run GSMCC multiple times in order to calculate
     the radiative Cross Section with different energies. 
-    The data is read from a file called "GSMCC_rCS.in". 
+    The data is read from a file called "input.GSMCC_rCS". 
     An example can be found at the end of the code.
     
-    The code also use the input file "GSM+GSMCC_run.in" of the code
+    The code also use the input file "input.GSM+GSMCC_run" of the code
     GSM+GSMCC_run.py as guide of calculations. An example of that file
     can be found at the end of the GSM+GSMCC_run.py code.
 """
@@ -70,7 +70,7 @@ def searchlinefinal(file,phrase):
 # .-
 
 # CALCULATION INPUT FILE
-readfilename = "GSM+GSMCC_run.in"
+readfilename = "input.GSM+GSMCC_run"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # DATA INPUT FILE
