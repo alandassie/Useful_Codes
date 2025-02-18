@@ -20,7 +20,7 @@ import math as m
 import numpy as np
 
 # LOG FILE
-logfile = os.getcwd() + '/GSMCC_rCS.log'
+logfile = os.getcwd() + '/log.GSMCC_rCS'
 
 # Declaration of funcitons
 def erease_output_file():
@@ -74,7 +74,7 @@ readfilename = "GSM+GSMCC_run.in"
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # DATA INPUT FILE
-readexpername = "GSMCC_rCS.in"
+readexpername = "input.GSMCC_rCS"
 theline = searchline(readexpername,"ENERGY START POINT (MeV):")
 init_ene = float(data[theline+1])
 theline = searchline(readexpername,"ENERGY END (MeV):")
@@ -167,7 +167,7 @@ time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 """
-    Example of GSMCC_rCS.in file:
+    Example of input.GSMCC_rCS file:
     _________________________________
     ENERGY START POINT (MeV):
     1
