@@ -69,22 +69,24 @@ def searchlinefinal(file,phrase):
     return l_num
 # .-
 
-# CALCULATION INPUT FILE
-readfilename = "input.GSM+GSMCC_run"
-with open(readfilename, 'r') as readfile:
-    data = readfile.read().split('\n')
 # DATA INPUT FILE
 readexpername = "input.GSMCC_rCS"
+with open(readexpername, 'r') as readfile:
+    data = readfile.read().split('\n')
 theline = searchline(readexpername,"ENERGY START POINT (MeV):")
 init_ene = float(data[theline+1])
-theline = searchline(readexpername,"ENERGY END (MeV):")
+theline = searchline(readexpername,"ENERGY END POINT (MeV):")
 end_ene = float(data[theline+1])
 theline = searchline(readexpername,"NUMBER OF ENERGY POINTS:")
 n_ene = int(data[theline+1])
 energy = np.linspace(init_ene,end_ene,n_ene)
 # LOGILE
 erease_output_file()
-    
+
+# CALCULATION INPUT FILE
+readfilename = "input.GSM+GSMCC_run"
+with open(readfilename, 'r') as readfile:
+    data = readfile.read().split('\n')
 print_twice("Be sure that you are using the correct directories!")
 # GSMCC directory
 gsmcc_directory = os.getcwd()
@@ -154,10 +156,10 @@ for i in range(0,n_ene):
     with open(readfilename_CC,'w') as gsmin:
         gsmin.write(inputfile_aux)
     #
-    outfilename_CCi = str(i) + '_E=' + str(round(energy_i,3))
+    outfilename_CCi = outfilename_CC[:-4] + '/' + str(i) + '_E=' + str(round(energy_i,3))
     start_gsmcc = time.time()
-    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
-    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
+    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CCi)
+    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CCi], shell=True)
     end_gsmcc = time.time()
     time_gsmcc = end_gsmcc-start_gsmcc
     print_twice("Time to calculate: ",time_gsmcc, "s")
