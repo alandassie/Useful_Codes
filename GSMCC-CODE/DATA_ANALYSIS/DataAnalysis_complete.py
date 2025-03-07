@@ -207,7 +207,7 @@ for index, energy, width in zip(indexes,energies,widths):
         print_twice(160*'-')
         print_twice('{0:2d}  Energy : {1:<.10f} \n    Width  : {2:<.10f}'.format(int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     else:
-        print_twice('{0:2d}  {1:>14.8f} {2:>14.8f}'.format(k+1,float(energy.split('MeV')[0]),float(width.split('keV')[0])))
+        print_twice('{0:2d}   {1:2d}  {2:>14.8f} {3:>14.8f}'.format(k+1,int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0])))
     # .-
     # Occupation probabilities
     if print_info == 'ALL': print_twice('Occupation probabilities:\n')

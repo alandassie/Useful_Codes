@@ -22,9 +22,9 @@ from scipy.optimize import minimize
 import numpy as np
 
 # LOG FILE
-logfile = os.getcwd() + '/' + 'GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logfile = os.getcwd() + '/' + 'log.GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
-logname = 'WD_GSM+GSMCC_ICF_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logname = 'log.WD_GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
 logfolder = os.getcwd() + '/' + logname 
 if not os.path.exists(logfolder):
