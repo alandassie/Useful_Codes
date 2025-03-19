@@ -74,13 +74,15 @@ parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
-else:
+elif parallelism_type == 'OPENMP':
     running_prefix = ' ./'
+else:
+    print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
-    running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' ./'
+    running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' '
     
 # Using experimental thresholds in GSMCC calculations
 exp_thr = 0
