@@ -81,16 +81,26 @@ theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' ./'
+    
+# Using experimental thresholds in GSMCC calculations
+exp_thr = 0
+theline = searchline(readfilename,"EXPERIMENTAL-THRESHOLDS:")
+if theline != None:
+    exp_thr = int(data[theline+1])
 
 # Executable GSMCC file
+calc_cc = 0
 theline = searchline(readfilename,"GSMCC-exe:")
-running_cc = data[theline+1]
+if theline != None:  
+    calc_cc = 1
+    running_cc = data[theline+1]
 # Read-Out file name CC
 theline = searchline(readfilename,"GSMCC-files:")
-readfilename_CC = data[theline+1]
-outfilename_CC = data[theline+2]
-cc_write_aux = int(data[theline+3])
-cc_write = ' ' + cc_write_aux*'>' + ' '
+if theline != None:  
+    readfilename_CC = data[theline+1]
+    outfilename_CC = data[theline+2]
+    cc_write_aux = int(data[theline+3])
+    cc_write = ' ' + cc_write_aux*'>' + ' '
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
@@ -125,26 +135,34 @@ if theline != None:
         print_twice("Time to calculate: ",time_gsm, "s")
     #
 else:
-    print_twice("\nSkip GSM part, only GSMCC calculation!")
+    print_twice("\nSkip GSM part!")
 #
 # Edit thresholds
-print_twice("\nEdit thresholds in %s"% storage_directory)
-os.chdir(storage_directory)
-sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
+if exp_thr == 0:
+    print_twice("\nCalculations of GSMCC using GSM thresholds")
+elif exp_thr == 1:
+    print_twice("\nCalculations of GSMCC using experimental thresholds")
+    print_twice("\nEdit thresholds in %s"% storage_directory)
+    print_twice("\nBe sure that the file EditThreshold.in is in the directory!")
+    os.chdir(storage_directory)
+    sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 # RUN CC
-print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
-os.chdir(gsmcc_directory)
-start_gsmcc = time.time()
-print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
-sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
-end_gsmcc = time.time()
-time_gsmcc = end_gsmcc-start_gsmcc
-print_twice("Time to calculate: ",time_gsmcc, "s")
-#
-end_main = time.time()
-time_main = end_main-start_main
-print_twice("\n\nAll calculations lasted: ", time_main, "s")
+if calc_cc == 1:
+    print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
+    os.chdir(gsmcc_directory)
+    start_gsmcc = time.time()
+    print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC)
+    sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC], shell=True)
+    end_gsmcc = time.time()
+    time_gsmcc = end_gsmcc-start_gsmcc
+    print_twice("Time to calculate: ",time_gsmcc, "s")
+    #
+    end_main = time.time()
+    time_main = end_main-start_main
+    print_twice("\n\nAll calculations lasted: ", time_main, "s")
+else:
+    print_twice("\nSkip GSMCC part!")
 
 """
     Example of input.GSM+GSMCC_run file:
@@ -159,14 +177,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     2
     MACHINEFILE:
     machinefile
-
-    GSMCC-exe:
-    CC-24.11.20-MPI.x
-    GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
-    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
-    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
-    2
-
+    
     GSM-exe:
     GSM-24.11.20-MPI.x
     GSM-files: 1-n input files; 2-1 for overwrite or 2 for append; 3,n-input and output names
@@ -180,5 +191,15 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     CLUSPHY_projforCC_protonnocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    
+    EXPERIMENTAL-THRESHOLDS: Using experimental thresholds, 0 means NO and 1 means YES
+    1
+
+    GSMCC-exe:
+    CC-24.11.20-MPI.x
+    GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
+    2
     _________________________________
 """
