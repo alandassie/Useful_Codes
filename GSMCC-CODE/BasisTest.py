@@ -18,7 +18,17 @@ import ast
 
 
 # LOG FILE
-logfile = os.getcwd() + '/BasisTest_log.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+logfile = os.getcwd() + '/log.BasisTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+# LOG NAME
+logname = 'log.WD_BasisTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+# LOG FOLDER
+logfolder = os.getcwd() + '/' + logname 
+if not os.path.exists(logfolder):
+    os.makedirs(logfolder)
+else:
+    for filename in os.listdir(logfolder):
+        # remove the files inside
+        os.remove(f"{logfolder}/{filename}")
 
 # Declaration of funcitons
 def erease_output_file():
@@ -57,7 +67,7 @@ def indexof (obj, elem, offset=0):
 # .-
 
 # INPUT FILE
-readfilename = os.getcwd() + '/GSM+GSMCC_run.in'
+readfilename = os.getcwd() + '/input.GSM+GSMCC_run'
 with open(readfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 # LOGILE
@@ -93,6 +103,12 @@ theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
+    
+# Using experimental thresholds in GSMCC calculations
+exp_thr = 0
+theline = searchline(readfilename,"EXPERIMENTAL-THRESHOLDS:")
+if theline != None:
+    exp_thr = int(data[theline+1])
 
 # Executable GSMCC file
 theline = searchline(readfilename,"GSMCC-exe:")
@@ -120,7 +136,7 @@ if theline != None:
         readfilename_GSM = readfilename_GSM[:-1]
 
 # CALCULATING FILE
-calcfilename = os.getcwd() + '/BasisTest.in'
+calcfilename = os.getcwd() + '/input.BasisTest'
 with open(calcfilename, 'r') as readfile:
     data = readfile.read().split('\n')
 
@@ -206,6 +222,38 @@ if theline != None:
         # neutronso_starting_point = [float(data[theline+1])] # Read from the input file
         neutronso_step = float(data[theline+1])
         neutronso_n = int(data[theline+2])
+        
+# Preparing both WS
+theline = searchline(calcfilename,"BOTHWS")
+if theline != None:
+    print_twice('Doing Woods-Saxon test for proton and neutron at the same time')
+    both_proton_type = data[theline+1]
+    both_neutron_type = data[theline+1]
+    if both_proton_type == 'ALL' and both_neutron_type == 'ALL':
+        print_twice('All WS partial waves equal in neutron and proton')
+        theline = searchline(calcfilename,"BOTH_STRENGTHWS")
+        both_lwave_n = 0
+        # protonws_starting_point = [float(data[theline+1])] # Read from the input file
+        both_step = float(data[theline+1])
+        both_n = int(data[theline+2])
+    else:
+        print('Not coded yet!')
+        exit()
+        # print_twice('Selected specific partial waves')
+        # both_protonws_lwave = ast.literal_eval(both_type)
+        # both_protonws_lwave_n = len(both_protonws_lwave)
+        # theline = searchline(calcfilename,"BOTH_PROTONSTRENGTHWS")
+        # # protonws_starting_point = [float(data[theline+1])] # Read from the input file
+        # both_protonws_step = float(data[theline+1])
+        # both_protonws_n = int(data[theline+2])
+        # #
+        # both_neutronws_lwave = both_protonws_lwave
+        # both_neutronws_lwave_n = len(both_neutronws_lwave)
+        # theline = searchline(calcfilename,"BOTH_NEUTRONSTRENGTHWS")
+        # # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
+        # both_neutronws_step = float(data[theline+1])
+        # both_neutronws_n = int(data[theline+2])
+
 
 # Start calculation
 start_main = time.time()
@@ -229,9 +277,14 @@ else:
     print_twice("\nSkip GSM part, only GSMCC calculation!")
 #
 # Edit thresholds
-print_twice("\nEdit thresholds in %s"% storage_directory)
-os.chdir(storage_directory)
-sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
+if exp_thr == 0:
+    print_twice("\nCalculations of GSMCC using GSM thresholds")
+elif exp_thr == 1:
+    print_twice("\nCalculations of GSMCC using experimental thresholds")
+    print_twice("\nEdit thresholds in %s"% storage_directory)
+    print_twice("\nBe sure that the file EditThreshold.in is in the directory!")
+    os.chdir(storage_directory)
+    sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
@@ -277,7 +330,7 @@ if theline != None:
         #
         # Runnning the code
         start_gsmcc = time.time()
-        outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% j
+        outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% j
         print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
         sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
         end_gsmcc = time.time()
@@ -326,7 +379,79 @@ if theline != None:
         #
         # Runnning the code
         start_gsmcc = time.time()
-        outfilename_CC_j = outfilename_CC[:-4] + '_%s.out'% (j+1)
+        outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% (j+1)
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
+#   
+# Calculating both WS
+theline = searchline(calcfilename,"BOTHWS")
+if theline != None:
+    print_twice('Start WS test')
+    both_proton_type = data[theline+1]
+    both_neutron_type = data[theline+2]
+    # Start calculations
+    for j in range(both_n+1):
+        # Open GSMCC input file
+        with open(readfilename_CC,'r') as gsmin:
+            inputfile_lines = gsmin.read().split('\n')
+        # Find the basis.parameters line
+        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        # First edit proton
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            if both_proton_type == 'ALL':
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + both_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            else:
+                print('Not coded yet!')
+                exit()
+            # elif int(aux[0]) in protonws_lwave:
+            #     if j == 0:
+            #         aux_vo = float(aux[3])
+            #     else:
+            #         aux_vo = float(aux[3]) + protonws_step
+            #     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+            #     k += 1
+            #     if inputfile_lines[theline + shift + k].split() == []:
+            #         i = 1
+        # Then edit neutron
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            if both_neutron_type == 'ALL':
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + both_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            else:
+                print('Not coded yet!')
+                exit()
+        # Save and close GSMCC input file
+        inputfile_aux = '\n'.join(inputfile_lines)
+        with open(readfilename_CC,'w') as gsmin:
+            gsmin.write(inputfile_aux)
+        #
+        # Runnning the code
+        start_gsmcc = time.time()
+        outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% (j+1)
         print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
         sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
         end_gsmcc = time.time()
@@ -341,7 +466,7 @@ time_main = end_main-start_main
 print_twice("\n\nAll calculations lasted: ", time_main, "s")
 
 """
-    Example of BasisTest.in file:
+    Example of input.BasisTest file:
     _________________________________
     # Remove the lines that you are not using, this example is with the complete test
     PROTONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
@@ -372,5 +497,13 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     6
     0.1
     3
+    
+    BOTHWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test. 1 - for protons , 2 - for neutron
+    ALL
+    ALL
+    BOTH_STRENGTHWS: starting point read from GSMCC file. If ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
+    0.2
+    10
+    
     _________________________________
 """
