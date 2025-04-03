@@ -224,7 +224,7 @@ if theline != None:
         neutronso_n = int(data[theline+2])
         
 # Preparing both WS
-theline = searchline(calcfilename,"BOTHWS")
+theline = searchline(calcfilename,"BOTHWS:")
 if theline != None:
     print_twice('Doing Woods-Saxon test for proton and neutron at the same time')
     both_proton_type = data[theline+1]
@@ -253,7 +253,21 @@ if theline != None:
         # # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
         # both_neutronws_step = float(data[theline+1])
         # both_neutronws_n = int(data[theline+2])
-
+        
+# Saving WF
+theline = searchline(calcfilename,"SAVE_WF:")
+if theline != None:
+    savingwf_info = data[theline+1]
+    if savingwf_info == 'NO':
+        print_twice('The channels WF of each calculation will not be saved')
+    else:
+        theline = searchline(calcfilename,"WF_JPI_INDEX:")
+        n_wf = int(data[theline+1])
+        jpi_wf = []
+        index_wf = []
+        for i in range(0,n_wf):
+            jpi_wf.append( data[theline+2*(i+1)] )
+            index_wf.append( data[theline+2*(i+1)+1] )
 
 # Start calculation
 start_main = time.time()
@@ -288,6 +302,10 @@ elif exp_thr == 1:
 #
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
+# Saving startgin point
+with open(readfilename_CC,'r') as gsmin:
+    startingpoint_lines = gsmin.read().split('\n')
+#
 # Calculating neutron WS
 theline = searchline(calcfilename,"NEUTRONWS")
 if theline != None:
@@ -360,18 +378,15 @@ if theline != None:
                 else:
                     aux_vo = float(aux[3]) + protonws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
             elif int(aux[0]) in protonws_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
                 else:
                     aux_vo = float(aux[3]) + protonws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
         # Save and close GSMCC input file
         inputfile_aux = '\n'.join(inputfile_lines)
         with open(readfilename_CC,'w') as gsmin:
@@ -457,7 +472,11 @@ if theline != None:
         end_gsmcc = time.time()
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
-        
+#
+# Restore GSMCC file
+startingpoint_aux = '\n'.join(startingpoint_lines)
+with open(readfilename_CC,'w') as gsmin:
+    gsmin.write(startingpoint_aux)
 
 
 #
@@ -471,30 +490,26 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     # Remove the lines that you are not using, this example is with the complete test
     PROTONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
-    PROTONSTRENGTHWS: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    54
+    PROTONSTRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
     0.2
     10
     PROTONSO: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     [0,2]
-    PROTONSTRENGTHSO: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    6
+    PROTONSTRENGTHSO: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
     0.1
     3
-    5
     0.05
     2
     
     NEUTRONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
-    NEUTRONSTRENGTHWS: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
+    NEUTRONSTRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
     54
     0.2
     10
     NEUTRONSO: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
-    NEUTRONSTRENGTHSO: if ALL, 1 - starting point, 2 - step, 3 - n points; if not, 1-2-3 for each partial wave defined before
-    6
+    NEUTRONSTRENGTHSO: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
     0.1
     3
     
@@ -505,5 +520,26 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     0.2
     10
     
+    # Save WF?
+    SAVE_WF: YES or NO
+    YES
+    WF_JPI_INDEX: If YES, indicate 1-number of states, and for each, 2-JPi, 3-Index
+    8
+    3/2-
+    0
+    3/2-
+    1
+    3/2-
+    2
+    3/2-
+    3
+    7/2+
+    0
+    7/2+
+    1
+    7/2+
+    2
+    7/2+
+    3
     _________________________________
 """
