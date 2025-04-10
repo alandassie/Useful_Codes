@@ -338,9 +338,9 @@ if theline != None:
                 else:
                     aux_vo = float(aux[3]) + neutronws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
         # Save and close GSMCC input file
         inputfile_aux = '\n'.join(inputfile_lines)
         with open(readfilename_CC,'w') as gsmin:
