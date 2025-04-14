@@ -305,6 +305,11 @@ theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
     machinefile_name = data[theline+1]
     running_prefix = running_prefix[:-2] + '-hostfile ' + machinefile_name + ' '
+# Using experimental thresholds in GSMCC calculations
+exp_thr = 0
+theline = searchline(readfilename,"EXPERIMENTAL-THRESHOLDS:")
+if theline != None:
+    exp_thr = int(data[theline+1])
 #
 # Looking up the optimization code to use
 theline = searchline(readfilename,"OPTIMIZATIONMETHOD:")
@@ -408,9 +413,14 @@ else:
     print_twice("\nSkip GSM part, only GSMCC calculation!")
 #
 # Edit thresholds
-print_twice("\nEdit thresholds in %s"% storage_directory)
-os.chdir(storage_directory)
-sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
+if exp_thr == 0:
+    print_twice("\nCalculations of GSMCC using GSM thresholds")
+elif exp_thr == 1:
+    print_twice("\nCalculations of GSMCC using experimental thresholds")
+    print_twice("\nEdit thresholds in %s"% storage_directory)
+    print_twice("\nBe sure that the file EditThreshold.in is in the directory!")
+    os.chdir(storage_directory)
+    sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
 #
 print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
 os.chdir(gsmcc_directory)
