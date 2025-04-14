@@ -258,11 +258,11 @@ def f(x):
         print_twice('\n'+20*'-'+'\n')
         return return_residue
     elif method == 'MINIMIZATION':
-        print_twice('Finish iteration of TNC or Nelder-Mead optimizer')
+        print_twice('Finish iteration of MINIMIZATION optimizer')
         print_twice('\n'+20*'-'+'\n')
         return res
     else:
-        print_twice('METHOD must be NEWTON or MINIMIZATION;(TNC or Nelder-Mead)')
+        print_twice('METHOD must be NEWTON or MINIMIZATION;(TNC or Nelder-Mead or BFGS)')
         exit()
 # .-
 
@@ -484,12 +484,13 @@ elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
-    elif mini_method == 'Nelder-Mead':
+    elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
         if used_icf == 1:
             bounds_opt = (eval(icf_bounds + ',' + ccf_bounds))
         else:
             bounds_opt = ( eval(ccf_bounds + ',') )
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
+        
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
     exit()
@@ -514,7 +515,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MACHINEFILE: DEFINE THE FILE FOR THE EXECUTION, IF NEEDED
     machinefile
     
-    OPTIMIZATIONMETHOD:  NEWTON or ('MINIMIZATION;' + 'TNC' or 'Nelder-Mead' for the moment)
+    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;TNC
     
     CORRECTIVEFACTORS: 1 - COMPLEX, REAL or IMAG; 2 - REAL SEED; 3 - IMAG SEED; 4 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
@@ -542,13 +543,8 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     12.
     2
     0.5
-
-    GSMCC-exe:
-    CC-24.11.20-MPI.x
-    GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
-    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
-    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
-    2
+    
+    
     
     GSM-exe:
     GSM-24.11.20-MPI.x
@@ -563,5 +559,15 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     CLUSPHY_projforCC_protonnocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
+    
+    
+
+    GSMCC-exe:
+    CC-24.11.20-MPI.x
+    GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
+    CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
+    2
+    
     _________________________________
 """
