@@ -112,7 +112,7 @@ else:
                 line_all += aux
             else:
                 line_all = [aux]
-# Identify index, energy and with of the state:
+# Identify index, energy and width of the state:
 indexes = []
 energies = []
 widths = []
@@ -123,8 +123,10 @@ for line in line_all:
 #
 line_occprob_i = []
 line_occprob_f = []
-line_partwidth_i = []
-line_partwidth_f = []
+line_partwidth_rd_i = []
+line_partwidth_rd_f = []
+line_partwidth_ri_i = []
+line_partwidth_ri_f = []
 k = -1
 for line in line_all:
     k += 1
@@ -150,33 +152,57 @@ for line in line_all:
         else:
             line_occprob_f_aux = line_occprob_i_aux+i
             break
-    # Search first partial width
+    # Search first partial width (r-dependent)
     i = 0
     while i < 1000:
         aux = data[line_occprob_f_aux+i]
-        finder = aux.find('(alternative current formula)')
+        finder = aux.find('(r-dependent)')
         if finder == -1:
             i += 1
             continue
         else:
-            line_partwidth_i_aux = line_occprob_f_aux+i
+            line_partwidth_rd_i_aux = line_occprob_f_aux+i+3
             break
-    # Search last partial width
+    # Search last partial width (r-dependent)
     i = 0
     while i < 1000:
-        aux = data[line_partwidth_i_aux+i]
-        finder = aux.find('(alternative current formula)')
+        aux = data[line_partwidth_rd_i_aux+i]
+        finder = aux.find(' Gamma : ')
         if finder != -1:
             i += 1
             continue
         else:
-            line_partwidth_f_aux = line_partwidth_i_aux+i
+            line_partwidth_rd_f_aux = line_partwidth_rd_i_aux+i
+            break
+    # Search first partial width (r-independent)
+    i = 0
+    while i < 1000:
+        aux = data[line_occprob_f_aux+i]
+        finder = aux.find('(r-independent)')
+        if finder == -1:
+            i += 1
+            continue
+        else:
+            line_partwidth_ri_i_aux = line_occprob_f_aux+i+3
+            break
+    # Search last partial width (r-independent)
+    i = 0
+    while i < 1000:
+        aux = data[line_partwidth_ri_i_aux+i]
+        finder = aux.find(' Gamma : ')
+        if finder != -1:
+            i += 1
+            continue
+        else:
+            line_partwidth_ri_f_aux = line_partwidth_ri_i_aux+i
             break
     #
     line_occprob_i.append(line_occprob_i_aux)
     line_occprob_f.append(line_occprob_f_aux)
-    line_partwidth_i.append(line_partwidth_i_aux)
-    line_partwidth_f.append(line_partwidth_f_aux)
+    line_partwidth_rd_i.append(line_partwidth_rd_i_aux)
+    line_partwidth_rd_f.append(line_partwidth_rd_f_aux)
+    line_partwidth_ri_i.append(line_partwidth_ri_i_aux)
+    line_partwidth_ri_f.append(line_partwidth_ri_f_aux)
 #
 if calc_sf == 'YES':
     # Search for spectroscopic factor lines
@@ -282,8 +308,8 @@ for index, energy, width in zip(indexes,energies,widths):
     # .-
     if print_info == 'ALL': print_twice(20*'-')
     # .-
-    # Partial Widths
-    if print_info == 'ALL': print_twice('Partial Widths:\n')
+    # Partial Widths (r-dependent)
+    if print_info == 'ALL': print_twice('Partial Widths (r-dependent):\n')
     #
     # Build arrays
     channels = []
@@ -297,16 +323,16 @@ for index, energy, width in zip(indexes,energies,widths):
     j = 0
     i = -1
     projectile_old = " "
-    line_partwidth_i_aux = line_partwidth_i[k]
-    line_partwidth_f_aux = line_partwidth_f[k]
+    line_partwidth_i_aux = line_partwidth_rd_i[k]
+    line_partwidth_f_aux = line_partwidth_rd_f[k]
     for x in data[line_partwidth_i_aux:line_partwidth_f_aux]:
         if x == '':
             continue
         projectile = x.split(' : ')[2].split(' ')[0]
         channel = x.split('^(%s'% jpi_state)[0]
         aux1 = x.split(' : ')[3].split(' , ')
-        aux2 = float(aux1[0].split(' keV ')[0])
-        aux3 = float(aux1[1].split(' keV ')[0])
+        aux2 = float(aux1[0].split()[0])
+        aux3 = float(aux1[0].split()[3])
         if projectile == projectile_old :
             current_width_aux += aux2
             altcurrent_width_aux += aux3
@@ -349,6 +375,86 @@ for index, energy, width in zip(indexes,energies,widths):
             print_twice('Total alt current width (keV) : {0:.5g}'.format(altcurrent_width[i]))
             print_twice('Max partial alt current width (keV) : {0:.5g}'.format(max(partial_altcurrent_width[i])))
             index_max = max(range(len(partial_altcurrent_width[i])), key=partial_altcurrent_width[i].__getitem__)
+            print_twice('  With the channel : %s'% channels[i][index_max])
+            print_twice(10*'-')
+            print_twice(' ')
+    # .-
+    # Partial Widths (r-independent)
+    if print_info == 'ALL': print_twice('Partial Widths (r-independent):\n')
+    #
+    # Build arrays
+    channels = []
+    projectile_width = []
+    current_width = []
+    current_lower_width = []
+    current_upper_width = []
+    partial_current_width = []
+    partial_current_lower_width = []
+    partial_current_upper_width = []
+    current_width_aux = 0
+    current_width_lower_aux = 0
+    current_width_upper_aux = 0
+    j = 0
+    i = -1
+    projectile_old = " "
+    line_partwidth_i_aux = line_partwidth_ri_i[k]
+    line_partwidth_f_aux = line_partwidth_ri_f[k]
+    for x in data[line_partwidth_i_aux:line_partwidth_f_aux]:
+        if x == '':
+            continue
+        projectile = x.split(' : ')[2].split(' ')[0]
+        channel = x.split('^(%s'% jpi_state)[0]
+        aux1 = x.split(' : ')[3]
+        aux2 = float(aux1.split()[0])
+        aux3 = float(aux1.split()[3])
+        aux4 = float(aux1.split()[9])
+        if projectile == projectile_old :
+            current_width_aux += aux2
+            current_width_lower_aux += aux3
+            current_width_upper_aux += aux4
+            partial_current_width[i].append(aux2)
+            partial_current_lower_width[i].append(aux3)
+            partial_current_upper_width[i].append(aux4)
+            channels[i].append(channel)
+        else:
+            if j == 0:
+                i += 1
+                current_width_aux += aux2
+                current_width_lower_aux += aux3
+                current_width_upper_aux += aux4
+                projectile_old = projectile
+                partial_current_width.append([aux2])
+                partial_current_lower_width.append([aux3])
+                partial_current_upper_width.append([aux4])
+                channels.append([channel])
+                projectile_width.append(projectile)
+                j +=1
+            else:
+                current_width.append(current_width_aux)
+                current_lower_width.append(current_width_lower_aux)
+                current_upper_width.append(current_width_upper_aux)
+                #
+                i+=1
+                projectile_old = projectile
+                projectile_width.append(projectile)
+                current_width_aux = aux2
+                current_width_lower_aux = aux3
+                current_width_upper_aux = aux4
+                partial_current_width.append([aux2])
+                partial_current_lower_width.append([aux3])
+                partial_current_upper_width.append([aux4])
+                channels.append([channel])
+    current_width.append(current_width_aux)
+    current_lower_width.append(current_width_lower_aux)
+    current_upper_width.append(current_width_upper_aux)
+
+    if print_info == 'ALL':     
+        for i in range(0,len(projectile_width)):
+            print_twice('Projectile mass partition : {0:s}'.format(projectile_width[i]))
+            print_twice('Total app. current width (keV) : {0:.5g}'.format(current_width[i]))
+            index_max = max(range(len(partial_current_width[i])), key=partial_current_width[i].__getitem__)
+            print_twice('Max partial app. current width (keV) : {0:.5g} ({1:.5g},{2:.5g})'.format( 
+                        max(partial_current_width[i]), partial_current_lower_width[i][index_max], partial_current_upper_width[i][index_max] ))
             print_twice('  With the channel : %s'% channels[i][index_max])
             print_twice(10*'-')
             print_twice(' ')
