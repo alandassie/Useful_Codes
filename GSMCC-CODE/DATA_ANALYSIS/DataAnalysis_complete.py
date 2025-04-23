@@ -127,6 +127,10 @@ line_partwidth_rd_i = []
 line_partwidth_rd_f = []
 line_partwidth_ri_i = []
 line_partwidth_ri_f = []
+line_partwidth_rd_i_aux = 0
+line_partwidth_rd_f_aux = 0
+line_partwidth_ri_i_aux = 0
+line_partwidth_ri_f_aux = 0
 k = -1
 for line in line_all:
     k += 1
@@ -154,7 +158,7 @@ for line in line_all:
             break
     # Search first partial width (r-dependent)
     i = 0
-    while i < 1000:
+    while i < 300:
         aux = data[line_occprob_f_aux+i]
         finder = aux.find('(r-dependent)')
         if finder == -1:
@@ -163,20 +167,21 @@ for line in line_all:
         else:
             line_partwidth_rd_i_aux = line_occprob_f_aux+i+3
             break
-    # Search last partial width (r-dependent)
-    i = 0
-    while i < 1000:
-        aux = data[line_partwidth_rd_i_aux+i]
-        finder = aux.find(' Gamma : ')
-        if finder != -1:
-            i += 1
-            continue
-        else:
-            line_partwidth_rd_f_aux = line_partwidth_rd_i_aux+i
-            break
+    if line_partwidth_rd_i_aux != 0:
+        # Search last partial width (r-dependent)
+        i = 0
+        while i < 300:
+            aux = data[line_partwidth_rd_i_aux+i]
+            finder = aux.find(' Gamma : ')
+            if finder != -1:
+                i += 1
+                continue
+            else:
+                line_partwidth_rd_f_aux = line_partwidth_rd_i_aux+i
+                break
     # Search first partial width (r-independent)
     i = 0
-    while i < 1000:
+    while i < 300:
         aux = data[line_occprob_f_aux+i]
         finder = aux.find('(r-independent)')
         if finder == -1:
@@ -185,17 +190,18 @@ for line in line_all:
         else:
             line_partwidth_ri_i_aux = line_occprob_f_aux+i+3
             break
-    # Search last partial width (r-independent)
-    i = 0
-    while i < 1000:
-        aux = data[line_partwidth_ri_i_aux+i]
-        finder = aux.find(' Gamma : ')
-        if finder != -1:
-            i += 1
-            continue
-        else:
-            line_partwidth_ri_f_aux = line_partwidth_ri_i_aux+i
-            break
+    if line_partwidth_rd_f_aux != 0:
+        # Search last partial width (r-independent)
+        i = 0
+        while i < 300:
+            aux = data[line_partwidth_ri_i_aux+i]
+            finder = aux.find(' Gamma : ')
+            if finder != -1:
+                i += 1
+                continue
+            else:
+                line_partwidth_ri_f_aux = line_partwidth_ri_i_aux+i
+                break
     #
     line_occprob_i.append(line_occprob_i_aux)
     line_occprob_f.append(line_occprob_f_aux)
