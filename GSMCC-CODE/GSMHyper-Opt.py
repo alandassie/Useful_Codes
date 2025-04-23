@@ -165,11 +165,11 @@ def f(x):
         print_twice('\n'+20*'-'+'\n')
         return res_e
     elif method == 'MINIMIZATION':
-        print_twice('Finish iteration of TNC or Nelder-Mead optimizer')
+        print_twice('Finish iteration of MINIMIZATION optimizer')
         print_twice('\n'+20*'-'+'\n')
         return res
     else:
-        print_twice('METHOD must be NEWTON or MINIMIZATION;(TNC or Nelder-Mead)')
+        print_twice('METHOD must be NEWTON or MINIMIZATION;(TNC or Nelder-Mead or BFGS)')
         exit()
 # .-
 
@@ -331,7 +331,7 @@ elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
-    elif mini_method == 'Nelder-Mead':
+    elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
         if opt_onehyperon_ws == 1:
             bounds_opt = (eval(onehyperon_ws_bounds + ',' + yn_bounds))
         else:
@@ -361,7 +361,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MACHINEFILE: 1 - NAME OF THE FILE
     machinefile
 
-    OPTIMIZATIONMETHOD:  NEWTON or ('MINIMIZATION;' + 'TNC' or 'Nelder-Mead' for the moment)
+    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;Nelder-Mead
 
     OPTIMIZEDHYPERONS: 1 - NUMBER OF HYPERONS TO OPTIMIZE; 2,N - NAME OF EACH HYPERON
@@ -370,13 +370,13 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - l PARTIAL WAVE; 3 - REAL SEED; 4 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - l PARTIAL WAVE; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
     1
     0
     40
     (30,60)
 
-    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - IF Nelder-Mead, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
     2
     V8a.SU3.f
     -0.2
