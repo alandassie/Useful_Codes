@@ -224,35 +224,29 @@ if theline != None:
         neutronso_n = int(data[theline+2])
         
 # Preparing both WS
-theline = searchline(calcfilename,"BOTHWS:")
+theline = searchline(calcfilename,"BOTHWS")
 if theline != None:
     print_twice('Doing Woods-Saxon test for proton and neutron at the same time')
     both_proton_type = data[theline+1]
-    both_neutron_type = data[theline+1]
+    both_neutron_type = data[theline+2]
     if both_proton_type == 'ALL' and both_neutron_type == 'ALL':
         print_twice('All WS partial waves equal in neutron and proton')
         theline = searchline(calcfilename,"BOTH_STRENGTHWS")
         both_lwave_n = 0
         # protonws_starting_point = [float(data[theline+1])] # Read from the input file
-        both_step = float(data[theline+1])
-        both_n = int(data[theline+2])
+        both_proton_step = float(data[theline+1])
+        both_neutron_step = float(data[theline+2])
+        both_n = int(data[theline+3])
     else:
-        print('Not coded yet!')
-        exit()
-        # print_twice('Selected specific partial waves')
-        # both_protonws_lwave = ast.literal_eval(both_type)
-        # both_protonws_lwave_n = len(both_protonws_lwave)
-        # theline = searchline(calcfilename,"BOTH_PROTONSTRENGTHWS")
-        # # protonws_starting_point = [float(data[theline+1])] # Read from the input file
-        # both_protonws_step = float(data[theline+1])
-        # both_protonws_n = int(data[theline+2])
-        # #
-        # both_neutronws_lwave = both_protonws_lwave
-        # both_neutronws_lwave_n = len(both_neutronws_lwave)
-        # theline = searchline(calcfilename,"BOTH_NEUTRONSTRENGTHWS")
-        # # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
-        # both_neutronws_step = float(data[theline+1])
-        # both_neutronws_n = int(data[theline+2])
+        print_twice('Selected specific partial waves')
+        both_protonws_lwave = ast.literal_eval(both_proton_type)
+        both_protonws_lwave_n = len(both_protonws_lwave)
+        both_neutronws_lwave = ast.literal_eval(both_neutron_type)
+        both_neutronws_lwave_n = len(both_neutronws_lwave)
+        theline = searchline(calcfilename,"BOTH_STRENGTHWS")
+        both_proton_step = float(data[theline+1])
+        both_neutron_step = float(data[theline+2])
+        both_n = int(data[theline+3])
         
 # Saving WF
 theline = searchline(calcfilename,"SAVE_WF:")
@@ -424,23 +418,17 @@ if theline != None:
                 if j == 0:
                     aux_vo = float(aux[3])
                 else:
-                    aux_vo = float(aux[3]) + both_step
+                    aux_vo = float(aux[3]) + both_proton_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
-            else:
-                print('Not coded yet!')
-                exit()
-            # elif int(aux[0]) in protonws_lwave:
-            #     if j == 0:
-            #         aux_vo = float(aux[3])
-            #     else:
-            #         aux_vo = float(aux[3]) + protonws_step
-            #     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-            #     k += 1
-            #     if inputfile_lines[theline + shift + k].split() == []:
-            #         i = 1
+            elif int(aux[0]) in both_protonws_lwave:
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + both_proton_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
         # Then edit neutron
         shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
         i = 0
@@ -453,12 +441,15 @@ if theline != None:
                 else:
                     aux_vo = float(aux[3]) + both_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                k += 1
-                if inputfile_lines[theline + shift + k].split() == []:
-                    i = 1
-            else:
-                print('Not coded yet!')
-                exit()
+            elif int(aux[0]) in both_neutronws_lwave:
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + both_neutron_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
         # Save and close GSMCC input file
         inputfile_aux = '\n'.join(inputfile_lines)
         with open(readfilename_CC,'w') as gsmin:
@@ -513,12 +504,13 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     0.1
     3
     
-    BOTHWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test. 1 - for protons , 2 - for neutron
-    ALL
-    ALL
-    BOTH_STRENGTHWS: starting point read from GSMCC file. If ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
-    0.2
-    10
+    BOTHWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
+    [0]
+    [0]
+    BOTH_STRENGTHWS: if ALL, 1 - proton step, 2 - neutron step, 3 - n points; if not, 1-2-3 for each partial wave defined before
+    1
+    1
+    20
     
     # Save WF?
     SAVE_WF: YES or NO
