@@ -1,24 +1,32 @@
 """
     Created on June 2024 by Alan D.K.
 
-    This code Test different shapes of the CC contours
+    This code run multiples GSM and/or GSMCC calculations in order to calculate 
+    the GSMCC spectrum with different contour.
     
-    Comment on October 29 2024: Outdated code, can be improved with an independent
-    input file called ContourMod.in when needed!!
+    For reading file, the information about working directories and files
+    is the same as in the code GSM+GSMCC_run.py.
+    A particular file called input.ContourTest is used to define the parameters of the test.
+    An example can be found at the end of the code.
 """
 
 import numpy as np
 import subprocess as sp
+import os
+import time
 
-
-# Output file name
-# now = datetime.now()
-# optout = 'conttest%s.out'% (now.strftime("%y.%m.%d-%H:%M"))
-# # Erease output file
-# with open(optout,'w') as output:
-#     pass
-# Read file name
-readfilename_array = ['IN2P3_11C_CC_GSMOpt-24.07.24-10.00_Basis-24.08.07-19.00_3I2-.in']
+# LOG FILE
+logfile = os.getcwd() + '/log.ContourTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+# LOG NAME
+logname = 'log.WD_ContourTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+# LOG FOLDER
+logfolder = os.getcwd() + '/' + logname 
+if not os.path.exists(logfolder):
+    os.makedirs(logfolder)
+else:
+    for filename in os.listdir(logfolder):
+        # remove the files inside
+        os.remove(f"{logfolder}/{filename}")
 
 # Declaration of funcitons
 def print_twice(*args,**kwargs): # Allow to print in file and in terminal at the same line
@@ -52,6 +60,112 @@ def indexof (obj, elem, offset=0):
         return offset + obj[offset:].index(elem)
     return -1
 # .-
+
+# INPUT FILE
+readfilename = os.getcwd() + '/input.GSM+GSMCC_run'
+with open(readfilename, 'r') as readfile:
+    data = readfile.read().split('\n')
+# LOGILE
+erease_output_file()
+
+print_twice("Be sure that you are using the correct directories!")
+# GSMCC directory
+gsmcc_directory = os.getcwd()
+# GSM directory
+theline = searchline(readfilename,"GSM-DIRECTORY:")
+gsm_directory = data[theline+1]
+# storage directory
+theline = searchline(readfilename,"STORAGE-DIRECTORY:")
+storage_directory = data[theline+1]
+# Checking if it is a MPI or OPENMP/secuential calculation
+theline = searchline(readfilename,"PARALLELISM:")
+parallelism_type = data[theline+1]
+parallelism_nodes = data[theline+2]
+if parallelism_type == 'MPI':
+    running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
+else:
+    running_prefix = './'
+# Checking if we need machinefile
+theline = searchline(readfilename,"MACHINEFILE:")
+if theline != None:  
+    machinefile_name = data[theline+1]
+    running_prefix = running_prefix + '-hostfile ' + machinefile_name + ' '
+    
+# Using experimental thresholds in GSMCC calculations
+exp_thr = 0
+theline = searchline(readfilename,"EXPERIMENTAL-THRESHOLDS:")
+if theline != None:
+    exp_thr = int(data[theline+1])
+
+# Executable GSMCC file
+theline = searchline(readfilename,"GSMCC-exe:")
+running_cc = data[theline+1]
+# Read-Out file name CC
+theline = searchline(readfilename,"GSMCC-files:")
+readfilename_CC = data[theline+1]
+outfilename_CC = data[theline+2]
+cc_write_aux = int(data[theline+3])
+cc_write = ' ' + cc_write_aux*'>' + ' '
+#
+# Executable GSM file
+theline = searchline(readfilename,"GSM-exe:")
+if theline != None:  
+    running_gsm = data[theline+1]
+# Read-Out file name GSM
+theline = searchline(readfilename,"GSM-files:")
+if theline != None:  
+    gsm_files = int(data[theline+1])
+    gsm_write_aux = int(data[theline+2])
+    gsm_write = ' ' + gsm_write_aux*'>' + ' '
+    readfilename_GSM = data[theline+3:(theline+3)+2*gsm_files:2]
+    outfilename_GSM = data[theline+4:(theline+4)+2*gsm_files:2]
+    if len(readfilename_GSM) > gsm_files:
+        readfilename_GSM = readfilename_GSM[:-1]
+
+# CALCULATING FILE
+calcfilename = os.getcwd() + '/input.ContourTest'
+with open(calcfilename, 'r') as readfile:
+    data = readfile.read().split('\n')
+
+# IDENTIFY NUMBER OF CLUSTER CONTOUR TO CHANGE
+theline = searchline(calcfilename,"N_CLUSTERS:")
+n_clusters = int(data[theline+1])
+# NAME OF EACH CLUSTER
+theline = searchline(calcfilename,"NAMES_CLUSTERS:")
+names_clusters = []
+for i in range(n_clusters):
+    names_clusters.append( data[theline +1+i] )
+# PARTIAL WAVE FOR EACH CLUSTER
+n_pw_clusters = []
+pw_clusters = []
+for partition in names_clusters:
+    theline = searchline(calcfilename,"%s_PW:"% partition)
+    n_pw = int( data[theline + 1] )
+    n_pw_clusters.append( n_pw )
+    aux = []
+    for i in range(n_pw):
+        aux.append( data[theline +2+i] )
+    pw_clusters.append( aux )
+# Kpeak, Kmiddle OR Kmax FOR MODIFICATION:
+theline = searchline(calcfilename,"K_TO_MODIFY:")
+kmod = int(data[theline + 1]) # 1-Kpeak, 2-Kmiddle OR 3-Kmax
+ktype = data[theline + 2] # REAL, IMAG
+#
+kpeak_real_min = []
+kpeak_real_max = []
+kpeak_imag_min = []
+kpeak_imag_max = []
+#
+for partition in names_clusters:
+    theline = searchline(calcfilename,"%s_K:"% partition)
+    # if kmod == 1:
+    #     if ktype == 'REAL':
+            
+
+# MODIFY PARTIAL WAVES CONTOUR OF EACH CLUSTER AT THE SAME TIME
+theline = searchline(calcfilename,"SAME_TIME_CALC:")
+same_time = int( data[theline + 1] )
+
 
 # Define Kpeak, Kmiddle and Kmax limits
 kpeak_real_min = 0.2
@@ -119,3 +233,51 @@ for x1 in kpeak_real:
                     #
 
 
+# Start Calculations
+start_main = time.time()
+# RUN GSM
+theline = searchline(readfilename,"GSM-files:")
+if theline != None:
+    print_twice("\nRunning GSM in %s"% gsm_directory)
+    os.chdir(gsm_directory)
+    #
+    for i in range(0,gsm_files):
+        inp = readfilename_GSM[i]
+        out = outfilename_GSM[i]
+        start_gsm = time.time()
+        print_twice('\n ' + running_prefix + running_gsm  + ' < ' + inp + gsm_write + out)
+        sp.run([running_prefix + running_gsm + ' < ' + inp + gsm_write + out], shell=True)
+        end_gsm = time.time()
+        time_gsm = end_gsm-start_gsm
+        print_twice("Time to calculate: ",time_gsm, "s")
+    #
+else:
+    print_twice("\nSkip GSM part, only GSMCC calculation!")
+#
+# Edit thresholds
+if exp_thr == 0:
+    print_twice("\nCalculations of GSMCC using GSM thresholds")
+elif exp_thr == 1:
+    print_twice("\nCalculations of GSMCC using experimental thresholds")
+    print_twice("\nEdit thresholds in %s"% storage_directory)
+    print_twice("\nBe sure that the file EditThreshold.in is in the directory!")
+    os.chdir(storage_directory)
+    sp.run(['python3 Useful_Codes/GSMCC-CODE/EditThresholds.py'], shell=True)
+#
+print_twice("\nRunning GSMCC in %s"% gsmcc_directory)
+os.chdir(gsmcc_directory)
+# Saving startgin point
+with open(readfilename,'r') as gsmin:
+    startingpoint_lines = gsmin.read().split('\n')
+theline = searchline(readfilename,"N.K.CM.max")
+i = 1
+datain = []
+while i > 0:
+    aux_line = startingpoint_lines[theline+i]
+    aux_proj = aux_line.split()[0]
+    if aux_proj not in names_clusters:
+        
+    
+    
+    
+# Calculations for K_Peak
