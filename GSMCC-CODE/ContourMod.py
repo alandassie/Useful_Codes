@@ -274,10 +274,13 @@ i = 1
 datain = []
 while i > 0:
     aux_line = startingpoint_lines[theline+i]
+    if aux_line.split() == []:
+        break
     aux_proj = aux_line.split()[0]
-    if aux_proj not in names_clusters:
-        
-    
-    
-    
+    if aux_proj in names_clusters:
+        datain.append(aux_line)
+    i += 1
+input_n_contour = i
+
 # Calculations for K_Peak
+# Kmiddle, Kmax and N are fixed from input 
