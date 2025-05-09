@@ -49,14 +49,22 @@ def searchline(file,phrase):
         else:
             l_num = None
     return l_num
-def searchlinefinal(file,phrase):
+#
+# Idea from https://stackoverflow.com/questions/3873361/finding-multiple-occurrences-of-a-string-within-a-string-in-python
+def searchline_all(file,phrase):
     with open(file, 'r', encoding='utf-8') as f:
         text = f.read()
-        if phrase in text:
-            phrase_index = text.rindex(phrase)
-            l_num = text[:phrase_index].count('\n')  # Nth line has n-1 '\n's before
-        else:
-            l_num = None
+        count = 0
+        i = len(phrase)
+        x = 0
+        l_num = []
+        while x < len(text) - (i-1):
+            if text[x:x+i] == phrase:
+                l_num.append(text[:x].count('\n'))  # Nth line has n-1 '\n's before
+                x += i
+                count += 1
+            else:
+                x += 1
     return l_num
 # .-
 # Idea from https://stackoverflow.com/questions/176918/how-to-find-the-index-for-a-given-item-in-a-list
@@ -248,6 +256,27 @@ if theline != None:
         both_neutron_step = float(data[theline+2])
         both_n = int(data[theline+3])
         
+# Preparing alpha WS
+theline = searchline(calcfilename,"ALPHAWS")
+if theline != None:
+    print_twice('Doing Woods-Saxon test for alpha')
+    alpha_type = data[theline+1]
+    if alpha_type == 'ALL':
+        print_twice('All WS partial waves at the same time')
+        theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
+        alpha_lwave_n = 0
+        # protonws_starting_point = [float(data[theline+1])] # Read from the input file
+        alpha_step = float(data[theline+1])
+        alpha_n = int(data[theline+2])
+    else:
+        print_twice('Selected specific partial waves')
+        alpha_lwave = ast.literal_eval(alpha_type)
+        alpha_lwave_n = len(alpha_lwave)
+        theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
+        alpha_step = float(data[theline+1])
+        alpha_n = int(data[theline+2])
+
+        
 # Saving WF
 theline = searchline(calcfilename,"SAVE_WF:")
 if theline != None:
@@ -311,7 +340,7 @@ if theline != None:
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
         # Find the basis.parameters line
-        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[0]
         shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('neutron') + 2
         i = 0
         k = 0
@@ -360,7 +389,7 @@ if theline != None:
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
         # Find the basis.parameters line
-        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[0]
         shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
         i = 0
         k = 0
@@ -407,7 +436,7 @@ if theline != None:
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
         # Find the basis.parameters line
-        theline = searchline(readfilename_CC,"Basis.WS.parameters")
+        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[0]
         # First edit proton
         shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
         i = 0
@@ -439,7 +468,7 @@ if theline != None:
                 if j == 0:
                     aux_vo = float(aux[3])
                 else:
-                    aux_vo = float(aux[3]) + both_step
+                    aux_vo = float(aux[3]) + both_neutron_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             elif int(aux[0]) in both_neutronws_lwave:
                 if j == 0:
@@ -464,6 +493,53 @@ if theline != None:
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
 #
+# Calculating alpha WS
+theline = searchline(calcfilename,"ALPHAWS")
+if theline != None:
+    print_twice('Start alpha WS calculations')
+    alpha_type = data[theline+1]
+    # Start calculations
+    for j in range(alpha_n+1):
+        # Open GSMCC input file
+        with open(readfilename_CC,'r') as gsmin:
+            inputfile_lines = gsmin.read().split('\n')
+        # Find the basis.parameters line
+        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[-1]
+        thelineend = searchline(readfilename_CC,"cluster.type")
+        shift = [x.strip(' ') for x in inputfile_lines[theline:thelineend]].index('alpha') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            if alpha_type == 'ALL':
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + alpha_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+            elif int(aux[0]) in alpha_lwave:
+                if j == 0:
+                    aux_vo = float(aux[3])
+                else:
+                    aux_vo = float(aux[3]) + alpha_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
+        # Save and close GSMCC input file
+        inputfile_aux = '\n'.join(inputfile_lines)
+        with open(readfilename_CC,'w') as gsmin:
+            gsmin.write(inputfile_aux)
+        #
+        # Runnning the code
+        start_gsmcc = time.time()
+        outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% (j+1)
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
+#   
 # Restore GSMCC file
 startingpoint_aux = '\n'.join(startingpoint_lines)
 with open(readfilename_CC,'w') as gsmin:
