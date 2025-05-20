@@ -7,7 +7,7 @@
     file ordered by input file and JPi.
     
     The name of the file to be analyzed must be defined in the 
-    file "Data_Analysis_Energies.in". 
+    file "input.Data_Analysis_Energies". 
     An example of the input file is at the end of the code.
 """
 
@@ -52,7 +52,7 @@ def searchlinefinal(file,phrase):
 # .-
 # FILES
 # Input file
-inputfile = 'Data_Analysis_Energies.in' 
+inputfile = 'input.Data_Analysis_Energies' 
 with open(inputfile, 'r') as readfile:
     dataaux = readfile.read().split('\n')
 aux_l = searchline(inputfile, "GSMCC-NFILES:")
@@ -153,7 +153,7 @@ for j in range(0, len(all_jpi)):
         
 
 """
-    Example of Data_Analysis_Energies.in file:
+    Example of input.Data_Analysis_Energies file:
     _________________________________
     GSMCC-NFILES: # Number of files
     2
