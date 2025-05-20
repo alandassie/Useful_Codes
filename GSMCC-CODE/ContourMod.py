@@ -267,20 +267,20 @@ if kmod == 1:
                     if ktype == 'REAL':
                         auxi = list(eval(aux[4]))
                         auxi[0] = x1
-                        aux[4] = repr(tuple(auxi))
+                        aux[4] = "".join(repr(tuple(auxi)).split())
                     if ktype == 'IMAG':
                         auxi = list(eval(aux[4]))
                         auxi[1] = x1
-                        aux[4] = repr(tuple(auxi))
+                        aux[4] = "".join(repr(tuple(auxi)).split())
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
                     auxi = list(eval(aux[4]))
                     auxi[0] = x1
-                    aux[4] = repr(tuple(auxi))
+                    aux[4] = "".join(repr(tuple(auxi)).split())
                 if ktype == 'IMAG':
                     auxi = list(eval(aux[4]))
                     auxi[1] = x1
-                    aux[4] = repr(tuple(auxi))
+                    aux[4] = "".join(repr(tuple(auxi)).split())
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
@@ -314,20 +314,20 @@ if kmod == 2:
                     if ktype == 'REAL':
                         auxi = list(eval(aux[5]))
                         auxi[0] = x1
-                        aux[5] = repr(tuple(auxi))
+                        aux[5] = "".join(repr(tuple(auxi)).split())
                     if ktype == 'IMAG':
                         auxi = list(eval(aux[5]))
                         auxi[1] = x1
-                        aux[5] = repr(tuple(auxi))
+                        aux[5] = "".join(repr(tuple(auxi)).split())
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
                     auxi = list(eval(aux[5]))
                     auxi[0] = x1
-                    aux[5] = repr(tuple(auxi))
+                    aux[5] = "".join(repr(tuple(auxi)).split())
                 if ktype == 'IMAG':
                     auxi = list(eval(aux[5]))
                     auxi[1] = x1
-                    aux[5] = repr(tuple(auxi))
+                    aux[5] = "".join(repr(tuple(auxi)).split())
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
@@ -360,20 +360,12 @@ if kmod == 3:
                     if ktype == 'REAL':
                         auxi = list(eval(aux[6]))
                         auxi[0] = x1
-                        aux[6] = repr(tuple(auxi))
-                    if ktype == 'IMAG':
-                        auxi = list(eval(aux[6]))
-                        auxi[1] = x1
-                        aux[6] = repr(tuple(auxi))
+                        aux[6] = "".join(repr(tuple(auxi)).split())
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
                     auxi = list(eval(aux[6]))
                     auxi[0] = x1
-                    aux[6] = repr(tuple(auxi))
-                if ktype == 'IMAG':
-                    auxi = list(eval(aux[6]))
-                    auxi[1] = x1
-                    aux[6] = repr(tuple(auxi))
+                    aux[6] = "".join(repr(tuple(auxi)).split())
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
@@ -383,7 +375,7 @@ if kmod == 3:
         # Runnning the code
         start_gsmcc = time.time()
         outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% (k)
-        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CC_j)
         sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
         end_gsmcc = time.time()
         time_gsmcc = end_gsmcc-start_gsmcc
