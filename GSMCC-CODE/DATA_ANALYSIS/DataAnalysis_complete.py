@@ -8,12 +8,12 @@
     and shown those greater than 5% of the total.
     
     The name of the file to be analyzed must be defined in the 
-    file "Data_Analysis.in". An example of the input file is at the end of the code.
+    file "input.Data_Analysis". An example of the input file is at the end of the code.
 """
 import ast
 
 # Input file
-inputfile = 'Data_Analysis.in' 
+inputfile = 'input.Data_Analysis' 
 with open(inputfile, 'r') as readfile:
     dataaux = readfile.read().split('\n')
 namefile = dataaux[1]
@@ -516,7 +516,7 @@ for index, energy, width in zip(indexes,energies,widths):
 print_twice(' ')
 print_twice(30*'-')
 """
-    Example of Data_Analysis.in file:
+    Example of input.Data_Analysis file:
     _________________________________
     GSMCC-FILE:
     IN2P3_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.30-15.00_ICF-24.11.04-16.30.out
