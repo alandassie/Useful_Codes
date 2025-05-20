@@ -270,8 +270,11 @@ if kmod == 1:
                         aux[4] = "".join(repr(tuple(auxi)).split())
                     if ktype == 'IMAG':
                         auxi = list(eval(aux[4]))
+                        aux2 = list(eval(aux[5]))
                         auxi[1] = x1
+                        aux2[1] = x1 # Kpeak and Kmiddle must have the same imaginary value
                         aux[4] = "".join(repr(tuple(auxi)).split())
+                        aux[5] = "".join(repr(tuple(aux2)).split())
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
                     auxi = list(eval(aux[4]))
@@ -279,8 +282,11 @@ if kmod == 1:
                     aux[4] = "".join(repr(tuple(auxi)).split())
                 if ktype == 'IMAG':
                     auxi = list(eval(aux[4]))
+                    aux2 = list(eval(aux[5]))
                     auxi[1] = x1
+                    aux2[1] = x1 # Kpeak and Kmiddle must have the same imaginary value
                     aux[4] = "".join(repr(tuple(auxi)).split())
+                    aux[5] = "".join(repr(tuple(aux2)).split())
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
@@ -317,8 +323,11 @@ if kmod == 2:
                         aux[5] = "".join(repr(tuple(auxi)).split())
                     if ktype == 'IMAG':
                         auxi = list(eval(aux[5]))
+                        aux2 = list(eval(aux[4]))
                         auxi[1] = x1
+                        aux2[1] = x1 # Kpeak and Kmiddle must have the same imaginary value
                         aux[5] = "".join(repr(tuple(auxi)).split())
+                        aux[4] = "".join(repr(tuple(aux2)).split())
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
                     auxi = list(eval(aux[5]))
@@ -326,8 +335,11 @@ if kmod == 2:
                     aux[5] = "".join(repr(tuple(auxi)).split())
                 if ktype == 'IMAG':
                     auxi = list(eval(aux[5]))
+                    aux2 = list(eval(aux[4]))
                     auxi[1] = x1
+                    aux2[1] = x1 # Kpeak and Kmiddle must have the same imaginary value
                     aux[5] = "".join(repr(tuple(auxi)).split())
+                    aux[4] = "".join(repr(tuple(aux2)).split())
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
@@ -343,7 +355,7 @@ if kmod == 2:
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
         k += 1
-            
+
 if kmod == 3:
     k = 0
     for x1 in kmax_array:
