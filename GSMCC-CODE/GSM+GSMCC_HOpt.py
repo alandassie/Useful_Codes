@@ -367,21 +367,21 @@ os.chdir(gsmcc_directory)
 # Defining optimization part
 search = 'E(reference frame) :'
 # Open GSMCC input file
-with open(readfilename_CC,'r') as gsmin:
-    inputfile_lines = gsmin.read().split('\n')
-if one_proton_opt == 1:
-    # Line with the first proton partial wave
-    aux = searchline(readfilename_CC,"core.potential")
-    shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('proton') + 2
-    one_proton_line = aux + shift
-# Line with the interaction corrective factor
-if used_icf == 1:
-    icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
-# Lines with the cluster corrective factor
-if used_ccf == 1:
-    ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
-    for i in range(0,ccf_numberofcluster):
-        ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
+# with open(readfilename_CC,'r') as gsmin:
+#     inputfile_lines = gsmin.read().split('\n')
+# if one_proton_opt == 1:
+#     # Line with the first proton partial wave
+#     aux = searchline(readfilename_CC,"core.potential")
+#     shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('proton') + 2
+#     one_proton_line = aux + shift
+# # Line with the interaction corrective factor
+# if used_icf == 1:
+#     icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
+# # Lines with the cluster corrective factor
+# if used_ccf == 1:
+#     ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
+#     for i in range(0,ccf_numberofcluster):
+#         ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
 # The seed values are defined in the GSMCC input file
 # And since we are going to optimize an X value of proportion
