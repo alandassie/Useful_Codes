@@ -95,6 +95,7 @@ def f(x):
     start_value = 0
     if separate_optimization == 0:
         # The order of X is [ONEPROTON_VAL, ONENEUTRON_VAL, TB_VAL]
+        shift = 0
         if one_proton_opt == 1:
             # EDIT ONE PROTON
             theline = searchline(readfilename_CC,"core.potential")
@@ -103,7 +104,7 @@ def f(x):
             k = 0
             while i == 0:
                 aux = inputfile_lines[theline + shift + k].split()
-                if one_proton_type == 'ALL':
+                if one_proton_partialwaves == 'ALL':
                     aux_vo = float(aux[3])*x[start_value]
                     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
                 elif int(aux[0]) in one_proton_partialwaves:
@@ -116,12 +117,12 @@ def f(x):
         if one_neutron_opt == 1:
             # EDIT ONE NEUTRON
             theline = searchline(readfilename_CC,"core.potential")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('neutron') + 2
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+shift+10]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
                 aux = inputfile_lines[theline + shift + k].split()
-                if one_neutron_type == 'ALL':
+                if one_neutron_partialwaves == 'ALL':
                     aux_vo = float(aux[3])*x[start_value]
                     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
                 elif int(aux[0]) in one_neutron_partialwaves:
@@ -283,7 +284,7 @@ onebody_opt = 0
 theline = searchline(calcfilename,"OPT_ONEBODY:")
 if theline != None:
     onebody_opt = 1
-    separate_optimization = data[theline+1]
+    separate_optimization = int(data[theline+1])
     one_proton_opt = 0
     one_neutron_opt = 0
     theline = searchline(calcfilename,"OPT_ONEPROTON:")
@@ -400,7 +401,7 @@ if separate_optimization == 1:
         onebody_seed = [1 for i in range(0,one_neutron_npartialwaves)] 
 else:
     if one_proton_opt == 1 and one_neutron_opt == 1:
-        onebody_seed = [1, 1]
+        onebody_seed = [2, 2]
     else:
         onebody_seed = [1]
 # FOR THE MOMENT ONLY ONE-BODY OPT
