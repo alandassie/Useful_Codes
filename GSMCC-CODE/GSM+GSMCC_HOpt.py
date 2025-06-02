@@ -104,7 +104,7 @@ def f(x):
             i = 0
             k = 0
             while i == 0:
-                aux = inputfile_lines[theline + shift + k].split()
+                aux = inputfile_lines_start[theline + shift + k].split()
                 if one_proton_partialwaves == 'ALL':
                     aux_vo = float(aux[3])*x[start_value]
                     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -118,11 +118,11 @@ def f(x):
         if one_neutron_opt == 1:
             # EDIT ONE NEUTRON
             theline = searchline(readfilename_CC,"core.potential")
-            shift = [x.strip(' ') for x in inputfile_lines[theline+k:theline+k+10]].index('neutron') + 2
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+k+10]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
-                aux = inputfile_lines[theline + shift + k].split()
+                aux = inputfile_lines_start[theline + shift + k].split()
                 if one_neutron_partialwaves == 'ALL':
                     aux_vo = float(aux[3])*x[start_value]
                     inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -414,6 +414,9 @@ else:
         onebody_seed = [1]
 # FOR THE MOMENT ONLY ONE-BODY OPT
 seeds = onebody_seed # + twobody_seed
+# Read GSMCC input file
+with open(readfilename_CC,'r') as gsmin:
+    inputfile_lines_start = gsmin.read().split('\n')
 # Then calculation
 if method == 'NEWTON':
     print_twice('Using Newton optimizer, x and f(x) must be of the same size!')
