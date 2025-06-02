@@ -23,6 +23,7 @@ import math as m
 from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
+import ast
 
 # LOG FILE
 logfile = os.getcwd() + '/' + 'log.GSM+GSMCC_HOpt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
@@ -179,11 +180,11 @@ def f(x):
     print_twice(auxiliar)
     # Compare with the experimental energy or separation energy
     if opt_sepenergy == 1:
-        calc_sep_energy = abs(auxiliar[0][0] - auxiliar[1][0])
+        calc_sep_energy = auxiliar[0][0] - auxiliar[1][0]
         print_twice('Calculated separation energy: {0:10.6f} MeV'.format(calc_sep_energy))
-        res = (calc_sep_energy - exp_value)**2
+        res = m.sqrt(abs(calc_sep_energy**2 - exp_value**2))
     if opt_energy == 1:
-        res = (auxiliar[0][0] - exp_value)**2
+        res = m.sqrt(abs(auxiliar[0][0]**2 - exp_value**2))
     #
     # Check which optimizator we are using
     if method == 'NEWTON':
@@ -284,7 +285,16 @@ onebody_opt = 0
 theline = searchline(calcfilename,"OPT_ONEBODY:")
 if theline != None:
     onebody_opt = 1
+<<<<<<< HEAD
     separate_optimization = int(data[theline+1])
+=======
+    separate_optimization = data[theline+1]
+    ##
+    if separate_optimization == 1:
+        print_twice('l-WAVE SEPARATE OPTIMIZATION IS NOT CODED YET!')
+        exit()
+    ##
+>>>>>>> 3aaaec1aa209ae089de26759188a67032454e4c8
     one_proton_opt = 0
     one_neutron_opt = 0
     theline = searchline(calcfilename,"OPT_ONEPROTON:")
@@ -294,10 +304,10 @@ if theline != None:
         one_proton_type = data[theline+1]
         if one_proton_type == 'WS':
             one_proton_partialwaves = data[theline+2]
-            if one_proton_partialwaves == 'ALL':
+            if one_proton_partialwaves == 'ALL' and separate_optimization == 1:
                 one_proton_npartialwaves = data[theline+3]
-            elif one_proton_partialwaves != 'ALL':
-                one_proton_partialwaves = ast.literal_eval(one_proton_partialwaves)
+            elif one_proton_partialwaves != 'ALL' and separate_optimization == 1:
+                one_proton_npartialwaves = len(one_proton_partialwaves)
     theline = searchline(calcfilename,"OPT_ONENEUTRON:")
     if theline != None:
         one_neutron_opt = 1
@@ -305,10 +315,10 @@ if theline != None:
         one_neutron_type = data[theline+1]
         if one_neutron_type == 'WS':
             one_neutron_partialwaves = data[theline+2]
-            if one_neutron_partialwaves == 'ALL':
+            if one_neutron_partialwaves == 'ALL' and separate_optimization == 1:
                 one_neutron_npartialwaves = data[theline+3]
-            elif one_neutron_partialwaves != 'ALL':
-                one_neutron_partialwaves = ast.literal_eval(one_proton_partialwaves)
+            elif one_neutron_partialwaves != 'ALL' and separate_optimization == 1:
+                one_neutron_npartialwaves = len(one_neutron_partialwaves)
 # Will two-body be optimized?
 twobody_opt = 0
 theline = searchline(calcfilename,"OPT_TWOBODY:")
