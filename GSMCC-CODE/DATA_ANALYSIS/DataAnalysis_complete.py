@@ -392,14 +392,11 @@ for index, energy, width in zip(indexes,energies,widths):
     channels = []
     projectile_width = []
     current_width = []
-    current_lower_width = []
-    current_upper_width = []
     partial_current_width = []
-    partial_current_lower_width = []
-    partial_current_upper_width = []
     current_width_aux = 0
-    current_width_lower_aux = 0
-    current_width_upper_aux = 0
+    altcurrent_width = []
+    partial_altcurrent_width = []
+    altcurrent_width_aux = 0
     j = 0
     i = -1
     projectile_old = " "
@@ -410,57 +407,51 @@ for index, energy, width in zip(indexes,energies,widths):
             continue
         projectile = x.split(' : ')[2].split(' ')[0]
         channel = x.split('^(%s'% jpi_state)[0]
-        aux1 = x.split(' : ')[3]
-        aux2 = float(aux1.split()[0])
-        aux3 = float(aux1.split()[3])
-        aux4 = float(aux1.split()[9])
+        aux1 = x.split(' : ')[3].split(' , ')
+        aux2 = float(aux1[0].split()[0])
+        aux3 = float(aux1[0].split()[3])
         if projectile == projectile_old :
             current_width_aux += aux2
-            current_width_lower_aux += aux3
-            current_width_upper_aux += aux4
+            altcurrent_width_aux += aux3
             partial_current_width[i].append(aux2)
-            partial_current_lower_width[i].append(aux3)
-            partial_current_upper_width[i].append(aux4)
+            partial_altcurrent_width[i].append(aux3)
             channels[i].append(channel)
         else:
             if j == 0:
                 i += 1
                 current_width_aux += aux2
-                current_width_lower_aux += aux3
-                current_width_upper_aux += aux4
+                altcurrent_width_aux += aux3
                 projectile_old = projectile
                 partial_current_width.append([aux2])
-                partial_current_lower_width.append([aux3])
-                partial_current_upper_width.append([aux4])
+                partial_altcurrent_width.append([aux3])
                 channels.append([channel])
                 projectile_width.append(projectile)
                 j +=1
             else:
                 current_width.append(current_width_aux)
-                current_lower_width.append(current_width_lower_aux)
-                current_upper_width.append(current_width_upper_aux)
+                altcurrent_width.append(altcurrent_width_aux)
                 #
                 i+=1
                 projectile_old = projectile
                 projectile_width.append(projectile)
                 current_width_aux = aux2
-                current_width_lower_aux = aux3
-                current_width_upper_aux = aux4
+                altcurrent_width_aux = aux3
                 partial_current_width.append([aux2])
-                partial_current_lower_width.append([aux3])
-                partial_current_upper_width.append([aux4])
+                partial_altcurrent_width.append([aux3])
                 channels.append([channel])
     current_width.append(current_width_aux)
-    current_lower_width.append(current_width_lower_aux)
-    current_upper_width.append(current_width_upper_aux)
+    altcurrent_width.append(altcurrent_width_aux)
 
     if print_info == 'ALL':     
         for i in range(0,len(projectile_width)):
             print_twice('Projectile mass partition : {0:s}'.format(projectile_width[i]))
             print_twice('Total app. current width (keV) : {0:.5g}'.format(current_width[i]))
+            print_twice('Max partial app. current width (keV) : {0:.5g}'.format(max(partial_current_width[i])))
             index_max = max(range(len(partial_current_width[i])), key=partial_current_width[i].__getitem__)
-            print_twice('Max partial app. current width (keV) : {0:.5g} ({1:.5g},{2:.5g})'.format( 
-                        max(partial_current_width[i]), partial_current_lower_width[i][index_max], partial_current_upper_width[i][index_max] ))
+            print_twice('  With the channel : %s'% channels[i][index_max])
+            print_twice('Total alt app. current width (keV) : {0:.5g}'.format(altcurrent_width[i]))
+            print_twice('Max partial alt app. current width (keV) : {0:.5g}'.format(max(partial_altcurrent_width[i])))
+            index_max = max(range(len(partial_altcurrent_width[i])), key=partial_altcurrent_width[i].__getitem__)
             print_twice('  With the channel : %s'% channels[i][index_max])
             print_twice(10*'-')
             print_twice(' ')
