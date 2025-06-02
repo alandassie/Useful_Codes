@@ -23,7 +23,6 @@ import math as m
 from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
-import ast
 
 # LOG FILE
 logfile = os.getcwd() + '/' + 'log.GSM+GSMCC_HOpt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
@@ -118,7 +117,7 @@ def f(x):
         if one_neutron_opt == 1:
             # EDIT ONE NEUTRON
             theline = searchline(readfilename_CC,"core.potential")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+shift+20]].index('neutron') + 2
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
@@ -285,16 +284,12 @@ onebody_opt = 0
 theline = searchline(calcfilename,"OPT_ONEBODY:")
 if theline != None:
     onebody_opt = 1
-<<<<<<< HEAD
     separate_optimization = int(data[theline+1])
-=======
-    separate_optimization = data[theline+1]
     ##
     if separate_optimization == 1:
         print_twice('l-WAVE SEPARATE OPTIMIZATION IS NOT CODED YET!')
         exit()
     ##
->>>>>>> 3aaaec1aa209ae089de26759188a67032454e4c8
     one_proton_opt = 0
     one_neutron_opt = 0
     theline = searchline(calcfilename,"OPT_ONEPROTON:")
