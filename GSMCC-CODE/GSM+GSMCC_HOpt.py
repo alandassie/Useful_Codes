@@ -23,6 +23,7 @@ import math as m
 from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
+import ast
 
 # LOG FILE
 logfile = os.getcwd() + '/' + 'log.GSM+GSMCC_HOpt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
@@ -95,7 +96,7 @@ def f(x):
     start_value = 0
     if separate_optimization == 0:
         # The order of X is [ONEPROTON_VAL, ONENEUTRON_VAL, TB_VAL]
-        shift = 0
+        k = 0
         if one_proton_opt == 1:
             # EDIT ONE PROTON
             theline = searchline(readfilename_CC,"core.potential")
@@ -117,7 +118,7 @@ def f(x):
         if one_neutron_opt == 1:
             # EDIT ONE NEUTRON
             theline = searchline(readfilename_CC,"core.potential")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('neutron') + 2
+            shift = [x.strip(' ') for x in inputfile_lines[theline+k:theline+k+10]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
@@ -301,7 +302,8 @@ if theline != None:
             one_proton_partialwaves = data[theline+2]
             if one_proton_partialwaves == 'ALL' and separate_optimization == 1:
                 one_proton_npartialwaves = data[theline+3]
-            elif one_proton_partialwaves != 'ALL' and separate_optimization == 1:
+            elif one_proton_partialwaves != 'ALL':
+                one_proton_partialwaves = ast.literal_eval(one_proton_partialwaves)
                 one_proton_npartialwaves = len(one_proton_partialwaves)
     theline = searchline(calcfilename,"OPT_ONENEUTRON:")
     if theline != None:
@@ -312,7 +314,8 @@ if theline != None:
             one_neutron_partialwaves = data[theline+2]
             if one_neutron_partialwaves == 'ALL' and separate_optimization == 1:
                 one_neutron_npartialwaves = data[theline+3]
-            elif one_neutron_partialwaves != 'ALL' and separate_optimization == 1:
+            elif one_neutron_partialwaves != 'ALL':
+                one_neutron_partialwaves = ast.literal_eval(one_neutron_partialwaves)
                 one_neutron_npartialwaves = len(one_neutron_partialwaves)
 # Will two-body be optimized?
 twobody_opt = 0
