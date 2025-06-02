@@ -117,7 +117,7 @@ def f(x):
         if one_neutron_opt == 1:
             # EDIT ONE NEUTRON
             theline = searchline(readfilename_CC,"core.potential")
-            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+shift+10]].index('neutron') + 2
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+shift+20]].index('neutron') + 2
             i = 0
             k = 0
             while i == 0:
@@ -401,7 +401,7 @@ if separate_optimization == 1:
         onebody_seed = [1 for i in range(0,one_neutron_npartialwaves)] 
 else:
     if one_proton_opt == 1 and one_neutron_opt == 1:
-        onebody_seed = [2, 2]
+        onebody_seed = [1, 1]
     else:
         onebody_seed = [1]
 # FOR THE MOMENT ONLY ONE-BODY OPT
