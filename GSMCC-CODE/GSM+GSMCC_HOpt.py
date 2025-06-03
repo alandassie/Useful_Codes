@@ -204,17 +204,18 @@ def f(x):
     #
     # Compare with the experimental energy or separation energy of the selected JPi states
     if opt_sepenergy == 1:
-        calc_sep_energy0 = ene_wid[0][0][0] - ene_wid[0][1][0]
-        print_twice('Calculated separation energy: {0:10.6f} MeV'.format(calc_sep_energy0))
-        res0 = m.sqrt(abs(calc_sep_energy0**2 - exp_value[0]**2))
-        calc_sep_energy1 = ene_wid[1][0][0] - ene_wid[1][1][0]
-        print_twice('Calculated separation energy: {0:10.6f} MeV'.format(calc_sep_energy1))
-        res1 = m.sqrt(abs(calc_sep_energy0**2 - exp_value[1]**2))
-        calc_sep_energy2 = ene_wid[2][0][0] - ene_wid[2][1][0]
-        print_twice('Calculated separation energy: {0:10.6f} MeV'.format(calc_sep_energy2))
-        res2 = m.sqrt(abs(calc_sep_energy0**2 - exp_value[2]**2))
-        res = res0 + res1 + res2
-        print_twice('Calculated residues: ', res)
+        res = 0
+        for i in range(n_jpi_states):
+            if jpi_states[i] in jpi:
+                related_index = jpi.index(jpi_states[i])
+                calc_sep_energy = ene_wid[related_index][jpi_states_index[i][0]][0] - ene_wid[related_index][jpi_states_index[i][1]][0]
+                print_twice('Calculated separation energy for JPi={0:s}: {1:10.6f} MeV'.format(jpi_states[i],calc_sep_energy))
+                res_i = m.sqrt( abs(calc_sep_energy0**2 - exp_value[i]**2) )
+                print_twice('Residue as sqrt(calc**2 - exp**2): {0:10.6f}'.format(res_i))
+                res += res_i
+            else:
+                print_twice('The state JPi=%s has not been calculated!!' % jpi_states[i])
+        print_twice('Sum of calculated residues: {0:10.6f}', res)
     # if opt_energy == 1:
         # res = m.sqrt(abs(auxiliar[0][0]**2 - exp_value**2))
     #
@@ -368,7 +369,14 @@ if theline != None:
 # elif data[theline+1] == 'ENERGY':
 #     opt_energy = 1
 # New version, only sep_energy will be optimized
-opt_sepenergy = 1
+opt_sepenergy = 10
+#
+# Reading JPi states to optimize their separation energies
+theline = searchline(calcfilename,"JPI_STATES:")
+jpi_states = data[theline+1].split(',')
+n_jpi_states = len(jpi_states)
+# Then read pairs of each JPi state in the form [(a1,a2),(b1b2),..]
+jpi_states_index = ast.literal_eval( data[theline+2] )
 #
 # Reading experimental data
 theline = searchline(calcfilename,"EXPERIMENTALVALUES:")
