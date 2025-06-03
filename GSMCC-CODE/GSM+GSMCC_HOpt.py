@@ -506,11 +506,19 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPT_ONENEUTRON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize ALL or [0,1...]
     WS
     ALL
-        
-    OPTIMIZATION_OF: ENERGY for only energy of one state or SEPENERGY for the distance between two calculated states
-    SEPENERGY
-    
-    EXPERIMENTALVALUE: Value of the energy or separation energy (no sign) in MeV
-    0.5
+
+    OPT_TWOBODY: 1 - number of TB interaction to opt; 2,.. - name of each as in GSMCC input
+    4
+    (V0.NN.central.odd.triplet(S=1,T=1))
+    (V0.NN.central.even.triplet(S=1,T=0))
+    (V0.NN.central.odd.singlet(S=0,T=0))
+    (V0.NN.central.even.singlet(S=0,T=1))
+
+    JPI_STATES: 1 - JPi of each of the pair to optimize separation energies; 2 - pair of index for each JPi in format [(a1,a2),(b1b2),..]
+    0+,1-,2+
+    [(0,1),(0,1),(0,1)]
+
+    EXPERIMENTALVALUES: Values of theseparation energy (no sign) in MeV of the desired JPi's
+    6,2.5,2.9
     _________________________________
 """
