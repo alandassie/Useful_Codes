@@ -148,6 +148,7 @@ def f(x):
     #
     aux = time.strftime( "%y.%m.%d-%H.%M.%S", time.localtime() )
     outfilename_CCi = logname + '/' + outfilename_CC + '-' + aux
+    # outfilename_CCi = 're.52'
     start_gsmcc = time.time()
     print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi)
     sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write + outfilename_CCi], shell=True)
@@ -168,13 +169,16 @@ def f(x):
         # auxindex = outputfile_lines[line-10].split()[1].split('(')[1].split(')')[0]
         if jpi == [] or auxjpi not in jpi:
             jpi.append(auxjpi)
-            print(jpi)
             if j > 0:
                 auxiliar = list(zip(energy,width))
                 auxiliar.sort()
                 ene_wid.append(auxiliar)
                 print_twice('Calculated energies and widths for JPi=%s:'% jpi[k])
-                print_twice(auxiliar)
+                for i in range(len(auxiliar)):
+                    if i == len(auxiliar) - 1:
+                        print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]))
+                    else:
+                        print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]), end=' ')
             energy = []
             width = []
             k += 1
@@ -200,7 +204,11 @@ def f(x):
     auxiliar.sort()
     ene_wid.append(auxiliar)
     print_twice('Calculated energies and widths for JPi=%s:'% jpi[k])
-    print_twice(auxiliar)
+    for i in range(len(auxiliar)):
+        if i == len(auxiliar) - 1:
+            print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]))
+        else:
+            print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]), end=' ')
     #
     # Compare with the experimental energy or separation energy of the selected JPi states
     if opt_sepenergy == 1:
@@ -210,12 +218,12 @@ def f(x):
                 related_index = jpi.index(jpi_states[i])
                 calc_sep_energy = ene_wid[related_index][jpi_states_index[i][0]][0] - ene_wid[related_index][jpi_states_index[i][1]][0]
                 print_twice('Calculated separation energy for JPi={0:s}: {1:10.6f} MeV'.format(jpi_states[i],calc_sep_energy))
-                res_i = m.sqrt( abs(calc_sep_energy0**2 - exp_value[i]**2) )
+                res_i = m.sqrt( abs(calc_sep_energy**2 - exp_value[i]**2) )
                 print_twice('Residue as sqrt(calc**2 - exp**2): {0:10.6f}'.format(res_i))
                 res += res_i
             else:
                 print_twice('The state JPi=%s has not been calculated!!' % jpi_states[i])
-        print_twice('Sum of calculated residues: {0:10.6f}', res)
+        print_twice('Sum of calculated residues: {0:10.6f}'.format(res))
     # if opt_energy == 1:
         # res = m.sqrt(abs(auxiliar[0][0]**2 - exp_value**2))
     #
@@ -369,7 +377,8 @@ if theline != None:
 # elif data[theline+1] == 'ENERGY':
 #     opt_energy = 1
 # New version, only sep_energy will be optimized
-opt_sepenergy = 10
+opt_energy = 0
+opt_sepenergy = 1
 #
 # Reading JPi states to optimize their separation energies
 theline = searchline(calcfilename,"JPI_STATES:")
