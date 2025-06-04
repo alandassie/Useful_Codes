@@ -235,11 +235,25 @@ print_twice('Number of calculations for this state %s'% (len(energies)))
 k = -1
 for index, energy, width in zip(indexes,energies,widths):
     k += 1
+    # .-
+    # Search for rigidity
+    aux_for_rigidity_in = line_occprob_f[k]
+    aux_for_rigidity_out = line_partwidth_rd_i[k]
+    if aux_for_rigidity_out == 0:
+        aux_for_rigidity_out = aux_for_rigidity_in + 100
+    for x in data[aux_for_rigidity_in+1:aux_for_rigidity_out-1]:
+        if x == '':
+            continue
+        elif 'Total rigidity' in x:
+            rigidity_real = float( x.split('(')[1].split(',')[0] )
+            rigidity_imag = float( x.split('(')[1].split(',')[1].split(')')[0] )
+            break
+    # .-
     if print_info == 'ALL':
         print_twice(160*'-')
-        print_twice('{0:2d}  Energy : {1:<.10f} \n    Width  : {2:<.10f}'.format(int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0])))
+        print_twice('{0:2d}  Energy : {1:<.10f} \n    Width  : {2:<.10f} \n    Rigidity  : {3:<.10f},{4:<.10f}'.format(int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0]),rigidity_real,rigidity_imag))
     else:
-        print_twice('{0:2d}   {1:2d}  {2:>14.8f} {3:>14.8f}'.format(k+1,int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0])))
+        print_twice('{0:2d}   {1:2d}  {2:>14.8f} {3:>14.8f} {4:>14.8f} {5:>14.8f}'.format(k+1,int(index),float(energy.split('MeV')[0]),float(width.split('keV')[0]),rigidity_real,rigidity_imag))
     # .-
     # Occupation probabilities
     if print_info == 'ALL': print_twice('Occupation probabilities:\n')
