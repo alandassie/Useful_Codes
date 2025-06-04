@@ -171,17 +171,6 @@ def f(x):
     auxiliar.sort()
     print_twice('Calculated energies and widths:')
     print_twice(auxiliar)
-    # Compare with all the experimental energies
-    adjusting_energy = 1
-    adjusting_width = 1
-    if (ccf_type == 'REAL' or ccf_type == 'NONE') and (icf_type == 'REAL' or icf_type == 'NONE'):
-        print_twice('Only adjusting energies:')
-        adjusting_width = 0
-    elif (ccf_type == 'IMAG' or ccf_type == 'NONE') and (icf_type == 'IMAG' or icf_type == 'NONE'):
-        print_twice('Only adjusting widths:')
-        adjusting_energy = 0
-    else:
-        print_twice('Adjusting energies and widths:')
     # New version to avoid problems with doublets or loss of states
     res_e = np.zeros(numberofstates)
     res_w = np.zeros(numberofstates)
@@ -233,11 +222,11 @@ def f(x):
                 res_w[i] = ( res_w_aux )**2 / abs(expwid) * stweig / 1000
             print_twice('State selected Index : {0:d}\n  E Residue = {1:10.6f} MeV, W Residue = {2:10.6f} keV'.format(numberindex,res_e_aux,res_w_aux))
         else:
-            print_twice('YES OR NO FOR INDEX SEARCHING!')
+            print_twice('YES or NO for index searching!')
             exit()
-    if adjusting_width == 0:
+    if optimize_width == 0:
         res = np.sum(res_e)
-    elif adjusting_energy == 0:
+    elif optimize_energy == 0:
         res = np.sum(res_w)
     else:
         res = np.sum(res_e) + np.sum(res_w)
@@ -246,9 +235,9 @@ def f(x):
     # Check which optimizator we are using
     if method == 'NEWTON':
         print_twice('Finish iteration of Newton optimizer, x and f(x) must be of the same size!')
-        if adjusting_width == 0:
+        if optimize_width == 0:
             return_residue = res_e
-        elif adjusting_energy == 0:
+        elif optimize_energy == 0:
             return_residue == res_w
         else:
             aux = list(res_e) + list(res_w)
@@ -316,6 +305,25 @@ theline = searchline(readfilename,"OPTIMIZATIONMETHOD:")
 method =  data[theline+1].split(';')[0]
 if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
+#
+# The code will optimize energy, width or both
+theline = searchline(readfilename,"OPTIMIZATION_OF:")
+optimize_energy = 0
+optimize_width = 0
+optimize_read = data[theline + 1 ]
+if optimize_read == 'ENERGY':
+    optimize_energy = 1
+    print_twice('Only the energies will be adjusted')
+elif optimize_read == 'WIDTH':
+    optimize_width = 1
+    print_twice('Only the widths will be adjusted')
+elif optimize_read == 'BOTH':
+    optimize_energy = 1
+    optimize_width = 1
+    print_twice('The energies and widths will be adjusted')
+else:
+    print_twice('ENERGY, WIDHT or BOTH must be the optimization code!')
+    exit()
 #
 # Checking if real or complex interaction corrective factors will be used
 used_icf = 0
@@ -527,6 +535,9 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     
     OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;TNC
+    
+    OPTIMIZATION_OF: 'ENERGY', 'WIDTH' or 'BOTH'
+    ENERGY
     
     CORRECTIVEFACTORS: 1 - COMPLEX, REAL or IMAG; 2 - REAL SEED; 3 - IMAG SEED; 4 - IF Nelder-Mead, DEFINE COMPLEX OR REAL BOUNDS IN A FORM (R.MIN,R.MAX),(I.MIN,I.MAX)
     REAL
