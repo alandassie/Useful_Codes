@@ -555,7 +555,6 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     0.5
     
     
-    
     GSM-exe:
     GSM-24.11.20-MPI.x
     GSM-files: 1-n input files; 2-1 for overwrite or 2 for append; 3,n-input and output names
@@ -570,14 +569,14 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.in
     CLUSPHY_projforCC_alphanocore_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30.out
     
+    EXPERIMENTAL-THRESHOLDS: Using experimental thresholds, 0 means NO and 1 means YES
+    0
     
-
     GSMCC-exe:
     CC-24.11.20-MPI.x
     GSMCC-files: 1-input file; 2-output file; 3-1 for overwrite or 2 for append
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
     2
-    
     _________________________________
 """
