@@ -73,11 +73,13 @@ theline = searchline(readfilename,"PARALLELISM:")
 parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
-    running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
+    running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
 elif parallelism_type == 'OPENMP':
     running_prefix = ' ./'
+elif parallelism_type == 'SLURM':
+    running_prefix = 'srun -N ' + parallelism_nodes + ' '
 else:
-    print_twice('Parallelism must be MPI or OPENMP')
+    print_twice('Parallelism must be MPI, OPENMP or SRUN')
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
@@ -174,10 +176,10 @@ else:
     STORAGE-DIRECTORY:
     /home/dassie/2024/Carbon-11_Porject/GSM-24.02/GSM_dir_2D/storage_11C_GSMOpt-24.08.26-11.00_Basis-24.10.17-17.30
     
-    PARALLELISM:
+    PARALLELISM: 1 - MPI, OPENMP or SLURM; 2 - NUMBER OF NODES
     MPI
     2
-    MACHINEFILE:
+    MACHINEFILE: Only if needed
     machinefile
     
     GSM-exe:
