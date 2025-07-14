@@ -320,6 +320,10 @@ theline = searchline(calcfilename,"OPTIMIZATIONMETHOD:")
 method =  data[theline+1].split(';')[0]
 if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
+if method == 'MINIMIZATION':
+    print_twice("Optimization method: %s; %s"% (method,mini_method))
+else:
+    print_twice("Optimization method: %s"% method)
 #
 # Will one-body be optimized?
 onebody_opt = 0
@@ -341,7 +345,9 @@ if theline != None:
         # FOR THE MOMENT, ONLY WS WILL BE OPTIMIZED
         one_proton_type = data[theline+1]
         if one_proton_type == 'WS':
+            print_twice('One proton WS will be optimized:')
             one_proton_partialwaves = data[theline+2]
+            print_twice('  Partial waves to optimize: %s'% one_proton_partialwaves)
             if one_proton_partialwaves == 'ALL' and separate_optimization == 1:
                 one_proton_npartialwaves = data[theline+3]
             elif one_proton_partialwaves != 'ALL':
@@ -353,7 +359,9 @@ if theline != None:
         # FOR THE MOMENT, ONLY WS WILL BE OPTIMIZED
         one_neutron_type = data[theline+1]
         if one_neutron_type == 'WS':
+            print_twice('One neutron WS will be optimized:')
             one_neutron_partialwaves = data[theline+2]
+            print_twice('  Partial waves to optimize: %s'% one_neutron_partialwaves)
             if one_neutron_partialwaves == 'ALL' and separate_optimization == 1:
                 one_neutron_npartialwaves = data[theline+3]
             elif one_neutron_partialwaves != 'ALL':
@@ -364,9 +372,12 @@ twobody_opt = 0
 theline = searchline(calcfilename,"OPT_TWOBODY:")
 if theline != None:
     twobody_opt = 1
+    print_twice('Two-body interactions will be optimized:')
     n_tb_interactions = int(data[theline+1])
+    print_twice('  Number of two-body interactions to optimize: %d'% n_tb_interactions)
     tb_interactions = []
     for i in range(n_tb_interactions):
+        print_twice('  Interaction %d: %s'% (i+1, data[theline+i+2]))
         tb_interactions.append( data[theline+i+2] )
 # Will SEPENERGY or ENERGY be optimized?
 # theline = searchline(calcfilename,"OPTIMIZATION_OF:")
@@ -383,13 +394,16 @@ opt_sepenergy = 1
 # Reading JPi states to optimize their separation energies
 theline = searchline(calcfilename,"JPI_STATES:")
 jpi_states = data[theline+1].split(',')
+print_twice("JPi states to optimize: %s"% jpi_states)
 n_jpi_states = len(jpi_states)
 # Then read pairs of each JPi state in the form [(a1,a2),(b1b2),..]
 jpi_states_index = ast.literal_eval( data[theline+2] )
+print_twice("Pairs of JPi states to optimize: %s"% jpi_states_index)
 #
 # Reading experimental data
 theline = searchline(calcfilename,"EXPERIMENTALVALUES:")
 exp_value = [float(x) for x in data[theline+1].split(',')]
+print_twice("Experimental separation energy to optimize: %s"% exp_value)
 #
 #
 #
