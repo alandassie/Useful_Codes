@@ -132,9 +132,13 @@ with open(outputfile,"a") as f:  # appends to file and closes it when finished
     f.write('# F   JPi  {0:>16} {1:>16} {2:>16} {3:>16}\n'.format('k.real(fm^-1)','k.imag(fm^-1)','Ene(MeV)','Gamma(keV)','|Jost|'))
 aux_print_sort_1D = ''
 for i in range(0, numberfiles):
+    aux_old = '0'
     for j in range(0,n_poles):
         aux_data = data_full[i][j]
+        if aux_data[0][-1] != aux_old:
+            aux_print_sort_1D += '\n'
         aux_print_sort_1D += ' {0:2d}  {1:s} {2:16.8f} {3:16.8f} {4:16.8f} {5:16.8f} \n'.format(i,aux_data[0],aux_data[1],aux_data[2],aux_data[3],aux_data[4],aux_data[5])
+        aux_old = aux_data[0][-1]
     aux_print_sort_1D += '\n'
 with open(outputfile,"a") as f:  # appends to file and closes it when finished
     f.write(aux_print_sort_1D)
