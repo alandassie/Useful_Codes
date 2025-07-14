@@ -64,8 +64,13 @@ for j in range(aux_l+1,aux_l+1+numberfiles):
     namefiles.append( dataaux[j] )
 aux_l = searchline(inputfile, "PROJECTILE:")
 all_projectile = dataaux[aux_l+1]
+aux_pw = searchline(inputfile, "PARTIAL_WAVES:")
+if aux_pw is not None:
+    all_partial_waves = dataaux[aux_pw+1].split(',')
 aux_l = searchline(inputfile, "OUTPUT-FILE:")
 outputfile = dataaux[aux_l+1]+'_'+all_projectile
+if aux_pw is not None:
+    outputfile += '-'+'.'.join(all_partial_waves)
 #
 # CONTINUE FUNDEF
 def print_twice(*args,**kwargs): # Allow to print in file and in terminal at the same line
@@ -135,9 +140,18 @@ for i in range(0, numberfiles):
     aux_old = '0'
     for j in range(0,n_poles):
         aux_data = data_full[i][j]
-        if aux_data[0][-1] != aux_old:
-            aux_print_sort_1D += '\n'
-        aux_print_sort_1D += ' {0:2d}  {1:s} {2:16.8f} {3:16.8f} {4:16.8f} {5:16.8f} \n'.format(i,aux_data[0],aux_data[1],aux_data[2],aux_data[3],aux_data[4],aux_data[5])
+        jpi = aux_data[0]
+        for k in jpi:
+            if k.isdigit() is not True:
+                l = k
+                break
+        if aux_pw is not None:
+            if l not in all_partial_waves:
+                continue
+        else:
+            if l != aux_old:
+                aux_print_sort_1D += '\n'
+        aux_print_sort_1D += ' {0:2d}  {1:s} {2:16.8f} {3:16.8f} {4:16.8f} {5:16.8f} \n'.format(i,jpi,aux_data[1],aux_data[2],aux_data[3],aux_data[4],aux_data[5])
         aux_old = aux_data[0][-1]
     aux_print_sort_1D += '\n'
 with open(outputfile,"a") as f:  # appends to file and closes it when finished
@@ -159,6 +173,9 @@ with open(outputfile,"a") as f:  # appends to file and closes it when finished
     
     PROJECTILE:
     proton
+    
+    PARTIAL_WAVES: # Optional, if you want to analyze only some partial waves, comma separated
+    S
     _________________________________
     
 """
