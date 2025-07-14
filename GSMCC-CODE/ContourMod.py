@@ -370,14 +370,10 @@ if kmod == 3:
                 aux_pw = aux[1]
                 if any(aux_pw in t for t in pw_clusters):
                     if ktype == 'REAL':
-                        auxi = list(eval(aux[6]))
-                        auxi[0] = x1
-                        aux[6] = "".join(repr(tuple(auxi)).split())
+                        aux[6] = str(x1)
             if any(aux_p in t for t in pw_clusters):
                 if ktype == 'REAL':
-                    auxi = list(eval(aux[6]))
-                    auxi[0] = x1
-                    aux[6] = "".join(repr(tuple(auxi)).split())
+                    aux[6] = str(x1)
             data[theline + 1 + j] = "  ".join(aux)
             j += 1
             #
