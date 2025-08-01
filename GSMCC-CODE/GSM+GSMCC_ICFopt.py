@@ -287,6 +287,8 @@ if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
 elif parallelism_type == 'OPENMP':
     running_prefix = ' ./'
+elif parallelism_type == 'SLURM':
+    running_prefix = 'srun -N ' + parallelism_nodes + ' '
 else:
     print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile

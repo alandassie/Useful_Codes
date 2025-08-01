@@ -104,8 +104,12 @@ parallelism_type = data[theline+1]
 parallelism_nodes = data[theline+2]
 if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' '
+elif parallelism_type == 'OPENMP':
+    running_prefix = ' ./'
+elif parallelism_type == 'SLURM':
+    running_prefix = 'srun -N ' + parallelism_nodes + ' '
 else:
-    running_prefix = './'
+    print_twice('Parallelism must be MPI, OPENMP or SRUN')
 # Checking if we need machinefile
 theline = searchline(readfilename,"MACHINEFILE:")
 if theline != None:  
