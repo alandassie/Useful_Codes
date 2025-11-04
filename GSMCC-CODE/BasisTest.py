@@ -155,138 +155,157 @@ with open(calcfilename, 'r') as readfile:
 # Preparing proton WS
 theline = searchline(calcfilename,"PROTONWS")
 if theline != None:
-    print_twice('Doing Woods-Saxon proton test')
+    print_twice('\n Doing Woods-Saxon proton test')
     proton_type = data[theline+1]
     if proton_type == 'ALL':
-        print_twice('All WS partial waves equal')
+        print_twice('  All WS partial waves equal!')
         theline = searchline(calcfilename,"PROTONSTRENGTHWS")
         protonws_lwave_n = 0
         # protonws_starting_point = [float(data[theline+1])] # Read from the input file
         protonws_step = float(data[theline+1])
         protonws_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (protonws_step, protonws_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         protonws_lwave = ast.literal_eval(proton_type)
+        print_twice('    ', protonws_lwave)
         protonws_lwave_n = len(protonws_lwave)
         theline = searchline(calcfilename,"PROTONSTRENGTHWS")
         # protonws_starting_point = [float(data[theline+1])] # Read from the input file
         protonws_step = float(data[theline+1])
         protonws_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (protonws_step, protonws_n))
 # Preparing proton SO 
 theline = searchline(calcfilename,"PROTONSO")
 if theline != None:
-    print_twice('Doing spin-orbit proton test')
+    print_twice('\n Doing spin-orbit proton test')
     proton_type = data[theline+1]
     if proton_type == 'ALL':
-        print_twice('All SO partial waves equal')
+        print_twice('  All SO partial waves equal!')
         theline = searchline(calcfilename,"PROTONSTRENGTHSO")
         protonso_lwave_n = 0
         # protonso_starting_point = [float(data[theline+1])] # Read from the input file
         protonso_step = float(data[theline+1])
         protonso_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (protonso_step, protonso_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         protonso_lwave = ast.literal_eval(proton_type)
+        print_twice('    ', protonso_lwave)
         protonso_lwave_n = len(protonso_lwave)
         theline = searchline(calcfilename,"PROTONSTRENGTHSO")
         protonso_lwave_n = 0
         # protonso_starting_point = [float(data[theline+1])] # Read from the input file
         protonso_step = float(data[theline+1])
         protonso_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (protonso_step, protonso_n))
 
 # Preparing neutron WS
 theline = searchline(calcfilename,"NEUTRONWS")
 if theline != None:
-    print_twice('Doing Woods-Saxon neutron test')
+    print_twice('\n Doing Woods-Saxon neutron test')
     neutron_type = data[theline+1]
     if neutron_type == 'ALL':
-        print_twice('All WS partial waves equal')
+        print_twice('  All WS partial waves equal!')
         theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
         neutronws_lwave_n = 0
         # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
         neutronws_step = float(data[theline+1])
         neutronws_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (neutronws_step, neutronws_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         neutronws_lwave = ast.literal_eval(neutron_type)
+        print_twice('    ', neutronws_lwave)
         neutronws_lwave_n = len(neutronws_lwave)
         theline = searchline(calcfilename,"NEUTRONSTRENGTHWS")
         # neutronws_starting_point = [float(data[theline+1])] # Read from the input file
         neutronws_step = float(data[theline+1])
         neutronws_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (neutronws_step, neutronws_n))
 # Preparing neutron SO 
 theline = searchline(calcfilename,"NEUTRONSO")
 if theline != None:
-    print_twice('Doing spin-orbit neutron test')
+    print_twice('\n Doing spin-orbit neutron test')
     neutron_type = data[theline+1]
     if neutron_type == 'ALL':
-        print_twice('All SO partial waves equal')
+        print_twice('  All SO partial waves equal!')
         theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
         neutronso_lwave_n = 0
         # neutronso_starting_point = [float(data[theline+1])] # Read from the input file
         neutronso_step = float(data[theline+1])
         neutronso_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (neutronso_step, neutronso_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         neutronso_lwave = ast.literal_eval(neutron_type)
+        print_twice('    ', neutronso_lwave)
         neutronso_lwave_n = len(neutronso_lwave)
         theline = searchline(calcfilename,"NEUTRONSTRENGTHSO")
         # neutronso_starting_point = [float(data[theline+1])] # Read from the input file
         neutronso_step = float(data[theline+1])
         neutronso_n = int(data[theline+2])
-        
+        print_twice('    Step: %s, Times: %s', (neutronso_step, neutronso_n))
+
 # Preparing both WS
 theline = searchline(calcfilename,"BOTHWS")
 if theline != None:
-    print_twice('Doing Woods-Saxon test for proton and neutron at the same time')
+    print_twice('\n Doing Woods-Saxon test for proton and neutron at the same time')
     both_proton_type = data[theline+1]
     both_neutron_type = data[theline+2]
     if both_proton_type == 'ALL' and both_neutron_type == 'ALL':
-        print_twice('All WS partial waves equal in neutron and proton')
+        print_twice('  All WS partial waves equal in neutron and proton!')
         theline = searchline(calcfilename,"BOTH_STRENGTHWS")
         both_lwave_n = 0
         # protonws_starting_point = [float(data[theline+1])] # Read from the input file
         both_proton_step = float(data[theline+1])
         both_neutron_step = float(data[theline+2])
         both_n = int(data[theline+3])
+        print_twice('    Step proton: %s, Step neutron: %s, Times: %s', (both_proton_step, both_neutron_step, both_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         both_protonws_lwave = ast.literal_eval(both_proton_type)
+        print_twice('    Proton l-waves: ', both_protonws_lwave)
         both_protonws_lwave_n = len(both_protonws_lwave)
         both_neutronws_lwave = ast.literal_eval(both_neutron_type)
+        print_twice('    Neutron l-waves: ', both_neutronws_lwave)
         both_neutronws_lwave_n = len(both_neutronws_lwave)
         theline = searchline(calcfilename,"BOTH_STRENGTHWS")
         both_proton_step = float(data[theline+1])
         both_neutron_step = float(data[theline+2])
         both_n = int(data[theline+3])
+        print_twice('    Step proton: %s, Step neutron: %s, Times: %s', (both_proton_step, both_neutron_step, both_n))
         
 # Preparing alpha WS
 theline = searchline(calcfilename,"ALPHAWS")
 if theline != None:
-    print_twice('Doing Woods-Saxon test for alpha')
+    print_twice('\n Doing Woods-Saxon test for alpha')
     alpha_type = data[theline+1]
     if alpha_type == 'ALL':
-        print_twice('All WS partial waves at the same time')
+        print_twice('  All WS partial waves at the same time!')
         theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
         alpha_lwave_n = 0
         # protonws_starting_point = [float(data[theline+1])] # Read from the input file
         alpha_step = float(data[theline+1])
         alpha_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (alpha_step, alpha_n))
     else:
-        print_twice('Selected specific partial waves')
+        print_twice('  Selected specific partial waves:')
         alpha_lwave = ast.literal_eval(alpha_type)
+        print_twice('    ', alpha_lwave)
         alpha_lwave_n = len(alpha_lwave)
         theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
         alpha_step = float(data[theline+1])
         alpha_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (alpha_step, alpha_n))
 
-        
+
 # Saving WF
 theline = searchline(calcfilename,"SAVE_WF:")
 if theline != None:
     savingwf_info = data[theline+1]
     if savingwf_info == 'NO':
-        print_twice('The channels WF of each calculation will not be saved')
+        print_twice('\nINFO: The channels WF of each calculation will not be saved')
     else:
         theline = searchline(calcfilename,"WF_JPI_INDEX:")
         n_wf = int(data[theline+1])
@@ -353,6 +372,7 @@ if theline != None:
             if neutron_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[3]) + neutronws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -361,6 +381,7 @@ if theline != None:
             elif int(aux[0]) in neutronws_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[3]) + neutronws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -401,12 +422,14 @@ if theline != None:
             if proton_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[3]) + protonws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             elif int(aux[0]) in protonws_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[3]) + protonws_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -449,12 +472,14 @@ if theline != None:
             if both_proton_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: For proton, starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[3]) + both_proton_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             elif int(aux[0]) in both_protonws_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: For proton, starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[3]) + both_proton_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -470,12 +495,14 @@ if theline != None:
             if both_neutron_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: For neutron, starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[3]) + both_neutron_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             elif int(aux[0]) in both_neutronws_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: For neutron, starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[3]) + both_neutron_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -517,12 +544,14 @@ if theline != None:
             if alpha_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[3]) + alpha_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             elif int(aux[0]) in alpha_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
+                    print_twice('INFO: Starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[3]) + alpha_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
@@ -544,6 +573,7 @@ if theline != None:
         print_twice("Time to calculate: ",time_gsmcc, "s")
 #   
 # Spin Orbit part
+# 
 # Calculating proton SO
 theline = searchline(calcfilename,"PROTONSO")
 if theline != None:
@@ -564,12 +594,14 @@ if theline != None:
             if proton_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[4])
+                    print_twice('INFO: Starting from VSO = %s for ALL l-waves'% aux_vo)
                 else:
                     aux_vo = float(aux[4]) + protonso_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+str(aux_vo)
             elif int(aux[0]) in protonso_lwave:
                 if j == 0:
                     aux_vo = float(aux[4])
+                    print_twice('INFO: Starting from VSO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
                     aux_vo = float(aux[4]) + protonso_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+str(aux_vo)
