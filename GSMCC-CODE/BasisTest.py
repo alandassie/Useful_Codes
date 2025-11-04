@@ -17,8 +17,6 @@ import time
 import ast
 
 
-# LOG FILE
-logfile = os.getcwd() + '/log.BasisTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
 logname = 'log.WD_BasisTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
@@ -29,6 +27,8 @@ else:
     for filename in os.listdir(logfolder):
         # remove the files inside
         os.remove(f"{logfolder}/{filename}")
+# LOG FILE
+logfile = logfolder + '/log.BasisTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
@@ -543,6 +543,53 @@ if theline != None:
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
 #   
+# Spin Orbit part
+# Calculating proton SO
+theline = searchline(calcfilename,"PROTONSO")
+if theline != None:
+    print_twice('Start proton SO calculations')
+    proton_type = data[theline+1]
+    # Start calculations
+    for j in range(protonso_n+1):
+        # Open GSMCC input file
+        with open(readfilename_CC,'r') as gsmin:
+            inputfile_lines = gsmin.read().split('\n')
+        # Find the basis.parameters line
+        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[0]
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+20]].index('proton') + 2
+        i = 0
+        k = 0
+        while i == 0:
+            aux = inputfile_lines[theline + shift + k].split()
+            if proton_type == 'ALL':
+                if j == 0:
+                    aux_vo = float(aux[4])
+                else:
+                    aux_vo = float(aux[4]) + protonso_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+str(aux_vo)
+            elif int(aux[0]) in protonso_lwave:
+                if j == 0:
+                    aux_vo = float(aux[4])
+                else:
+                    aux_vo = float(aux[4]) + protonso_step
+                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+str(aux_vo)
+            k += 1
+            if inputfile_lines[theline + shift + k].split() == []:
+                i = 1
+        # Save and close GSMCC input file
+        inputfile_aux = '\n'.join(inputfile_lines)
+        with open(readfilename_CC,'w') as gsmin:
+            gsmin.write(inputfile_aux)
+        #
+        # Runnning the code
+        start_gsmcc = time.time()
+        outfilename_CC_j = logname + '/' + outfilename_CC[:-4] + '_%s.out'% (j+1)
+        print_twice('\n ' + running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j)
+        sp.run([running_prefix + running_cc + ' < ' + readfilename_CC + cc_write+outfilename_CC_j], shell=True)
+        end_gsmcc = time.time()
+        time_gsmcc = end_gsmcc-start_gsmcc
+        print_twice("Time to calculate: ",time_gsmcc, "s")
+#
 # Restore GSMCC file
 startingpoint_aux = '\n'.join(startingpoint_lines)
 with open(readfilename_CC,'w') as gsmin:

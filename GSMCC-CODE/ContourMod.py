@@ -15,8 +15,6 @@ import subprocess as sp
 import os
 import time
 
-# LOG FILE
-logfile = os.getcwd() + '/log.ContourTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
 logname = 'log.WD_ContourTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
@@ -27,6 +25,8 @@ else:
     for filename in os.listdir(logfolder):
         # remove the files inside
         os.remove(f"{logfolder}/{filename}")
+# LOG FILE
+logfile = logfolder + '/log.ContourTest.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
