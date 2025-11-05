@@ -21,8 +21,6 @@ from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
 
-# LOG FILE
-logfile = os.getcwd() + '/' + 'log.GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
 logname = 'log.WD_GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
@@ -33,6 +31,8 @@ else:
     for filename in os.listdir(logfolder):
         # remove the files inside
         os.remove(f"{logfolder}/{filename}")
+# LOG FILE
+logfile = logfolder + '/' + 'log.GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
@@ -238,7 +238,7 @@ def f(x):
         if optimize_width == 0:
             return_residue = res_e
         elif optimize_energy == 0:
-            return_residue == res_w
+            return_residue = res_w
         else:
             aux = list(res_e) + list(res_w)
             aux[::2] = list(res_e)
