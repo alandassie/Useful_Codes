@@ -14,6 +14,7 @@ import os
 # LOG FILE
 logfile = os.getcwd() + '/log.GSM+GSMCC_run.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
+
 # Declaration of funcitons
 def erease_output_file():
     with open(logfile,'w') as output:
@@ -105,6 +106,23 @@ if theline != None:
     outfilename_CC = data[theline+2]
     cc_write_aux = int(data[theline+3])
     cc_write = ' ' + cc_write_aux*'>' + ' '
+# Is it cross-section calculation?
+calc_cc_cs = 0
+theline = searchline(readfilename,"IT IS CS:")
+if theline != None:
+    calc_cc_cs = 1
+    type_cs = data[theline+1]
+    # LOG FOLDER (ONLY FOR CROSS-SECTION CALCULATIONS)
+    logname = 'log.WD_GSM+GSMCC_' + type_cs + '.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
+    logfolder = os.getcwd() + '/' + logname 
+    if not os.path.exists(logfolder):
+        os.makedirs(logfolder)
+    else:
+        for filename in os.listdir(logfolder):
+            # remove the files inside
+            os.remove(f"{logfolder}/{filename}")
+    #
+    
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
@@ -165,6 +183,17 @@ if calc_cc == 1:
     end_main = time.time()
     time_main = end_main-start_main
     print_twice("\n\nAll calculations lasted: ", time_main, "s")
+    #
+    # If it is cross-section calculation, move files to log folder
+    if calc_cc_cs == 1:
+        print_twice("\nMoving cross-section calculation files to log folder %s"% logfolder)
+        for filename in os.listdir(os.getcwd()):
+            if type_cs == 'radiative.capture':
+                if ('astrophysical_factor_total_cross_section' in filename) or ('radiative_capture_d_sigma_dOmega' in filename):
+                    sp.run(['mv ' + filename + ' ' + logfolder], shell=True)
+            if time_cs == 'scattering':
+                if ('scattering_differential_cross_section' in filename) or ('scattering_excitation_function' in filename) or ('Phase_shifts_' in filename):
+                    sp.run(['mv ' + filename + ' ' + logfolder], shell=True)
 else:
     print_twice("\nSkip GSMCC part!")
 
@@ -205,5 +234,8 @@ else:
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30.in
     CLUSPHY_11C_CC_GSMOpt-24.08.26-11.00_Basis-24.10.24-17.00_ICF-24.10.24-17.30_7I2+.out
     2
+    
+    IT IS CS: radiative.capture or scattering
+    radiative.capture
     _________________________________
 """
