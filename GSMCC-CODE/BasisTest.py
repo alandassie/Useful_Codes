@@ -285,7 +285,7 @@ if theline != None:
     cluster_partialwaves_type = data[theline+2]
     if cluster_partialwaves_type == 'ALL':
         print_twice('  All WS partial waves at the same time!')
-        theline = searchline(calcfilename,"%s_STRENGTHWS"% cluster_type)
+        theline = searchline(calcfilename,"CLUSTER_STRENGTHWS")
         cluster_lwave_n = 0
         cluster_step = float(data[theline+1])
         cluster_n = int(data[theline+2])
@@ -295,7 +295,7 @@ if theline != None:
         cluster_lwave = ast.literal_eval(partialwaves_type)
         print_twice('    ', cluster_lwave)
         cluster_lwave_n = len(cluster_lwave)
-        theline = searchline(calcfilename,"%s_STRENGTHWS"% cluster_type)
+        theline = searchline(calcfilename,"CLUSTER_STRENGTHWS")
         cluster_step = float(data[theline+1])
         cluster_n = int(data[theline+2])
         print_twice('    Step: %s, Times: %s', (cluster_step, cluster_n))
@@ -639,6 +639,13 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Example of input.BasisTest file:
     _________________________________
     # Remove the lines that you are not using, this example is with the complete test
+    CLUSTER_WS: name of cluster as in GSMCC input file
+    alpha
+    ALL
+    CLUSTER_STRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
+    0.5
+    10
+        
     PROTONWS: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
     PROTONSTRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
