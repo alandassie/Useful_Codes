@@ -67,11 +67,18 @@ def searchline_all(file,phrase):
                 x += 1
     return l_num
 # .-
-# Idea from https://stackoverflow.com/questions/176918/how-to-find-the-index-for-a-given-item-in-a-list
-def indexof (obj, elem, offset=0):
-    if elem in obj[offset:]:
-        return offset + obj[offset:].index(elem)
-    return -1
+# Idea from https://thelearninghub.in/get-list-of-indexes-of-a-repeated-item-in-python-list/
+def indexof (my_list, key):
+    index_val = [] 
+    i=0 #counter
+    while i != len(my_list):
+        try:
+            ind = my_list[i:len(my_list)].index(key) #checking the index 
+            index_val.append(ind+i)
+            i = ind+1+i
+        except ValueError:
+            i = len(my_list)
+    return index_val
 # .-
 
 # INPUT FILE
@@ -292,7 +299,7 @@ if theline != None:
         print_twice('    Step: %s, Times: %s', (cluster_step, cluster_n))
     else:
         print_twice('  Selected specific partial waves:')
-        cluster_lwave = ast.literal_eval(partialwaves_type)
+        cluster_lwave = ast.literal_eval(cluster_partialwaves_type)
         print_twice('    ', cluster_lwave)
         cluster_lwave_n = len(cluster_lwave)
         theline = searchline(calcfilename,"CLUSTER_STRENGTHWS")
@@ -536,9 +543,10 @@ if theline != None:
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
         # Find the basis.parameters line
-        theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[-1]
+        theline = searchline(readfilename_CC,"cluster(s)")
         thelineend = searchline(readfilename_CC,"cluster.type")
-        shift = [x.strip(' ') for x in inputfile_lines[theline:thelineend]].index(cluster_type) + 2
+        aux = indexof([x.strip(' ') for x in inputfile_lines[theline:thelineend]],'Basis.WS.parameters')[0]
+        shift = [x.strip(' ') for x in inputfile_lines[theline+aux:thelineend]].index(cluster_type) + 2 + aux
         i = 0
         k = 0
         while i == 0:
