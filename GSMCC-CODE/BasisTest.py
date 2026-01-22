@@ -275,29 +275,30 @@ if theline != None:
         both_neutron_step = float(data[theline+2])
         both_n = int(data[theline+3])
         print_twice('    Step proton: %s, Step neutron: %s, Times: %s', (both_proton_step, both_neutron_step, both_n))
-        
-# Preparing alpha WS
-theline = searchline(calcfilename,"ALPHAWS")
+
+# Generalization to all possible clusters
+# Preparing CLUSTER WS
+theline = searchline(calcfilename,"CLUSTER_WS:")
 if theline != None:
-    print_twice('\n Doing Woods-Saxon test for alpha')
-    alpha_type = data[theline+1]
-    if alpha_type == 'ALL':
+    cluster_type = data[theline+1] # Only one cluster at a time, name as in GSMCC input file
+    print_twice('\n Doing Woods-Saxon test for %s'% cluster_type)
+    cluster_partialwaves_type = data[theline+2]
+    if cluster_partialwaves_type == 'ALL':
         print_twice('  All WS partial waves at the same time!')
-        theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
-        alpha_lwave_n = 0
-        # protonws_starting_point = [float(data[theline+1])] # Read from the input file
-        alpha_step = float(data[theline+1])
-        alpha_n = int(data[theline+2])
-        print_twice('    Step: %s, Times: %s', (alpha_step, alpha_n))
+        theline = searchline(calcfilename,"%s_STRENGTHWS"% cluster_type)
+        cluster_lwave_n = 0
+        cluster_step = float(data[theline+1])
+        cluster_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (cluster_step, cluster_n))
     else:
         print_twice('  Selected specific partial waves:')
-        alpha_lwave = ast.literal_eval(alpha_type)
-        print_twice('    ', alpha_lwave)
-        alpha_lwave_n = len(alpha_lwave)
-        theline = searchline(calcfilename,"ALPHA_STRENGTHWS")
-        alpha_step = float(data[theline+1])
-        alpha_n = int(data[theline+2])
-        print_twice('    Step: %s, Times: %s', (alpha_step, alpha_n))
+        cluster_lwave = ast.literal_eval(partialwaves_type)
+        print_twice('    ', cluster_lwave)
+        cluster_lwave_n = len(cluster_lwave)
+        theline = searchline(calcfilename,"%s_STRENGTHWS"% cluster_type)
+        cluster_step = float(data[theline+1])
+        cluster_n = int(data[theline+2])
+        print_twice('    Step: %s, Times: %s', (cluster_step, cluster_n))
 
 
 # Saving WF
@@ -523,37 +524,38 @@ if theline != None:
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
 #
-# Calculating alpha WS
-theline = searchline(calcfilename,"ALPHAWS")
+# Calculating cluster WS
+theline = searchline(calcfilename,"CLUSTER_WS")
 if theline != None:
-    print_twice('Start alpha WS calculations')
-    alpha_type = data[theline+1]
+    cluster_type = data[theline+1]
+    print_twice('Start %s WS calculations'% cluster_type)
+    cluster_partialwaves_type = data[theline+2]
     # Start calculations
-    for j in range(alpha_n+1):
+    for j in range(cluster_n+1):
         # Open GSMCC input file
         with open(readfilename_CC,'r') as gsmin:
             inputfile_lines = gsmin.read().split('\n')
         # Find the basis.parameters line
         theline = searchline_all(readfilename_CC,"Basis.WS.parameters")[-1]
         thelineend = searchline(readfilename_CC,"cluster.type")
-        shift = [x.strip(' ') for x in inputfile_lines[theline:thelineend]].index('alpha') + 2
+        shift = [x.strip(' ') for x in inputfile_lines[theline:thelineend]].index(cluster_type) + 2
         i = 0
         k = 0
         while i == 0:
             aux = inputfile_lines[theline + shift + k].split()
-            if alpha_type == 'ALL':
+            if cluster_partialwaves_type == 'ALL':
                 if j == 0:
                     aux_vo = float(aux[3])
                     print_twice('INFO: Starting from VO = %s for ALL l-waves'% aux_vo)
                 else:
-                    aux_vo = float(aux[3]) + alpha_step
+                    aux_vo = float(aux[3]) + cluster_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-            elif int(aux[0]) in alpha_lwave:
+            elif int(aux[0]) in cluster_lwave:
                 if j == 0:
                     aux_vo = float(aux[3])
                     print_twice('INFO: Starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
                 else:
-                    aux_vo = float(aux[3]) + alpha_step
+                    aux_vo = float(aux[3]) + cluster_step
                 inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
             k += 1
             if inputfile_lines[theline + shift + k].split() == []:
