@@ -289,7 +289,11 @@ theline = searchline(calcfilename,"CLUSTER_WS:")
 if theline != None:
     cluster_type = data[theline+1] # Only one cluster at a time, name as in GSMCC input file
     print_twice('\n Doing Woods-Saxon test for %s'% cluster_type)
-    cluster_partialwaves_type = data[theline+2]
+    parameters_type = int(data[theline+2]) # Parameter to change: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
+    parameters_list = ['diffuseness (a0)', 'radius (R0)', 'WS depth (VO)', 'spin-orbit depth (VSO)']
+    print_twice('  Changing parameter: %s'% parameters_list[parameters_type])
+    theline = searchline(calcfilename,"PARTIAL_WAVES:")
+    cluster_partialwaves_type = data[theline+1]
     if cluster_partialwaves_type == 'ALL':
         print_twice('  All WS partial waves at the same time!')
         theline = searchline(calcfilename,"CLUSTER_STRENGTHWS")
@@ -535,7 +539,7 @@ if theline != None:
 theline = searchline(calcfilename,"CLUSTER_WS")
 if theline != None:
     cluster_type = data[theline+1]
-    print_twice('Start %s WS calculations'% cluster_type)
+    print_twice('Start %s WS calculations for the parameter %s'% (cluster_type, parameters_list[parameters_type]))
     cluster_partialwaves_type = data[theline+2]
     # Start calculations
     for j in range(cluster_n+1):
@@ -553,18 +557,24 @@ if theline != None:
             aux = inputfile_lines[theline + shift + k].split()
             if cluster_partialwaves_type == 'ALL':
                 if j == 0:
-                    aux_vo = float(aux[3])
-                    print_twice('INFO: Starting from VO = %s for ALL l-waves'% aux_vo)
+                    aux_vo = float(aux[parameters_type + 1])
+                    print_twice('INFO: Starting %s from %s for ALL l-waves'% (parameters_list[parameters_type], aux_vo))
                 else:
-                    aux_vo = float(aux[3]) + cluster_step
-                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                    aux_vo = float(aux[parameters_type + 1]) + cluster_step
+                for ii in range(4):
+                    if parameters_type == ii:
+                        aux[ii] = str(aux_vo)
+                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             elif int(aux[0]) in cluster_lwave:
                 if j == 0:
-                    aux_vo = float(aux[3])
-                    print_twice('INFO: Starting from VO = %s for l-wave %s'% (aux_vo, aux[0]))
+                    aux_vo = float(aux[parameters_type + 1])
+                    print_twice('INFO: Starting %s from %s for l=%s'% (parameters_list[parameters_type], aux_vo, aux[0]))
                 else:
-                    aux_vo = float(aux[3]) + cluster_step
-                inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                    aux_vo = float(aux[parameters_type + 1]) + cluster_step
+                for ii in range(4):
+                    if parameters_type == ii:
+                        aux[i] = str(aux_vo)
+                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             k += 1
             if inputfile_lines[theline + shift + k].split() == []:
                 i = 1
@@ -649,6 +659,8 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     # Remove the lines that you are not using, this example is with the complete test
     CLUSTER_WS: name of cluster as in GSMCC input file
     alpha
+    PARAMETER: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
+    PARTIAL_WAVES: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
     CLUSTER_STRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
     0.5
