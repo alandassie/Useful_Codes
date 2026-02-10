@@ -322,11 +322,11 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     # Remove the lines that you are not using, this example is with the complete test
     PROJECTILE_TYPE: name of the projectile as in GSMCC input file= "proton", "neutron", "deuteron", "triton", "3He", "alpha"
     alpha
-    PARAMETER: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
+    PARAMETER: options: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
     2
     PARTIAL_WAVES: can be "ALL" for changing all the l-wave at the same time or "[0,2,3]" being 0,2,3 the partial waves to test
     ALL
-    STRENGTHWS: if ALL, 1 - step, 2 - n points; if not, 1-2 for each partial wave defined before
+    STRENGTHWS: if ALL, line 1 - step, line 2 - n points; if not, 1-2 for each partial wave defined before
     0.5
     10
     
