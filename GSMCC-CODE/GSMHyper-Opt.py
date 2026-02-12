@@ -89,7 +89,9 @@ def f(x):
             for j in range(0,len(onebaryon_ws_l)):
                 l = onebaryon_ws_l[j]
                 aux1 = inputfile_lines[onebaryon_ws_line+l].split()
-                aux2 = str(x[j])
+                if onebaryon_ws_samev0.upper() == 'YES':
+                    aux2 = str(x[0])
+                else: aux2 = str(x[j])
                 #  
                 inputfile_lines[onebaryon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
     if opt_yn == 1: # Optimizing YN interactions
@@ -226,22 +228,28 @@ for i in range(0,baryon_n):
 #
 # Checking if one-baryon WS interaction will be optimized
 opt_onebaryon_ws = 0
-onebaryon_ws_bounds = ''
 theline = searchline(readfilename,"VWSOPTIMIZATION:")
 if theline != None:
     opt_onebaryon_ws = 1
     onebaryon_ws_npw = int(data[theline+1])
     onebaryon_ws_l = onebaryon_ws_npw*[0]
-    onebaryon_ws_seed = onebaryon_ws_npw*[0]
+    onebaryon_ws_samev0 = data[theline+2]
+    if onebaryon_ws_samev0.upper() == 'YES':
+        onebaryon_ws_seed = [0]
+    else:
+        onebaryon_ws_seed = onebaryon_ws_npw*[0]
     #
     for i in range(0,onebaryon_ws_npw):
         factor = i*3
-        onebaryon_ws_l[i] = int(data[theline+2+factor])
-        onebaryon_ws_seed[i] = float(data[theline+3+factor])
-        if i == 0:
-            onebaryon_ws_bounds += data[theline+4+factor]
+        onebaryon_ws_l[i] = int(data[theline+3+factor])
+        if onebaryon_ws_samev0.upper() == 'YES':
+            onebaryon_ws_seed = [float(data[theline+4+factor])]
         else:
-            onebaryon_ws_bounds += ',' + data[theline+4+factor]
+            onebaryon_ws_seed[i] = float(data[theline+4+factor])
+        if i == 0:
+            onebaryon_ws_bounds = data[theline+5+factor]
+        elif i > 0 and onebaryon_ws_samev0.upper() == 'NO':
+            onebaryon_ws_bounds += ',' + data[theline+5+factor]
 #
 # Checkin if YN interactions will be optimized
 opt_yn = 0
@@ -372,8 +380,9 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - l PARTIAL WAVE; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
     1
+    YES
     0
     40
     (30,60)
