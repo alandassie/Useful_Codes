@@ -20,6 +20,7 @@ import math as m
 from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
+import re
 
 # LOG NAME
 logname = 'log.WD_GSM+GSMCC_ICF.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )

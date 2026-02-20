@@ -191,8 +191,8 @@ if calc_cc == 1:
             if type_cs == 'radiative.capture':
                 if ('astrophysical_factor_total_cross_section' in filename) or ('radiative_capture_d_sigma_dOmega' in filename):
                     sp.run(['mv ' + filename + ' ' + logfolder], shell=True)
-            if time_cs == 'scattering':
-                if ('scattering_differential_cross_section' in filename) or ('scattering_excitation_function' in filename) or ('Phase_shifts_' in filename):
+            if type_cs == 'scattering':
+                if ('scattering_differential_cross_section' in filename) or ('scattering_excitation_function' in filename) or ('Phase_shifts_' in filename) or ('analyzing_power_' in filename):
                     sp.run(['mv ' + filename + ' ' + logfolder], shell=True)
 else:
     print_twice("\nSkip GSMCC part!")
