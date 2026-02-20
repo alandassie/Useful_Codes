@@ -222,34 +222,63 @@ if method == 'MINIMIZATION':
 # Look for optimized hyperons
 theline = searchline(readfilename,"OPTIMIZEDBARYONS:")
 baryon_n = int(data[theline+1])
+same_corrective_factor = data[theline+2]
+# If we are going to use the same corrective factor for all baryons, also the same for all partial waves
+if same_corrective_factor.upper() == 'YES':
+    seeds_size = 1
 baryon_names = []
 for i in range(0,baryon_n):
-    baryon_names.append(data[theline+2+i])
+    baryon_names.append(data[theline+3+i])
 #
 # Checking if one-baryon WS interaction will be optimized
 opt_onebaryon_ws = 0
 theline = searchline(readfilename,"VWSOPTIMIZATION:")
 if theline != None:
     opt_onebaryon_ws = 1
-    onebaryon_ws_npw = int(data[theline+1])
-    onebaryon_ws_l = onebaryon_ws_npw*[0]
-    onebaryon_ws_samev0 = data[theline+2]
-    if onebaryon_ws_samev0.upper() == 'YES':
-        onebaryon_ws_seed = [0]
-    else:
-        onebaryon_ws_seed = onebaryon_ws_npw*[0]
-    #
-    for i in range(0,onebaryon_ws_npw):
-        factor = i*3
-        onebaryon_ws_l[i] = int(data[theline+3+factor])
-        if onebaryon_ws_samev0.upper() == 'YES':
-            onebaryon_ws_seed = [float(data[theline+4+factor])]
+    onebaryon_ws_npw = []
+    onebaryon_ws_l = []
+    onebaryon_ws_samev0 = []
+    onebaryon_ws_seed = []
+    for k in range(0,baryon_n):
+        onebaryon_ws_npw.append(int(data[theline+4*k+1]))
+        if baryon_n == 1:
+            onebaryon_ws_l = onebaryon_ws_npw[k]*[0]
         else:
-            onebaryon_ws_seed[i] = float(data[theline+4+factor])
-        if i == 0:
-            onebaryon_ws_bounds = data[theline+5+factor]
-        elif i > 0 and onebaryon_ws_samev0.upper() == 'NO':
-            onebaryon_ws_bounds += ',' + data[theline+5+factor]
+            onebaryon_ws_l.append(onebaryon_ws_npw[k]*[0])
+        onebaryon_ws_samev0.append(data[theline+4*k+2])
+        if same_corrective_factor.upper() == 'YES' and k == 0:
+            # Same corrective factor for all l and baryons
+            onebaryon_ws_seed = [0]
+        if same_corrective_factor.upper() == 'NO':
+            if onebaryon_ws_samev0[k].upper() == 'YES':
+                if baryon_n == 1:
+                    onebaryon_ws_seed = [0]
+                else:
+                    onebaryon_ws_seed.append([0])
+            else:
+                if baryon_n == 1:
+                    onebaryon_ws_seed = onebaryon_ws_npw[k]*[0]
+                else:
+                    onebaryon_ws_seed.append(onebaryon_ws_npw[k]*[0])
+        #
+        if k == 0:
+            shift = 0
+        else:
+            shift = onebaryon_ws_npw[k-1]
+        for i in range(0,onebaryon_ws_npw[k]):
+            factor = i*3
+            onebaryon_ws_l[i+shift] = int(data[theline+3+factor+4*k])
+            if same_corrective_factor.upper() == 'YES' and k == 0 and i == 0:
+                onebaryon_ws_seed[i] = float(data[theline+4+factor])
+            if same_corrective_factor.upper() == 'NO':
+                if onebaryon_ws_samev0[k].upper() == 'YES':
+                    onebaryon_ws_seed[shift+k] = [float(data[theline+4+factor])]
+                else:
+                    onebaryon_ws_seed[i] = float(data[theline+4+factor])
+                if i == 0:
+                    onebaryon_ws_bounds = data[theline+5+factor]
+                elif i > 0 and onebaryon_ws_samev0.upper() == 'NO':
+                    onebaryon_ws_bounds += ',' + data[theline+5+factor]
 #
 # Checkin if YN interactions will be optimized
 opt_yn = 0
@@ -372,15 +401,16 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;Nelder-Mead
 
-    OPTIMIZEDBARYONS: 1 - NUMBER OF BARYONS TO OPTIMIZE; 2,N - NAME OF EACH BARYON
+    OPTIMIZEDBARYONS: 1 - NUMBER OF BARYONS TO OPTIMIZE; 2 - SAME CORR FACTOR FOR ALL BARYONS; 2,N - NAME OF EACH BARYON
     5
+    YES
     neutron
     proton
     Lambda
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    VWSOPTIMIZATION: For each baryon -> 1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
     1
     YES
     0
