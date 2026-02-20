@@ -83,26 +83,34 @@ def f(x):
     start_value = 0
     if opt_onebaryon_ws == 1: # Optimizing WS part
         print_twice('Optimizing 1 baryon WS part')
-        start_value = len(onebaryon_ws_l)
+        # start_value = len(onebaryon_ws_l)
         for i in range(0,baryon_n):
             onebaryon_ws_line = onebaryon_ws_lines[i]
-            for j in range(0,len(onebaryon_ws_l)):
-                l = onebaryon_ws_l[j]
+            aux_onebaryon_ws_l = onebaryon_ws_l[i]
+            aux_onebaryon_ws_samev0 = onebaryon_ws_samev0[i]
+            for j in range(0,len(aux_onebaryon_ws_l)):
+                l = aux_onebaryon_ws_l[j]
                 aux1 = inputfile_lines[onebaryon_ws_line+l].split()
-                if onebaryon_ws_samev0.upper() == 'YES':
-                    aux2 = str(x[0])
-                else: aux2 = str(x[j])
+                if same_corrective_factor.upper() == 'YES':
+                    aux2 = str(x[0]*aux1[3])
+                elif aux_onebaryon_ws_samev0.upper() == 'YES':
+                    aux2 = str(x[start_value]*aux1[3])
+                else: aux2 = str(x[start_value+j]*aux1[3])
                 #  
                 inputfile_lines[onebaryon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
+            if aux_onebaryon_ws_samev0.upper() == 'NO':
+                start_value += len(aux_onebaryon_ws_l)
+            else:
+                start_value += 1
     if opt_yn == 1: # Optimizing YN interactions
         print_twice('Optimizing YN interactions')
         for i in range(0,yn_n):
             yn_line = yn_lines[i]
             aux1 = inputfile_lines[yn_line].split()
-            aux2 = str(x[start_value+i])
+            aux2 = str(x[start_value+i]*aux1[0])
             inputfile_lines[yn_line] = "  " + aux2 + "  " + aux1[1]
     # Print input array
-    print_twice('\n All the interaction strenghts:')
+    print_twice('\n All the interaction corrective factors strenghts:')
     print_twice(x)
     # Save and close GSM input file
     inputfile_aux = '\n'.join(inputfile_lines)
@@ -220,65 +228,61 @@ if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
 #
 # Look for optimized hyperons
+opt_onebaryon_ws = 0
 theline = searchline(readfilename,"OPTIMIZEDBARYONS:")
-baryon_n = int(data[theline+1])
-same_corrective_factor = data[theline+2]
-# If we are going to use the same corrective factor for all baryons, also the same for all partial waves
-if same_corrective_factor.upper() == 'YES':
-    seeds_size = 1
-baryon_names = []
-for i in range(0,baryon_n):
-    baryon_names.append(data[theline+3+i])
+if theline != None:
+    print_twice('One baryon interaction will be optimized') 
+    # FOR THE MOMENT, ONLY WS WILL BE OPTIMIZED
+    opt_onebaryon_ws = 1
+    baryon_n = int(data[theline+1])
+    same_corrective_factor = data[theline+2]
+    # If we are going to use the same corrective factor for all baryons, also the same for all partial waves
+    if same_corrective_factor.upper() == 'YES':
+        seeds_size = 1
+    baryon_names = []
+    for i in range(0,baryon_n):
+        baryon_names.append(data[theline+3+i])
 #
 # Checking if one-baryon WS interaction will be optimized
-opt_onebaryon_ws = 0
-theline = searchline(readfilename,"VWSOPTIMIZATION:")
-if theline != None:
-    opt_onebaryon_ws = 1
-    onebaryon_ws_npw = []
-    onebaryon_ws_l = []
-    onebaryon_ws_samev0 = []
-    onebaryon_ws_seed = []
-    for k in range(0,baryon_n):
-        onebaryon_ws_npw.append(int(data[theline+4*k+1]))
-        if baryon_n == 1:
-            onebaryon_ws_l = onebaryon_ws_npw[k]*[0]
+for k in range(0,baryon_n):
+    theline = searchline(readfilename, "WS_" + baryon_names[i].upper() + ":")
+    if theline != None:
+        aux_onebaryon_ws_npw = int(data[theline+1])
+        aux_onebaryon_ws_l = aux_onebaryon_ws_npw*[0]
+        aux_onebaryon_ws_samev0 = data[theline+2]
+        if aux_onebaryon_ws_samev0.upper() == 'YES':
+            aux_onebaryon_ws_seed_n = 1
         else:
-            onebaryon_ws_l.append(onebaryon_ws_npw[k]*[0])
-        onebaryon_ws_samev0.append(data[theline+4*k+2])
-        if same_corrective_factor.upper() == 'YES' and k == 0:
-            # Same corrective factor for all l and baryons
-            onebaryon_ws_seed = [0]
-        if same_corrective_factor.upper() == 'NO':
-            if onebaryon_ws_samev0[k].upper() == 'YES':
-                if baryon_n == 1:
-                    onebaryon_ws_seed = [0]
+            aux_onebaryon_ws_seed_n = aux_onebaryon_ws_npw
+        if aux_onebaryon_ws_samev0.upper() == 'NO' and same_corrective_factor.upper() == 'YES':
+            print_twice('If the same corrective factor is used for all baryons, the same should be used for all WS partial waves')
+            exit()
+        #
+        aux_onebaryon_ws_seed = aux_onebaryon_ws_seed_n*[0]
+        for i in range(0,aux_onebaryon_ws_npw):
+            factor = i*3
+            aux_onebaryon_ws_l[i] = int(data[theline+3+factor])
+            if aux_onebaryon_ws_samev0.upper() == 'YES' and i == 0:
+                aux_onebaryon_ws_seed[0] = float(data[theline+4+factor])
+                aux_onebaryon_ws_bounds = data[theline+5+factor]
+            elif aux_onebaryon_ws_samev0.upper() == 'NO':
+                aux_onebaryon_ws_seed[i] = float(data[theline+4+factor])
+                if i == 0:
+                    aux_onebaryon_ws_bounds = data[theline+5+factor]
                 else:
-                    onebaryon_ws_seed.append([0])
-            else:
-                if baryon_n == 1:
-                    onebaryon_ws_seed = onebaryon_ws_npw[k]*[0]
-                else:
-                    onebaryon_ws_seed.append(onebaryon_ws_npw[k]*[0])
+                    aux_onebaryon_ws_bounds += ',' + data[theline+5+factor]
         #
         if k == 0:
-            shift = 0
+            onebaryon_ws_l = [aux_onebaryon_ws_l]
+            onebaryon_ws_samev0 = [aux_onebaryon_ws_samev0]
+            onebaryon_ws_seed = aux_onebaryon_ws_seed
+            onebaryon_ws_bounds = aux_onebaryon_ws_bounds
         else:
-            shift = onebaryon_ws_npw[k-1]
-        for i in range(0,onebaryon_ws_npw[k]):
-            factor = i*3
-            onebaryon_ws_l[i+shift] = int(data[theline+3+factor+4*k])
-            if same_corrective_factor.upper() == 'YES' and k == 0 and i == 0:
-                onebaryon_ws_seed[i] = float(data[theline+4+factor])
+            onebaryon_ws_l.append(aux_onebaryon_ws_l)
+            onebaryon_ws_samev0.append(aux_onebaryon_ws_samev0)
             if same_corrective_factor.upper() == 'NO':
-                if onebaryon_ws_samev0[k].upper() == 'YES':
-                    onebaryon_ws_seed[shift+k] = [float(data[theline+4+factor])]
-                else:
-                    onebaryon_ws_seed[i] = float(data[theline+4+factor])
-                if i == 0:
-                    onebaryon_ws_bounds = data[theline+5+factor]
-                elif i > 0 and onebaryon_ws_samev0.upper() == 'NO':
-                    onebaryon_ws_bounds += ',' + data[theline+5+factor]
+                onebaryon_ws_seed += aux_onebaryon_ws_seed
+                onebaryon_ws_bounds += ',' + aux_onebaryon_ws_bounds
 #
 # Checkin if YN interactions will be optimized
 opt_yn = 0
@@ -357,6 +361,11 @@ print_twice("\nRunning GSM in %s"% gsm_directory)
 os.chdir(gsm_directory)
 seeds = []
 if opt_onebaryon_ws == 1:
+    # Check sizes
+    if same_corrective_factor.upper() == 'YES':
+        if len(onebaryon_ws_seed) > 1:
+            print_twice('The seed size should be one if you are going to use the same corrective factor for all baryons!')
+            exit()
     seeds += onebaryon_ws_seed
 if opt_yn == 1:
     seeds += yn_seed
@@ -410,7 +419,14 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: For each baryon -> 1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
+    VWS_NEUTRON:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
+    1
+    YES
+    0
+    40
+    (30,60)
+
+    VWS_LAMBDA:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
     1
     YES
     0
