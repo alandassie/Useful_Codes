@@ -333,6 +333,8 @@ if theline != None:
             one_proton_partialwaves = ast.literal_eval(one_proton_partialwaves)
             one_proton_npartialwaves = len(one_proton_partialwaves)
             one_proton_independent = data[theline+3].upper()
+            one_proton_seed = float(data[theline+4])
+            one_proton_bounds = data[theline+5]
     theline = searchline(calcfilename,"OPT_ONENEUTRON:")
     if theline != None:
         one_neutron_opt = 1
@@ -345,6 +347,8 @@ if theline != None:
             one_neutron_partialwaves = ast.literal_eval(one_neutron_partialwaves)
             one_neutron_npartialwaves = len(one_neutron_partialwaves)
             one_neutron_independent = data[theline+3].upper()
+            one_neutron_seed = float(data[theline+4])
+            one_neutron_bounds = data[theline+5]
 # Will two-body be optimized?
 twobody_opt = 0
 theline = searchline(calcfilename,"OPT_TWOBODY:")
@@ -357,6 +361,8 @@ if theline != None:
     for i in range(n_tb_interactions):
         print_twice('  Interaction %d: %s'% (i+1, data[theline+i+2]))
         tb_interactions.append( data[theline+i+2] )
+    tb_seed = float(data[theline+2+n_tb_interactions])
+    tb_bounds = data[theline+2+n_tb_interactions+1]
 # Will SEPENERGY or ENERGY be optimized?
 # theline = searchline(calcfilename,"OPTIMIZATION_OF:")
 # opt_sepenergy = 0
@@ -429,19 +435,24 @@ search = 'E(reference frame) :'
 # [ONEPROTONSEED x NUMBER_OF_PARTIAL_WAVES, ONENEUTRONSEED x NUMBER_OF_PARTIAL_WAVES, TO_SEED, TE_SEED, SO_SEED, SE_SEED, SOTO_SEED, SOTE_SEED, TTO_SEED, TTE_SEED]
 # For ONEBODY_SEED
 onebody_seed = []
+onebody_bounds = ''
 if onebody_opt == 1 :
     if one_proton_opt == 1:
+        onebody_bounds += one_proton_bounds
         if one_proton_independent == 'NO':
-            onebody_seed.append(1)
+            onebody_seed.append(one_proton_seed)
         else:
             for i in range(one_proton_npartialwaves):
-                onebody_seed.append(1)
+                onebody_seed.append(one_proton_seed)
     if one_neutron_opt == 1:
+        if onebody_bounds != '':
+            onebody_bounds += ','
+        onebody_bounds += one_neutron_bounds
         if one_neutron_independent == 'NO':
-            onebody_seed.append(1)
+            onebody_seed.append(one_neutron_seed)
         else:
             for i in range(one_neutron_npartialwaves):
-                onebody_seed.append(1)
+                onebody_seed.append(one_neutron_seed)
 # For TWOBODY_SEED
 if twobody_opt == 1:
     twobody_seed = n_tb_interactions * [1]
@@ -449,6 +460,10 @@ else:
     twobody_seed = []
 #
 seeds = onebody_seed + twobody_seed
+if onebody_bounds != '':
+    bounds = (eval(onebody_bounds + ',' + tb_bounds))
+else:
+    bounds = (eval(tb_bounds + ',' ))
 #
 # Read GSMCC input file
 with open(readfilename_CC,'r') as gsmin:
@@ -462,7 +477,7 @@ elif method == 'MINIMIZATION':
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
     elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
-        opt = minimize(f, seeds, method=mini_method)
+        opt = minimize(f, seeds, method=mini_method, bounds=bounds)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
     exit()
@@ -480,21 +495,27 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MINIMIZATION;BFGS
     
     OPT_ONEBODY: Define which one-body will be optimized
-    OPT_ONEPROTON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves
+    OPT_ONEPROTON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves; 4 - GLOBAL CF SEED; 5 - Bounds
     WS
     [0,1]
     YES
-    OPT_ONENEUTRON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves
+    1
+    (0.8,1.2)
+    OPT_ONENEUTRON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves; 4 - GLOBAL CF SEED; 5 - Bounds
     WS
     [0,1,2,3]
     NO
+    1
+    (0.8,1.2)
 
-    OPT_TWOBODY: 1 - number of TB interaction to opt; 2,.. - name of each as in GSMCC input
+    OPT_TWOBODY: 1 - number of TB interaction to opt; 2,.. - name of each as in GSMCC input; N+1 - GLOBAL CF SEED; N+2 - Bounds
     4
     (V0.NN.central.odd.triplet(S=1,T=1))
     (V0.NN.central.even.triplet(S=1,T=0))
     (V0.NN.central.odd.singlet(S=0,T=0))
     (V0.NN.central.even.singlet(S=0,T=1))
+    1
+    (0.8,1.2)
 
     JPI_STATES: 1 - JPi of each state to be optimized; 2 - index of the desired state
     3/2+,5/2+,5/2+,7/2+
