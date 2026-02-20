@@ -23,6 +23,7 @@ import math as m
 from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
+import re
 import ast
 
 # LOG FILE
@@ -94,52 +95,60 @@ def f(x):
         inputfile_lines = gsmin.read().split('\n')
     # 
     start_value = 0
-    if separate_optimization == 0:
-        # The order of X is [ONEPROTON_VAL, ONENEUTRON_VAL, TB_VAL]
-        k = 0
-        if onebody_opt == 1:
-            if one_proton_opt == 1:
-                # EDIT ONE PROTON
-                theline = searchline(readfilename_CC,"core.potential")
-                shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('proton') + 2
-                i = 0
-                k = 0
-                while i == 0:
-                    aux = inputfile_lines_start[theline + shift + k].split()
-                    if one_proton_partialwaves == 'ALL':
+    # The order of X is [ONEPROTON_VAL, ONENEUTRON_VAL, TB_VAL]
+    k = 0
+    if onebody_opt == 1:
+        if one_proton_opt == 1:
+            # EDIT ONE PROTON
+            theline = searchline(readfilename_CC,"core.potential")
+            shift = [line_aux.strip(' ') for line_aux in inputfile_lines[theline:theline+10]].index('proton') + 2
+            i = 0
+            k = 0
+            while i == 0:
+                aux = inputfile_lines_start[theline + shift + k].split()
+                if int(aux[0]) in one_proton_partialwaves:
+                    if one_proton_independent == 'YES':
+                        lwave_index = one_proton_partialwaves.index(int(aux[0]))
+                        aux_vo = float(aux[3])*x[start_value+lwave_index]
+                    else:
                         aux_vo = float(aux[3])*x[start_value]
-                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                    elif int(aux[0]) in one_proton_partialwaves:
-                        aux_vo = float(aux[3])*x[start_value]
-                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                    k += 1
-                    if inputfile_lines[theline + shift + k].split() == []:
-                        i = 1
-                start_value += 1
-            if one_neutron_opt == 1:
-                # EDIT ONE NEUTRON
-                theline = searchline(readfilename_CC,"core.potential")
-                shift = [x.strip(' ') for x in inputfile_lines[theline:theline+k+10]].index('neutron') + 2
-                i = 0
-                k = 0
-                while i == 0:
-                    aux = inputfile_lines_start[theline + shift + k].split()
-                    if one_neutron_partialwaves == 'ALL':
-                        aux_vo = float(aux[3])*x[start_value]
-                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                    elif int(aux[0]) in one_neutron_partialwaves:
-                        aux_vo = float(aux[3])*x[start_value]
-                        inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
-                    k += 1
-                    if inputfile_lines[theline + shift + k].split() == []:
-                        i = 1
-                start_value += 1
-        if twobody_opt == 1:
-            # EDIT TWO BODY INTERACTIONS
-            for i in range(n_tb_interactions):
-                theline = searchline(readfilename_CC, tb_interactions[i])
-                aux = float(inputfile_lines_start[theline].split()[0]) * x[start_value+i]
-                inputfile_lines[theline] = '  ' + str(aux) + ' ' + inputfile_lines_start[theline].split()[1]
+                    inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            start_value += 1
+        if one_neutron_opt == 1:
+            # EDIT ONE NEUTRON
+            theline = searchline(readfilename_CC,"core.potential")
+            shift = [x.strip(' ') for x in inputfile_lines[theline:theline+k+10]].index('neutron') + 2
+            i = 0
+            k = 0
+            while i == 0:
+                aux = inputfile_lines_start[theline + shift + k].split()
+                if int(aux[0]) in one_neutron_partialwaves:
+                    if one_neutron_independent == 'YES':
+                        lwave_index = one_neutron_partialwaves.index(int(aux[0]))
+                        if one_proton_opt == 1 and one_proton_independent == 'YES':
+                            aux_vo = float(aux[3])*x[one_proton_npartialwaves+lwave_index]
+                        elif one_proton_opt == 1 and one_proton_independent == 'NO':
+                            aux_vo = float(aux[3])*x[start_value+lwave_index]
+                        else:
+                            aux_vo = float(aux[3])*x[lwave_index]
+                    inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+str(aux_vo)+'  '+aux[4]
+                k += 1
+                if inputfile_lines[theline + shift + k].split() == []:
+                    i = 1
+            start_value += 1
+    if twobody_opt == 1:
+        # EDIT TWO BODY INTERACTIONS
+        for i in range(n_tb_interactions):
+            theline = searchline(readfilename_CC, tb_interactions[i])
+            shift_from_nucleons = 0
+            if one_proton_opt == 1 and one_proton_independent == 'YES': shift_from_nucleons += one_proton_npartialwaves
+            if one_neutron_opt == 1 and one_neutron_independent == 'YES': shift_from_nucleons += one_neutron_npartialwaves
+            if shift_from_nucleons == 0: shift_from_nucleons = start_value
+            aux = float(inputfile_lines_start[theline].split()[0]) * x[shift_from_nucleons+i]
+            inputfile_lines[theline] = '  ' + str(aux) + ' ' + inputfile_lines_start[theline].split()[1]
     #
     # Save and close GSMCC input file
     inputfile_aux = '\n'.join(inputfile_lines)
@@ -160,73 +169,50 @@ def f(x):
     with open(outfilename_CCi,'r') as gsmout:
         outputfile_lines = gsmout.read().split('\n')
     line_numbers = searchline_all(outfilename_CCi,search)
-    jpi = []
+    jpi_i = []
     ene_wid = []
-    j = 0
-    k = -1
     for line in line_numbers:
         auxjpi = outputfile_lines[line-10].split()[0]
-        # auxindex = outputfile_lines[line-10].split()[1].split('(')[1].split(')')[0]
-        if jpi == [] or auxjpi not in jpi:
-            jpi.append(auxjpi)
-            if j > 0:
-                auxiliar = list(zip(energy,width))
-                auxiliar.sort()
-                ene_wid.append(auxiliar)
-                print_twice('Calculated energies and widths for JPi=%s:'% jpi[k])
-                for i in range(len(auxiliar)):
-                    if i == len(auxiliar) - 1:
-                        print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]))
-                    else:
-                        print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]), end=' ')
-            energy = []
-            width = []
-            k += 1
-            # auxindex.append( int(auxindex) )
-        #
-        auxe = outputfile_lines[line]
-        ene = float(auxe.split(':')[1].split(' ')[1])
-        auxe_pole = outputfile_lines[line-4]
-        ene_pole = float(auxe_pole.split(':')[1].split(' ')[1])
-        auxw = outputfile_lines[line+1]
-        wid = float(auxw.split(':')[1].split(' ')[1])
-        # Only append when ene and ene_pole are close
-        if abs(ene - ene_pole) < 8: # Limit on 8 MeV
-            energy.append( ene )
-            width.append( wid )
-        else:
-            print_twice('OBS! The JPi=%s state with index %s differs from the pole approx more than 8 MeV!'% (auxjpi,j))
-            print_twice('E_pole = {0:10.6f}, E = {1:10.6f}'.format(ene_pole,ene))
-            energy.append( ene )
-            width.append( wid )
-        j += 1
-    auxiliar = list(zip(energy,width))
-    auxiliar.sort()
-    ene_wid.append(auxiliar)
-    print_twice('Calculated energies and widths for JPi=%s:'% jpi[k])
-    for i in range(len(auxiliar)):
-        if i == len(auxiliar) - 1:
-            print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]))
-        else:
-            print_twice(' E{0:d}={1:10.6f}, W{0:d}={2:10.6f};  '.format(i, auxiliar[i][0], auxiliar[i][1]), end=' ')
+        auxindex = re.findall(r'\((.*?)\)',outputfile_lines[line-10])[0]
+        jpi_i.append([auxjpi,auxindex])
+        auxene = float(outputfile_lines[line].split(':')[1].split(' ')[1])
+        wid = float(outputfile_lines[line+1].split(':')[1].split(' ')[1])
+        ene_wid.append([auxene,wid])
+    #
+    print_twice('Calculated energies and widths:')
+    for i, state in enumerate(zip(jpi_i,ene_wid)):
+        print_twice('  {0:s} ({1:s}) : E = {2:10.6f}, W = {3:10.6f};  '.format(state[0][0], state[0][1], state[1][0], state[1][1]))
+    print_twice(' ')
     #
     # Compare with the experimental energy or separation energy of the selected JPi states
     if opt_sepenergy == 1:
+        print("DEPRECATED!")
+        exit()
+        # res = 0
+        # for i in range(n_jpi_states):
+        #     if jpi_states[i] in jpi:
+        #         related_index = jpi.index(jpi_states[i])
+        #         calc_sep_energy = ene_wid[related_index][jpi_states_index[i][0]][0] - ene_wid[related_index][jpi_states_index[i][1]][0]
+        #         print_twice('Calculated separation energy for JPi={0:s}: {1:10.6f} MeV'.format(jpi_states[i],calc_sep_energy))
+        #         res_i = m.sqrt( abs(calc_sep_energy**2 - exp_value[i]**2) )
+        #         print_twice('Residue as sqrt(calc**2 - exp**2): {0:10.6f}'.format(res_i))
+        #         res += res_i
+        #     else:
+        #         print_twice('The state JPi=%s has not been calculated!!' % jpi_states[i])
+        # print_twice('Sum of calculated residues: {0:10.6f}'.format(res))
+    if opt_energy == 1:
         res = 0
-        for i in range(n_jpi_states):
-            if jpi_states[i] in jpi:
-                related_index = jpi.index(jpi_states[i])
-                calc_sep_energy = ene_wid[related_index][jpi_states_index[i][0]][0] - ene_wid[related_index][jpi_states_index[i][1]][0]
-                print_twice('Calculated separation energy for JPi={0:s}: {1:10.6f} MeV'.format(jpi_states[i],calc_sep_energy))
-                res_i = m.sqrt( abs(calc_sep_energy**2 - exp_value[i]**2) )
-                print_twice('Residue as sqrt(calc**2 - exp**2): {0:10.6f}'.format(res_i))
+        for i, jpi in enumerate(jpi_states):
+            index = jpi_states_index[i]
+            state = [jpi, str(index)]
+            if state in jpi_i:
+                calc_energy = ene_wid[jpi_i.index(state)][0]
+                delta_e = jpi_states_energy[i] - calc_energy
+                res_i = m.sqrt(abs(jpi_states_energy[i]**2 - calc_energy**2))
                 res += res_i
-            else:
-                print_twice('The state JPi=%s has not been calculated!!' % jpi_states[i])
-        print_twice('Sum of calculated residues: {0:10.6f}'.format(res))
-    # if opt_energy == 1:
-        # res = m.sqrt(abs(auxiliar[0][0]**2 - exp_value**2))
+                print_twice('For JPi: %s (%s) : Delta E = %s, Res = %s'% (jpi, index, delta_e, res_i))
     #
+    print_twice('Sum of calculated residues: {0:10.6f}'.format(res))
     # Check which optimizator we are using
     if method == 'NEWTON':
         print_twice('Finish iteration of Newton optimizer, x and f(x) must be of the same size!')
@@ -273,6 +259,8 @@ if parallelism_type == 'MPI':
     running_prefix = 'mpirun -np ' + parallelism_nodes + ' ./'
 elif parallelism_type == 'OPENMP':
     running_prefix = ' ./'
+elif parallelism_type == 'SLURM':
+    running_prefix = 'srun -N ' + parallelism_nodes + ' '
 else:
     print_twice('Parallelism must be MPI or OPENMP')
 # Checking if we need machinefile
@@ -327,15 +315,9 @@ else:
 #
 # Will one-body be optimized?
 onebody_opt = 0
-separate_optimization = 0
 theline = searchline(calcfilename,"OPT_ONEBODY:")
 if theline != None:
     onebody_opt = 1
-    separate_optimization = int(data[theline+1])
-    ##
-    if separate_optimization == 1:
-        print_twice('l-WAVE SEPARATE OPTIMIZATION IS NOT CODED YET!')
-        exit()
     ##
     one_proton_opt = 0
     one_neutron_opt = 0
@@ -348,11 +330,9 @@ if theline != None:
             print_twice('One proton WS will be optimized:')
             one_proton_partialwaves = data[theline+2]
             print_twice('  Partial waves to optimize: %s'% one_proton_partialwaves)
-            if one_proton_partialwaves == 'ALL' and separate_optimization == 1:
-                one_proton_npartialwaves = data[theline+3]
-            elif one_proton_partialwaves != 'ALL':
-                one_proton_partialwaves = ast.literal_eval(one_proton_partialwaves)
-                one_proton_npartialwaves = len(one_proton_partialwaves)
+            one_proton_partialwaves = ast.literal_eval(one_proton_partialwaves)
+            one_proton_npartialwaves = len(one_proton_partialwaves)
+            one_proton_independent = data[theline+3].upper()
     theline = searchline(calcfilename,"OPT_ONENEUTRON:")
     if theline != None:
         one_neutron_opt = 1
@@ -362,11 +342,9 @@ if theline != None:
             print_twice('One neutron WS will be optimized:')
             one_neutron_partialwaves = data[theline+2]
             print_twice('  Partial waves to optimize: %s'% one_neutron_partialwaves)
-            if one_neutron_partialwaves == 'ALL' and separate_optimization == 1:
-                one_neutron_npartialwaves = data[theline+3]
-            elif one_neutron_partialwaves != 'ALL':
-                one_neutron_partialwaves = ast.literal_eval(one_neutron_partialwaves)
-                one_neutron_npartialwaves = len(one_neutron_partialwaves)
+            one_neutron_partialwaves = ast.literal_eval(one_neutron_partialwaves)
+            one_neutron_npartialwaves = len(one_neutron_partialwaves)
+            one_neutron_independent = data[theline+3].upper()
 # Will two-body be optimized?
 twobody_opt = 0
 theline = searchline(calcfilename,"OPT_TWOBODY:")
@@ -387,23 +365,22 @@ if theline != None:
 #     opt_sepenergy = 1
 # elif data[theline+1] == 'ENERGY':
 #     opt_energy = 1
-# New version, only sep_energy will be optimized
-opt_energy = 0
-opt_sepenergy = 1
+# New version, only energy will be optimized
+opt_energy = 1
+opt_sepenergy = 0
 #
-# Reading JPi states to optimize their separation energies
+# Reading JPi states to optimize their energies
 theline = searchline(calcfilename,"JPI_STATES:")
 jpi_states = data[theline+1].split(',')
-print_twice("JPi states to optimize: %s"% jpi_states)
-n_jpi_states = len(jpi_states)
-# Then read pairs of each JPi state in the form [(a1,a2),(b1b2),..]
 jpi_states_index = ast.literal_eval( data[theline+2] )
-print_twice("Pairs of JPi states to optimize: %s"% jpi_states_index)
+print_twice("JPi states to optimize: ")
+print_twice(list(zip(jpi_states,jpi_states_index)))
+n_jpi_states = len(jpi_states)
 #
 # Reading experimental data
 theline = searchline(calcfilename,"EXPERIMENTALVALUES:")
-exp_value = [float(x) for x in data[theline+1].split(',')]
-print_twice("Experimental separation energy to optimize: %s"% exp_value)
+jpi_states_energy = [float(x) for x in data[theline+1].split(',')]
+print_twice("Experimental separation energy to optimize: %s"% jpi_states_energy)
 #
 #
 #
@@ -444,46 +421,27 @@ os.chdir(gsmcc_directory)
 #
 # Defining optimization part
 search = 'E(reference frame) :'
-# Open GSMCC input file
-# with open(readfilename_CC,'r') as gsmin:
-#     inputfile_lines = gsmin.read().split('\n')
-# if one_proton_opt == 1:
-#     # Line with the first proton partial wave
-#     aux = searchline(readfilename_CC,"core.potential")
-#     shift = [x.strip(' ') for x in inputfile_lines[theline:theline+10]].index('proton') + 2
-#     one_proton_line = aux + shift
-# # Line with the interaction corrective factor
-# if used_icf == 1:
-#     icf_line = searchline(readfilename_CC,"CC.interaction.corrective.factor.composite(s)")+2
-# # Lines with the cluster corrective factor
-# if used_ccf == 1:
-#     ccf_lines = np.zeros(ccf_numberofcluster,dtype=int)
-#     for i in range(0,ccf_numberofcluster):
-#         ccf_lines[i] = searchline(readfilename_CC,"CC.corrective.factor.%s.composite(s)"% ccf_clusters[i])+2
 #
 # The seed values are defined in the GSMCC input file
 # And since we are going to optimize an X value of proportion
 # to the GSMCC values, the seed for X is one
-# If separate optimization, the order of the array is 
+# The order of the array is 
 # [ONEPROTONSEED x NUMBER_OF_PARTIAL_WAVES, ONENEUTRONSEED x NUMBER_OF_PARTIAL_WAVES, TO_SEED, TE_SEED, SO_SEED, SE_SEED, SOTO_SEED, SOTE_SEED, TTO_SEED, TTE_SEED]
-# If not, the order of the array is
-# [ONEPROTONSEED, ONENEUTRONSEED, TB_SEED]
 # For ONEBODY_SEED
-if onebody_opt == 0 :
-    onebody_seed = []
-else:
-    if separate_optimization == 1:
-        if one_proton_opt == 1 and one_neutron_opt == 1:
-            onebody_seed = [1 for i in range(0,one_proton_npartialwaves)] + [1 for i in range(0,one_neutron_npartialwaves)] 
-        elif one_proton_opt == 1:
-            onebody_seed = [1 for i in range(0,one_proton_npartialwaves)]
-        elif one_neutron_opt == 1:
-            onebody_seed = [1 for i in range(0,one_neutron_npartialwaves)] 
-    else:
-        if one_proton_opt == 1 and one_neutron_opt == 1:
-            onebody_seed = [1, 1]
+onebody_seed = []
+if onebody_opt == 1 :
+    if one_proton_opt == 1:
+        if one_proton_independent == 'NO':
+            onebody_seed.append(1)
         else:
-            onebody_seed = [1]
+            for i in range(one_proton_npartialwaves):
+                onebody_seed.append(1)
+    if one_neutron_opt == 1:
+        if one_neutron_independent == 'NO':
+            onebody_seed.append(1)
+        else:
+            for i in range(one_neutron_npartialwaves):
+                onebody_seed.append(1)
 # For TWOBODY_SEED
 if twobody_opt == 1:
     twobody_seed = n_tb_interactions * [1]
@@ -521,14 +479,15 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;BFGS
     
-    OPT_ONEBODY: 0 means all the l-waves have the same proportion, 1 on contrary
-    0
-    OPT_ONEPROTON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize ALL or [0,1...]
+    OPT_ONEBODY: Define which one-body will be optimized
+    OPT_ONEPROTON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves
     WS
-    ALL
-    OPT_ONENEUTRON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize ALL or [0,1...]
+    [0,1]
+    YES
+    OPT_ONENEUTRON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves
     WS
-    ALL
+    [0,1,2,3]
+    NO
 
     OPT_TWOBODY: 1 - number of TB interaction to opt; 2,.. - name of each as in GSMCC input
     4
@@ -537,11 +496,11 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     (V0.NN.central.odd.singlet(S=0,T=0))
     (V0.NN.central.even.singlet(S=0,T=1))
 
-    JPI_STATES: 1 - JPi of each of the pair to optimize separation energies; 2 - pair of index for each JPi in format [(a1,a2),(b1b2),..]
-    0+,1-,2+
-    [(0,1),(0,1),(0,1)]
+    JPI_STATES: 1 - JPi of each state to be optimized; 2 - index of the desired state
+    3/2+,5/2+,5/2+,7/2+
+    [0,0,1,0]
 
-    EXPERIMENTALVALUES: Values of theseparation energy (no sign) in MeV of the desired JPi's
+    EXPERIMENTALVALUES: Values of the energy in MeV of the desired JPi's
     6,2.5,2.9
     _________________________________
 """
