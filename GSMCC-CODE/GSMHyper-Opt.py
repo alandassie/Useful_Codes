@@ -81,17 +81,19 @@ def searchlinefinal(file,phrase):
 def f(x):
     # 
     start_value = 0
-    if opt_onehyperon_ws == 1: # Optimizing WS part
-        print_twice('Optimizing 1Y WS part')
-        start_value = len(onehyperon_ws_l)
-        for i in range(0,hyperon_n):
-            onehyperon_ws_line = onehyperon_ws_lines[i]
-            for j in range(0,len(onehyperon_ws_l)):
-                l = onehyperon_ws_l[j]
-                aux1 = inputfile_lines[onehyperon_ws_line+l].split()
-                aux2 = str(x[j])
+    if opt_onebaryon_ws == 1: # Optimizing WS part
+        print_twice('Optimizing 1 baryon WS part')
+        start_value = len(onebaryon_ws_l)
+        for i in range(0,baryon_n):
+            onebaryon_ws_line = onebaryon_ws_lines[i]
+            for j in range(0,len(onebaryon_ws_l)):
+                l = onebaryon_ws_l[j]
+                aux1 = inputfile_lines[onebaryon_ws_line+l].split()
+                if onebaryon_ws_samev0.upper() == 'YES':
+                    aux2 = str(x[0])
+                else: aux2 = str(x[j])
                 #  
-                inputfile_lines[onehyperon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
+                inputfile_lines[onebaryon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
     if opt_yn == 1: # Optimizing YN interactions
         print_twice('Optimizing YN interactions')
         for i in range(0,yn_n):
@@ -218,30 +220,36 @@ if method == 'MINIMIZATION':
     mini_method = data[theline+1].split(';')[1]
 #
 # Look for optimized hyperons
-theline = searchline(readfilename,"OPTIMIZEDHYPERONS:")
-hyperon_n = int(data[theline+1])
-hyperon_names = []
-for i in range(0,hyperon_n):
-    hyperon_names.append(data[theline+2+i])
+theline = searchline(readfilename,"OPTIMIZEDBARYONS:")
+baryon_n = int(data[theline+1])
+baryon_names = []
+for i in range(0,baryon_n):
+    baryon_names.append(data[theline+2+i])
 #
-# Checking if one-hyperon WS interaction will be optimized
-opt_onehyperon_ws = 0
-onehyperon_ws_bounds = ''
+# Checking if one-baryon WS interaction will be optimized
+opt_onebaryon_ws = 0
 theline = searchline(readfilename,"VWSOPTIMIZATION:")
 if theline != None:
-    opt_onehyperon_ws = 1
-    onehyperon_ws_npw = int(data[theline+1])
-    onehyperon_ws_l = onehyperon_ws_npw*[0]
-    onehyperon_ws_seed = onehyperon_ws_npw*[0]
+    opt_onebaryon_ws = 1
+    onebaryon_ws_npw = int(data[theline+1])
+    onebaryon_ws_l = onebaryon_ws_npw*[0]
+    onebaryon_ws_samev0 = data[theline+2]
+    if onebaryon_ws_samev0.upper() == 'YES':
+        onebaryon_ws_seed = [0]
+    else:
+        onebaryon_ws_seed = onebaryon_ws_npw*[0]
     #
-    for i in range(0,onehyperon_ws_npw):
+    for i in range(0,onebaryon_ws_npw):
         factor = i*3
-        onehyperon_ws_l[i] = int(data[theline+2+factor])
-        onehyperon_ws_seed[i] = float(data[theline+3+factor])
-        if i == 0:
-            onehyperon_ws_bounds += data[theline+4+factor]
+        onebaryon_ws_l[i] = int(data[theline+3+factor])
+        if onebaryon_ws_samev0.upper() == 'YES':
+            onebaryon_ws_seed = [float(data[theline+4+factor])]
         else:
-            onehyperon_ws_bounds += ',' + data[theline+4+factor]
+            onebaryon_ws_seed[i] = float(data[theline+4+factor])
+        if i == 0:
+            onebaryon_ws_bounds = data[theline+5+factor]
+        elif i > 0 and onebaryon_ws_samev0.upper() == 'NO':
+            onebaryon_ws_bounds += ',' + data[theline+5+factor]
 #
 # Checkin if YN interactions will be optimized
 opt_yn = 0
@@ -294,13 +302,13 @@ with open(readfilename_GSM,'r') as gsmin:
 #
 # Defining optimization part
 search = 'Spectrum'
-# Lines with the 1Y WS part
-if opt_onehyperon_ws == 1:
+# Lines with the 1 baryon WS part
+if opt_onebaryon_ws == 1:
     theline = searchline(readfilename_GSM,"core.potential")
-    onehyperon_ws_lines = []
-    for i in range(0,hyperon_n):
-        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+30]].index(hyperon_names[i]) + 2
-        onehyperon_ws_lines.append(theline+shift)
+    onebaryon_ws_lines = []
+    for i in range(0,baryon_n):
+        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+30]].index(baryon_names[i]) + 2
+        onebaryon_ws_lines.append(theline+shift)
 # Lines with the YN interactions
 if opt_yn == 1:
     theline = searchline(readfilename_GSM,"Hamiltonian.interaction")
@@ -319,8 +327,8 @@ start_main = time.time()
 print_twice("\nRunning GSM in %s"% gsm_directory)
 os.chdir(gsm_directory)
 seeds = []
-if opt_onehyperon_ws == 1:
-    seeds += onehyperon_ws_seed
+if opt_onebaryon_ws == 1:
+    seeds += onebaryon_ws_seed
 if opt_yn == 1:
     seeds += yn_seed
 #
@@ -332,8 +340,8 @@ elif method == 'MINIMIZATION':
     if mini_method == 'TNC':
         opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
     elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
-        if opt_onehyperon_ws == 1:
-            bounds_opt = (eval(onehyperon_ws_bounds + ',' + yn_bounds))
+        if opt_onebaryon_ws == 1:
+            bounds_opt = (eval(onebaryon_ws_bounds + ',' + yn_bounds))
         else:
             bounds_opt = ( eval(yn_bounds + ',') )
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
@@ -364,14 +372,17 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
     MINIMIZATION;Nelder-Mead
 
-    OPTIMIZEDHYPERONS: 1 - NUMBER OF HYPERONS TO OPTIMIZE; 2,N - NAME OF EACH HYPERON
-    3
+    OPTIMIZEDBARYONS: 1 - NUMBER OF BARYONS TO OPTIMIZE; 2,N - NAME OF EACH BARYON
+    5
+    neutron
+    proton
     Lambda
     Sigma0
     Sigma-
 
-    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - l PARTIAL WAVE; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    VWSOPTIMIZATION: 1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
     1
+    YES
     0
     40
     (30,60)
