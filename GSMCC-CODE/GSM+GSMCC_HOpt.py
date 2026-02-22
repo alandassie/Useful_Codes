@@ -476,8 +476,8 @@ if method == 'NEWTON':
 elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
     if mini_method == 'TNC':
-        opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
-    elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
+        opt = minimize(f, seeds, method=mini_method, jac='2-point', bounds=bounds, options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
+    elif mini_method == 'Nelder-Mead' or mini_method == 'L-BFGS-B':
         opt = minimize(f, seeds, method=mini_method, bounds=bounds)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
@@ -492,8 +492,8 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
 """
     Example of input.GSM+GSMCC_HOpt file:
     _________________________________
-    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
-    MINIMIZATION;BFGS
+    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'L-BFGS-B')
+    MINIMIZATION;L-BFGS-B
     
     OPT_ONEBODY: Define which one-body will be optimized
     OPT_ONEPROTON: 1 - Part to optimize WS, SO, R0, AA; 2 - l-waves to optimize [0,1...]; 3 - INDEPENDENT l-waves; 4 - GLOBAL CF SEED; 5 - Bounds

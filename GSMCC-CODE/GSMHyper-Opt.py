@@ -91,11 +91,12 @@ def f(x):
             for j in range(0,len(aux_onebaryon_ws_l)):
                 l = aux_onebaryon_ws_l[j]
                 aux1 = inputfile_lines[onebaryon_ws_line+l].split()
+                aux3 = float(aux1[3])
                 if same_corrective_factor.upper() == 'YES':
-                    aux2 = str(x[0]*aux1[3])
+                    aux2 = str(x[0]*aux3)
                 elif aux_onebaryon_ws_samev0.upper() == 'YES':
-                    aux2 = str(x[start_value]*aux1[3])
-                else: aux2 = str(x[start_value+j]*aux1[3])
+                    aux2 = str(x[start_value]*aux3)
+                else: aux2 = str(x[start_value+j]*aux3)
                 #  
                 inputfile_lines[onebaryon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
             if aux_onebaryon_ws_samev0.upper() == 'NO':
@@ -107,7 +108,7 @@ def f(x):
         for i in range(0,yn_n):
             yn_line = yn_lines[i]
             aux1 = inputfile_lines[yn_line].split()
-            aux2 = str(x[start_value+i]*aux1[0])
+            aux2 = str(x[start_value+i]*float(aux1[0]))
             inputfile_lines[yn_line] = "  " + aux2 + "  " + aux1[1]
     # Print input array
     print_twice('\n All the interaction corrective factors strenghts:')
@@ -245,7 +246,7 @@ if theline != None:
 #
 # Checking if one-baryon WS interaction will be optimized
 for k in range(0,baryon_n):
-    theline = searchline(readfilename, "WS_" + baryon_names[i].upper() + ":")
+    theline = searchline(readfilename, "WS_" + baryon_names[k].upper() + ":")
     if theline != None:
         aux_onebaryon_ws_npw = int(data[theline+1])
         aux_onebaryon_ws_l = aux_onebaryon_ws_npw*[0]
