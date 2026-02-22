@@ -351,6 +351,7 @@ if theline != None:
             one_neutron_bounds = data[theline+5]
 # Will two-body be optimized?
 twobody_opt = 0
+tb_bounds = ''
 theline = searchline(calcfilename,"OPT_TWOBODY:")
 if theline != None:
     twobody_opt = 1
