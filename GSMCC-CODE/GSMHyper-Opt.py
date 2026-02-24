@@ -80,6 +80,10 @@ def searchlinefinal(file,phrase):
 # .-
 def f(x):
     # 
+    # Open GSM input file
+    with open(readfilename_GSM,'r') as gsmin:
+        inputfile_lines = gsmin.read().split('\n')
+    #
     start_value = 0
     if opt_onebaryon_ws == 1: # Optimizing WS part
         print_twice('Optimizing 1 baryon WS part')
@@ -90,12 +94,13 @@ def f(x):
             aux_onebaryon_ws_samev0 = onebaryon_ws_samev0[i]
             for j in range(0,len(aux_onebaryon_ws_l)):
                 l = aux_onebaryon_ws_l[j]
-                aux1 = inputfile_lines[onebaryon_ws_line+l].split()
+                aux1 = inputfile_lines_start[onebaryon_ws_line+l].split()
+                aux3 = float(aux1[3])
                 if same_corrective_factor.upper() == 'YES':
-                    aux2 = str(x[0]*aux1[3])
+                    aux2 = str(x[0]*aux3)
                 elif aux_onebaryon_ws_samev0.upper() == 'YES':
-                    aux2 = str(x[start_value]*aux1[3])
-                else: aux2 = str(x[start_value+j]*aux1[3])
+                    aux2 = str(x[start_value]*aux3)
+                else: aux2 = str(x[start_value+j]*aux3)
                 #  
                 inputfile_lines[onebaryon_ws_line+l] = "    " + str(l) + "   " + aux1[1] + "   " + aux1[2] + "   " + aux2 + "   " + aux1[4]
             if aux_onebaryon_ws_samev0.upper() == 'NO':
@@ -106,8 +111,8 @@ def f(x):
         print_twice('Optimizing YN interactions')
         for i in range(0,yn_n):
             yn_line = yn_lines[i]
-            aux1 = inputfile_lines[yn_line].split()
-            aux2 = str(x[start_value+i]*aux1[0])
+            aux1 = inputfile_lines_start[yn_line].split()
+            aux2 = str(x[start_value+i]*float(aux1[0]))
             inputfile_lines[yn_line] = "  " + aux2 + "  " + aux1[1]
     # Print input array
     print_twice('\n All the interaction corrective factors strenghts:')
@@ -245,7 +250,7 @@ if theline != None:
 #
 # Checking if one-baryon WS interaction will be optimized
 for k in range(0,baryon_n):
-    theline = searchline(readfilename, "WS_" + baryon_names[i].upper() + ":")
+    theline = searchline(readfilename, "WS_" + baryon_names[k].upper() + ":")
     if theline != None:
         aux_onebaryon_ws_npw = int(data[theline+1])
         aux_onebaryon_ws_l = aux_onebaryon_ws_npw*[0]
@@ -331,7 +336,7 @@ gsm_write = ' ' + gsm_write_aux*'>' + ' '
 #
 # Open GSM input file
 with open(readfilename_GSM,'r') as gsmin:
-    inputfile_lines = gsmin.read().split('\n')
+    inputfile_lines_start = gsmin.read().split('\n')
 #
 # Defining optimization part
 search = 'Spectrum'
@@ -340,12 +345,12 @@ if opt_onebaryon_ws == 1:
     theline = searchline(readfilename_GSM,"core.potential")
     onebaryon_ws_lines = []
     for i in range(0,baryon_n):
-        shift = [x.strip(' ') for x in inputfile_lines[theline:theline+30]].index(baryon_names[i]) + 2
+        shift = [x.strip(' ') for x in inputfile_lines_start[theline:theline+30]].index(baryon_names[i]) + 2
         onebaryon_ws_lines.append(theline+shift)
 # Lines with the YN interactions
 if opt_yn == 1:
     theline = searchline(readfilename_GSM,"Hamiltonian.interaction")
-    aux = [x.strip(' ') for x in inputfile_lines[theline:theline+20]]
+    aux = [x.strip(' ') for x in inputfile_lines_start[theline:theline+20]]
     yn_lines = []
     for i in range(0,yn_n):
         for j in range(20):
@@ -375,13 +380,13 @@ if method == 'NEWTON':
     opt = newton(f, seeds, tol=1e-10, maxiter=20, full_output=True)
 elif method == 'MINIMIZATION':
     print_twice('Using %s optimizer'% mini_method)
+    if opt_onebaryon_ws == 1:
+        bounds_opt = (eval(onebaryon_ws_bounds + ',' + yn_bounds))
+    else:
+        bounds_opt = ( eval(yn_bounds + ',') )
     if mini_method == 'TNC':
-        opt = minimize(f, seeds, method=mini_method, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
-    elif mini_method == 'Nelder-Mead' or mini_method == 'BFGS':
-        if opt_onebaryon_ws == 1:
-            bounds_opt = (eval(onebaryon_ws_bounds + ',' + yn_bounds))
-        else:
-            bounds_opt = ( eval(yn_bounds + ',') )
+        opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt, jac='2-point', options={ 'xtol' : 1e-3, 'finite_diff_rel_step': 0.001 }) # idea from https://stackoverflow.com/questions/20478949/how-to-force-larger-steps-on-scipy-optimize-functions
+    elif mini_method == 'Nelder-Mead' or mini_method == 'L-BFGS-B':
         opt = minimize(f, seeds, method=mini_method, bounds=bounds_opt)
 else:
     print_twice('METHOD must be NEWTON or MINIMIZATION!')
@@ -407,7 +412,7 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     MACHINEFILE: 1 - NAME OF THE FILE
     machinefile
 
-    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'BFGS')
+    OPTIMIZATIONMETHOD:  'NEWTON' or 'MINIMIZATION;' + ('TNC' or 'Nelder-Mead' or 'L-BFGS-B')
     MINIMIZATION;Nelder-Mead
 
     OPTIMIZEDBARYONS: 1 - NUMBER OF BARYONS TO OPTIMIZE; 2 - SAME CORR FACTOR FOR ALL BARYONS; 2,N - NAME OF EACH BARYON
@@ -419,21 +424,21 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     Sigma0
     Sigma-
 
-    VWS_NEUTRON:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
+    VWS_NEUTRON:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with MINIMIZATION)
     1
     YES
     0
-    40
-    (30,60)
+    1
+    (0.9,1.2)
 
-    VWS_LAMBDA:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with Nelder-Mead)
+    VWS_LAMBDA:  1 - NUMBER OF PARTIAL WAVES; 2 - SAME V0 FOR ALL PW; 2 - l PW; 3 - REAL SEED CF; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX) (Works with MINIMIZATION)
     1
     YES
     0
-    40
-    (30,60)
+    1
+    (0.9,1.2)
 
-    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - IF Nelder-Mead/BFGS, DEFINE BOUNDS IN A FORM (MIN,MAX)
+    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX)
     2
     V8a.SU3.f
     -0.2
