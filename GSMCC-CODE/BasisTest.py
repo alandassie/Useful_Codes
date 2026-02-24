@@ -169,7 +169,8 @@ if theline != None:
         print_twice('Projectile type must be one of the following: ', projectile_type_list)
         exit()
     print_twice('\n Doing Woods-Saxon+SO test for %s'% projectile_type)
-    parameters_type = int(data[theline+2]) # Parameter to change: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
+    theline = searchline(calcfilename,"PARAMETER:")
+    parameters_type = int(data[theline+1]) # Parameter to change: 0 - diffuseness (a0), 1 - radius (R0), 2 - WS depth (VO), 3 - spin-orbit depth (VSO)
     parameters_list = ['diffuseness (a0)', 'radius (R0)', 'WS depth (VO)', 'spin-orbit depth (VSO)']
     if parameters_type < 0 or parameters_type > 3:
         print_twice('Parameter to change must be 0, 1, 2 or 3')
@@ -209,6 +210,14 @@ if theline != None:
         for i in range(0,n_wf):
             jpi_wf.append( data[theline+2*(i+1)] )
             index_wf.append( data[theline+2*(i+1)+1] )
+
+# Is it cross-section calculation?
+calc_cc_cs = 0
+theline = searchline(calcfilename,"IT_IS_CS:")
+if theline != None:
+    print_twice('\nINFO: This is a cross-section calculation!')
+    calc_cc_cs = 1
+    type_cs = data[theline+1]
 
 # Start calculation
 start_main = time.time()
@@ -290,8 +299,8 @@ if theline != None:
                 else:
                     aux_vo = float(aux[parameters_type + 1]) + projectile_step
                 for ii in range(4):
-                    if parameters_type == ii:
-                        aux[i] = str(aux_vo)
+                    if parameters_type+1 == ii:
+                        aux[ii] = str(aux_vo)
                         inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             k += 1
             if inputfile_lines[theline + shift + k].split() == []:
@@ -309,6 +318,24 @@ if theline != None:
         end_gsmcc = time.time()
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
+        #
+        # If it is cross-section calculation, move files to log folder
+        if calc_cc_cs == 1:
+            logfolder_cs = logfolder + '/CS.' + str(j+1)
+            if not os.path.exists(logfolder_cs):
+                os.makedirs(logfolder_cs)
+            else:
+                for filename in os.listdir(logfolder_cs):
+                    # remove the files inside
+                    os.remove(f"{logfolder_cs}/{filename}")
+            print_twice("\nMoving cross-section calculation files to log folder %s"% logfolder_cs)
+            for filename in os.listdir(os.getcwd()):
+                if type_cs == 'radiative.capture':
+                    if ('astrophysical_factor_total_cross_section' in filename) or ('radiative_capture_d_sigma_dOmega' in filename):
+                        sp.run(['mv ' + filename + ' ' + logfolder_cs], shell=True)
+                if type_cs == 'scattering':
+                    if ('scattering_differential_cross_section' in filename) or ('scattering_excitation_function' in filename) or ('Phase_shifts_' in filename) or ('analyzing_power_' in filename):
+                        sp.run(['mv ' + filename + ' ' + logfolder_cs], shell=True)
 
 
 #
@@ -351,5 +378,8 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     2
     7/2+
     3
+    
+    IT IS CS: radiative.capture or scattering
+    radiative.capture
     _________________________________
 """
