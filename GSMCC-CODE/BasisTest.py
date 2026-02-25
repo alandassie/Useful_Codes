@@ -197,12 +197,15 @@ if theline != None:
 
 
 # Saving WF
+save_wf = 0
 theline = searchline(calcfilename,"SAVE_WF:")
 if theline != None:
     savingwf_info = data[theline+1]
     if savingwf_info == 'NO':
         print_twice('\nINFO: The channels WF of each calculation will not be saved')
     else:
+        print_twice('\nINFO: The channels WF of each calculation will be saved')
+        save_wf = 1
         theline = searchline(calcfilename,"WF_JPI_INDEX:")
         n_wf = int(data[theline+1])
         jpi_wf = []
@@ -318,6 +321,21 @@ if theline != None:
         end_gsmcc = time.time()
         time_gsmcc = end_gsmcc-start_gsmcc
         print_twice("Time to calculate: ",time_gsmcc, "s")
+        #
+        # If WF are saved, move them to log folder
+        if save_wf == 1:
+            logfolder_wf = logfolder + '/WF.' + str(j+1)
+            if not os.path.exists(logfolder_wf):
+                os.makedirs(logfolder_wf)
+            else:
+                for filename in os.listdir(logfolder_wf):
+                    # remove the files inside
+                    os.remove(f"{logfolder_wf}/{filename}")
+            print_twice("\nMoving WF files to log folder %s"% logfolder_wf)
+            for filename in os.listdir(os.getcwd()):
+                for i in range(0,n_wf):
+                    if ('CC_res_wf_' + jpi_wf[i].split('/')[0] + '|2' + jpi_wf[i][-1] + '_' + index_wf[i]+'.dat') in filename:
+                        sp.run(['mv ' + filename + ' ' + logfolder_wf], shell=True)
         #
         # If it is cross-section calculation, move files to log folder
         if calc_cc_cs == 1:
