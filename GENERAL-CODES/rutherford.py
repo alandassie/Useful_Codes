@@ -65,6 +65,51 @@ def rutherford_cross_section(theta_cm,
 
     return dsigma_domega_mb
 
+def cm_to_lab_cs(theta_cm,
+                 M1,
+                 M2,
+                 rutherford_cm_cs,
+                 theta_in_degrees=True):
+    """
+    Calculate Rutherford differential cross section
+    in Lab frame from data in CM frame.
+
+    Parameters
+    ----------
+    theta_cm : float
+        Center-of-mass scattering angle.
+        Degrees if theta_in_degrees=True, otherwise radians.
+    rutherford_cm_cs : array-like
+        Rutherford CS in the center-of-mass frame in mb/sr.
+    Z1, Z2 : int
+        Masses of projectile and target.
+    theta_in_degrees : bool, optional
+        If True, theta_cm is given in degrees (default: True).
+
+    Returns
+    -------
+    float
+        Differential [LAB] cross section in millibarn per steradian (mb/sr).
+    """
+
+    # Convert angle to radians if needed
+    if theta_in_degrees:
+        theta = np.deg2rad(theta_cm)
+    else:
+        theta = theta_cm
+
+    # Rutherford formula in fm^2/sr
+    rho = M1 / M2
+    numerator = (1 + (rho)**2 + 2 * rho * np.cos(theta))**(3/2)
+    denominator = abs(1 + rho * np.cos(theta))
+    
+    rutherford_lab_cs = rutherford_cm_cs * numerator / denominator    
+
+    return rutherford_lab_cs
+
+def cm_to_lab_energy(E_cm, M1, M2):
+    return E_cm * (1+M1 / M2)
+
 
 # Example: p particle on 6Li
 # theta = 90.03      # degrees
@@ -73,36 +118,25 @@ def rutherford_cross_section(theta_cm,
 # Z2 = 3            # 6Li nucleus
 
 # Calculation:
-# Charges
-Z1 = 2
-Z2 = 2
+# Charges and Masses
+Z1 = int(input("Enter charge of projectile: "))
+M1 = int(input("Enter mass A_p of projectile: "))
+Z2 = int(input("Enter charge of target: "))
+M2 = int(input("Enter mass A of target: "))
 # CM Energy
-E_cm = np.linspace(0.001, 3.501, 100)
-# Angles
-# theta = [54.77, 63.45, 73.95, 90.03, 104.6, 116.6, 125.3, 140.8]
-theta = [0.00001]
+e_cm_min = float(input("Enter minimum CM energy in MeV: "))
+e_cm_max = float(input("Enter maximum CM energy in MeV: "))
+E_cm = np.linspace(e_cm_min, e_cm_max, 200)
+E_lab = cm_to_lab_energy(E_cm, M1, M2)
+# CM Angles
+angles_aux = input("Enter CM angles in degrees (comma-separated): ")
+thetas_in_cm = [float(angle) for angle in angles_aux.split(",")]
 
-# sigma = rutherford_cross_section(theta, E_cm, Z1, Z2)
-
-# print(f"dσ/dΩ = {sigma:.6f} mb/sr")
-
-# elastic p on 6Li
-# Define angles
-# theta = [57.3, 68.3, 79, 90.75, 126.1, 159.12]
-
-# # Define energies
-# E_cm = np.linspace(0.001, 3.501, 100)
-
-# for theta_cm in theta:
-#     outputfile = open("rutherford_p_elastic_6Li_Theta%s.out"% (theta_cm), "a")
-#     for E in E_cm:
-#         sigma = rutherford_cross_section(theta_cm, E, 1, 3)
-#         outputfile.write("%f %f\n" % (E, sigma))
-#     outputfile.close()
-
-for theta_cm in theta:
-    outputfile = open("rutherford_Z1_%s_Z2_%s_Theta%s.out"% (Z1,Z2,theta_cm), "a")
-    for E in E_cm:
-        sigma = rutherford_cross_section(theta_cm, E, 3, 4)
-        outputfile.write("%f %e\n" % (E, sigma))
+for theta_cm in thetas_in_cm:
+    outputfile = open("rutherford_Z1_%s_Z2_%s_Theta%s.out"% (Z1,Z2,theta_cm), "w")
+    for i, E in enumerate(E_cm):
+        energy_lab = E_lab[i]
+        sigma = rutherford_cross_section(theta_cm, E, Z1, Z2)
+        sigma_lab = cm_to_lab_cs(theta_cm, M1, M2, sigma)
+        outputfile.write("%9.5f %9.5f %9.5f %9.5f\n" % (E, energy_lab, sigma, sigma_lab))
     outputfile.close()
