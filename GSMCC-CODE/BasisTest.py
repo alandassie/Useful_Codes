@@ -292,7 +292,7 @@ if theline != None:
                 else:
                     aux_vo = float(aux[parameters_type + 1]) + projectile_step
                 for ii in range(4):
-                    if parameters_type == ii:
+                    if parameters_type + 1 == ii:
                         aux[ii] = str(aux_vo)
                         inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             elif int(aux[0]) in projectile_lwave:
@@ -302,7 +302,7 @@ if theline != None:
                 else:
                     aux_vo = float(aux[parameters_type + 1]) + projectile_step
                 for ii in range(4):
-                    if parameters_type+1 == ii:
+                    if parameters_type + 1 == ii:
                         aux[ii] = str(aux_vo)
                         inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             k += 1
