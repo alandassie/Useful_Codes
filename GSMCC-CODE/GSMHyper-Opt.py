@@ -166,16 +166,31 @@ def f(x):
     print_twice('Calculated energies of the optimized states:')
     print_twice(auxiliar)
     # Compare with all the experimental energies
-    res_e = np.zeros(numberofstates)
-    for i in range(0,numberofstates):
-        expstate = state_read[i]
-        expene = expene_read[i]
-        for j in range(0,numberofstates):
-            if state[j] == expstate:
-                res_e[i] = ( expene - energy[j] )**2 / abs(expene) * stweig_read[i]
-                print_twice('State {0:s}, E Residue = {1:10.6f}'.format(expstate,res_e[i]))
-    res = np.sum(res_e)
-    print_twice('X^2 = {0:10.6f}'.format(res))
+    if opt_separation_energy == 0:
+        res_e = np.zeros(numberofstates)
+        for i in range(0,numberofstates):
+            expstate = state_read[i]
+            expene = expene_read[i]
+            for j in range(0,numberofstates):
+                if state[j] == expstate:
+                    res_e[i] = ( expene - energy[j] )**2 / abs(expene) * stweig_read[i]
+                    print_twice('State {0:s}, E Residue = {1:10.6f}'.format(expstate,res_e[i]))
+        res = np.sum(res_e)
+        print_twice('X^2 = {0:10.6f}'.format(res))
+    if opt_separation_energy == 1:
+        res_e = np.zeros(numberofpairs)
+        for i in range(0,numberofpairs):
+            expstate1 = pair_state1[i]
+            expstate2 = pair_state2[i]
+            expsepene = pair_separation_energy[i]
+            gsmstate1 = state.index(expstate1)
+            gsmstate2 = state.index(expstate2)
+            gsmsepene = abs(energy[gsmstate1] - energy[gsmstate2])
+            sepene = abs(expsepene - gsmsepene)
+            res_e[i] = ( expsepene - sepene )**2 / abs(expsepene)
+            print_twice('States {0:s} and {1:s}, Separation Energy Residue = {2:10.6f}'.format(expstate1,expstate2,res_e[i]))
+        res = np.sum(res_e)
+        print_twice('X^2 = {0:10.6f}'.format(res))
     #
     # Check which optimizator we are using
     if method == 'NEWTON':
@@ -340,6 +355,28 @@ for i in range(0,numberofstates):
     state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
     expene_read[i] = float(data[theline+4+factor])
     stweig_read[i] = float(data[theline+5+factor])
+# If experimental values are even, check if the separation energy should be optimized instead of the energy
+opt_separation_energy = 0
+if numberofstates%2 == 0:
+    theline = searchline(readfilename,"SEPARATIONENERGY:")
+    if theline != None:
+        opt_separation_energy = 1
+        numberofpairs = int(data[theline+1])
+        pair_state1 = []
+        pair_state2 = []
+        pair_separation_energy = np.zeros(numberofpairs)
+        for i in range(0,numberofpairs):
+            factor = i*2
+            aux_jpi = data[theline+2+factor].split(',')[0]
+            aux_index = data[theline+3+factor].split(',')[0]
+            pair_state1.append('%s(%s)'% (aux_jpi,aux_index) )
+            aux_jpi = data[theline+2+factor].split(',')[1]
+            aux_index = data[theline+3+factor].split(',')[1]
+            pair_state2.append('%s(%s)'% (aux_jpi,aux_index) )
+            #
+            ene_1 = expene_read[state_read.index(pair_state1[i])]
+            ene_2 = expene_read[state_read.index(pair_state2[i])]
+            pair_separation_energy[i] = abs(ene_1 - ene_2)
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
@@ -477,6 +514,11 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     0
     -135.705
     1
+    
+    SEPARATIONENERGY: 1 - Number of pairs of states to optimize the separation energy instead of the energy; for each pair -> 2 - JPi_1,Jpi_2; 3 - index_1,index_2
+    1
+    0+,2+
+    0,0
 
     GSM-exe:
     GSM-24.11.20-MPI.x
