@@ -186,8 +186,7 @@ def f(x):
             gsmstate1 = state.index(expstate1)
             gsmstate2 = state.index(expstate2)
             gsmsepene = abs(energy[gsmstate1] - energy[gsmstate2])
-            sepene = abs(expsepene - gsmsepene)
-            res_e[i] = ( expsepene - sepene )**2 / abs(expsepene)
+            res_e[i] = ( expsepene - gsmsepene )**2 / abs(expsepene)
             print_twice('States {0:s} and {1:s}, Separation Energy Residue = {2:10.6f}'.format(expstate1,expstate2,res_e[i]))
         res = np.sum(res_e)
         print_twice('X^2 = {0:10.6f}'.format(res))
@@ -360,6 +359,7 @@ opt_separation_energy = 0
 if numberofstates%2 == 0:
     theline = searchline(readfilename,"SEPARATIONENERGY:")
     if theline != None:
+        print_twice('Optimizing separation energy instead of energy')
         opt_separation_energy = 1
         numberofpairs = int(data[theline+1])
         pair_state1 = []
