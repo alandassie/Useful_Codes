@@ -19,8 +19,6 @@ from scipy.optimize import newton
 from scipy.optimize import minimize
 import numpy as np
 
-# LOG FILE
-logfile = os.getcwd() + '/' + 'log.GSMHyper_Opt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG NAME
 logname = 'log.WD_GSMHyper_Opt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 # LOG FOLDER
@@ -31,6 +29,8 @@ else:
     for filename in os.listdir(logfolder):
         # remove the files inside
         os.remove(f"{logfolder}/{filename}")
+# LOG FILE
+logfile = os.getcwd() + '/' + logname + '/' + 'log.GSMHyper_Opt.' + time.strftime( "%y.%m.%d-%H.%M", time.localtime() )
 
 # Declaration of funcitons
 def erease_output_file():
