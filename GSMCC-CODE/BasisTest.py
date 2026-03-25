@@ -292,7 +292,7 @@ if theline != None:
                 else:
                     aux_vo = float(aux[parameters_type + 1]) + projectile_step
                 for ii in range(4):
-                    if parameters_type == ii:
+                    if parameters_type + 1 == ii:
                         aux[ii] = str(aux_vo)
                         inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             elif int(aux[0]) in projectile_lwave:
@@ -302,7 +302,7 @@ if theline != None:
                 else:
                     aux_vo = float(aux[parameters_type + 1]) + projectile_step
                 for ii in range(4):
-                    if parameters_type+1 == ii:
+                    if parameters_type + 1 == ii:
                         aux[ii] = str(aux_vo)
                         inputfile_lines[theline + shift + k] = '    '+aux[0]+'   '+aux[1]+'   '+aux[2]+'    '+aux[3]+'  '+aux[4]
             k += 1
@@ -334,7 +334,7 @@ if theline != None:
             print_twice("\nMoving WF files to log folder %s"% logfolder_wf)
             for filename in os.listdir(os.getcwd()):
                 for i in range(0,n_wf):
-                    if ('CC_res_wf_' + jpi_wf[i].split('/')[0] + '|2' + jpi_wf[i][-1] + '_' + index_wf[i]+'.dat') in filename:
+                    if ('CC_res_wf_' + jpi_wf[i].split('/')[0] + 'I2' + jpi_wf[i][-1] + '_' + index_wf[i]+'.dat') in filename:
                         sp.run(['mv ' + filename + ' ' + logfolder_wf], shell=True)
         #
         # If it is cross-section calculation, move files to log folder
