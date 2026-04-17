@@ -13,6 +13,7 @@
 import subprocess as sp
 import time
 import os
+import re
 import math as m
 # from scipy.optimize import least_squares as least
 from scipy.optimize import newton
@@ -77,6 +78,17 @@ def searchlinefinal(file,phrase):
         else:
             l_num = None
     return l_num
+# .-
+def extract_e_value_as_float(s):
+    match = re.search(r'E:([\d.-]+)\s*MeV', s)
+    if match:
+        return float(match.group(1))
+    return None
+# .-
+def extract_spin_parity_and_parenthesis(s):
+    # Find all occurrences of patterns like '1/2+(0)', '0+(0)', etc.
+    matches = re.findall(r'([\d/+-]+)\s*\((\d+)\)', s)
+    return [(spin_parity, int(parenthesis)) for spin_parity, parenthesis in matches]
 # .-
 def f(x):
     # 
@@ -150,15 +162,16 @@ def f(x):
         if aux == []:
             i = 1
             continue
-        auxjpi = outputfile_lines[line+j].split()[3].split('(')[0]
-        auxindex = outputfile_lines[line+j].split()[3].split('(')[1].split(')')[0]
+        # auxjpi = outputfile_lines[line+j].split()[3].split('(')[0]
+        # auxindex = outputfile_lines[line+j].split()[3].split('(')[1].split(')')[0]
+        auxjpi, auxindex = extract_spin_parity_and_parenthesis(outputfile_lines[line+j])[0]
         aux_state = '%s(%s)'% (auxjpi,auxindex)
         print(auxjpi,auxindex,aux_state,state_read)
         if aux_state in state_read:
             state.append(aux_state)
             jpi.append(auxjpi)
             index.append(auxindex)
-            auxenergy = outputfile_lines[line+j].split()[4].split(':')[1]
+            auxenergy = extract_e_value_as_float(outputfile_lines[line+j])
             energy.append(float(auxenergy))
         j += 1
     #
