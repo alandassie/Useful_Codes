@@ -273,6 +273,7 @@ if theline != None:
     # If we are going to use the same corrective factor for all baryons, also the same for all partial waves
     if same_corrective_factor.upper() == 'YES':
         seeds_size = 1
+        print_twice('Same corrective factor for all optimized one-baryon interactions')
     baryon_names = []
     for i in range(0,baryon_n):
         baryon_names.append(data[theline+3+i])
@@ -288,6 +289,7 @@ for k in range(0,baryon_n):
         aux_onebaryon_npw = int(data[theline+2])
         aux_onebaryon_l = aux_onebaryon_npw*[0]
         aux_onebaryon_samev0 = data[theline+3]
+        print_twice('One-%s %s interaction of %s partial waves will be optimized'% (baryon_names[k],aux_onebaryon_type,aux_onebaryon_l))
         if aux_onebaryon_samev0.upper() == 'YES':
             aux_onebaryon_seed_n = 1
         else:
@@ -309,6 +311,7 @@ for k in range(0,baryon_n):
                     aux_onebaryon_bounds = data[theline+6+factor]
                 else:
                     aux_onebaryon_bounds += ',' + data[theline+6+factor]
+        print_twice('    Seeds: %s; Bounds: %s'% (aux_onebaryon_seed,aux_onebaryon_bounds))
         #
         if k == 0:
             onebaryon_type = [aux_onebaryon_type]
@@ -354,6 +357,7 @@ if theline != None:
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
+print_twice('Experimental data:')
 numberofstates = int(data[theline+1])
 state_read = []
 jpi_read = []
@@ -367,6 +371,7 @@ for i in range(0,numberofstates):
     state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
     expene_read[i] = float(data[theline+4+factor])
     stweig_read[i] = float(data[theline+5+factor])
+    print_twice('%s(%s) : E = %10.6f, Weight = %3.1f'% (jpi_read[i],index_read[i],expene_read[i],stweig_read[i]) )
 # If experimental values are even, check if the separation energy should be optimized instead of the energy
 opt_separation_energy = 0
 if numberofstates%2 == 0:
@@ -383,13 +388,16 @@ if numberofstates%2 == 0:
             aux_jpi = data[theline+2+factor].split(',')[0]
             aux_index = data[theline+3+factor].split(',')[0]
             pair_state1.append('%s(%s)'% (aux_jpi,aux_index) )
+            print_twice('Pair 1: %s(%s)'% (aux_jpi,aux_index))
             aux_jpi = data[theline+2+factor].split(',')[1]
             aux_index = data[theline+3+factor].split(',')[1]
             pair_state2.append('%s(%s)'% (aux_jpi,aux_index) )
+            print_twice('Pair 2: %s(%s)'% (aux_jpi,aux_index))
             #
             ene_1 = expene_read[state_read.index(pair_state1[i])]
             ene_2 = expene_read[state_read.index(pair_state2[i])]
             pair_separation_energy[i] = abs(ene_1 - ene_2)
+            print_twice('Pair experimental separation energy: %10.6f', pair_separation_energy[i])
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
