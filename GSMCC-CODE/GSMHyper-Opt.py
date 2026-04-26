@@ -289,7 +289,6 @@ for k in range(0,baryon_n):
         aux_onebaryon_npw = int(data[theline+2])
         aux_onebaryon_l = aux_onebaryon_npw*[0]
         aux_onebaryon_samev0 = data[theline+3]
-        print_twice('One-%s %s interaction of %s partial waves will be optimized'% (baryon_names[k],aux_onebaryon_type,aux_onebaryon_l))
         if aux_onebaryon_samev0.upper() == 'YES':
             aux_onebaryon_seed_n = 1
         else:
@@ -311,7 +310,8 @@ for k in range(0,baryon_n):
                     aux_onebaryon_bounds = data[theline+6+factor]
                 else:
                     aux_onebaryon_bounds += ',' + data[theline+6+factor]
-        print_twice('    Seeds: %s; Bounds: %s'% (aux_onebaryon_seed,aux_onebaryon_bounds))
+        print_twice('One-%s %s interaction of l=%s will be optimized'% (baryon_names[k],aux_onebaryon_type,aux_onebaryon_l))
+        print_twice('  Seeds: %s; Bounds: %s'% (aux_onebaryon_seed,aux_onebaryon_bounds))
         #
         if k == 0:
             onebaryon_type = [aux_onebaryon_type]
@@ -371,7 +371,7 @@ for i in range(0,numberofstates):
     state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
     expene_read[i] = float(data[theline+4+factor])
     stweig_read[i] = float(data[theline+5+factor])
-    print_twice('%s(%s) : E = %10.6f, Weight = %3.1f'% (jpi_read[i],index_read[i],expene_read[i],stweig_read[i]) )
+    print_twice('  %s(%s) : E = %10.6f, Weight = %3.1f'% (jpi_read[i],index_read[i],expene_read[i],stweig_read[i]) )
 # If experimental values are even, check if the separation energy should be optimized instead of the energy
 opt_separation_energy = 0
 if numberofstates%2 == 0:
