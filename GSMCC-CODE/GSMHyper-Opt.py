@@ -279,55 +279,55 @@ if theline != None:
         baryon_names.append(data[theline+3+i])
 #
 # Checking if one-baryon WS interaction will be optimized
-if opt_onebaryon == 1:
-    for k in range(0,baryon_n):
-        theline = searchline(readfilename, "OPT_" + baryon_names[k].upper() + ":")
-        if theline != None:
-            aux_onebaryon_type = data[theline+1] # Can be WS, SO for the moment
-            if aux_onebaryon_type == 'R0' or aux_onebaryon_type == 'AA':
-                print_twice('Only WS or SO fit for now')
-                exit()
-            aux_onebaryon_npw = int(data[theline+2])
-            aux_onebaryon_l = aux_onebaryon_npw*[0]
-            aux_onebaryon_samev0 = data[theline+3]
-            print_twice('One-%s %s interaction of %s partial waves will be optimized'% (baryon_names[k],aux_onebaryon_type,aux_onebaryon_l))
-            if aux_onebaryon_samev0.upper() == 'YES':
-                aux_onebaryon_seed_n = 1
-            else:
-                aux_onebaryon_seed_n = aux_onebaryon_npw
-            if aux_onebaryon_samev0.upper() == 'NO' and same_corrective_factor.upper() == 'YES':
-                print_twice('If the same corrective factor is used for all baryons, the same should be used for all WS partial waves')
-                exit()
-            #
-            aux_onebaryon_seed = aux_onebaryon_seed_n*[0]
-            for i in range(0,aux_onebaryon_npw):
-                factor = i*3
-                aux_onebaryon_l[i] = int(data[theline+4+factor])
-                if aux_onebaryon_samev0.upper() == 'YES' and i == 0:
-                    aux_onebaryon_seed[0] = float(data[theline+5+factor])
+for k in range(0,baryon_n):
+    theline = searchline(readfilename, "OPT_" + baryon_names[k].upper() + ":")
+    if theline != None:
+        aux_onebaryon_type = data[theline+1] # Can be WS, SO for the moment
+        if aux_onebaryon_type == 'R0' or aux_onebaryon_type == 'AA':
+            print_twice('Only WS or SO fit for now')
+            exit()
+        aux_onebaryon_npw = int(data[theline+2])
+        aux_onebaryon_l = aux_onebaryon_npw*[0]
+        aux_onebaryon_samev0 = data[theline+3]
+        if aux_onebaryon_samev0.upper() == 'YES':
+            aux_onebaryon_seed_n = 1
+        else:
+            aux_onebaryon_seed_n = aux_onebaryon_npw
+        if aux_onebaryon_samev0.upper() == 'NO' and same_corrective_factor.upper() == 'YES':
+            print_twice('If the same corrective factor is used for all baryons, the same should be used for all WS partial waves')
+            exit()
+        #
+        aux_onebaryon_seed = aux_onebaryon_seed_n*[0]
+        for i in range(0,aux_onebaryon_npw):
+            factor = i*3
+            aux_onebaryon_l[i] = int(data[theline+4+factor])
+            if aux_onebaryon_samev0.upper() == 'YES' and i == 0:
+                aux_onebaryon_seed[0] = float(data[theline+5+factor])
+                aux_onebaryon_bounds = data[theline+6+factor]
+            elif aux_onebaryon_samev0.upper() == 'NO':
+                aux_onebaryon_seed[i] = float(data[theline+5+factor])
+                if i == 0:
                     aux_onebaryon_bounds = data[theline+6+factor]
-                elif aux_onebaryon_samev0.upper() == 'NO':
-                    aux_onebaryon_seed[i] = float(data[theline+5+factor])
-                    if i == 0:
-                        aux_onebaryon_bounds = data[theline+6+factor]
-                    else:
-                        aux_onebaryon_bounds += ',' + data[theline+6+factor]
-            print_twice('    Seeds: %s; Bounds: %s'% (aux_onebaryon_seed,aux_onebaryon_bounds))
-            #
-            if k == 0:
-                onebaryon_type = [aux_onebaryon_type]
-                onebaryon_l = [aux_onebaryon_l]
-                onebaryon_samev0 = [aux_onebaryon_samev0]
-                onebaryon_seed = aux_onebaryon_seed
-                onebaryon_bounds = aux_onebaryon_bounds
-            else:
-                onebaryon_type.append(aux_onebaryon_type)
-                onebaryon_l.append(aux_onebaryon_l)
-                onebaryon_samev0.append(aux_onebaryon_samev0)
-                if same_corrective_factor.upper() == 'NO':
-                    onebaryon_seed += aux_onebaryon_seed
-                    onebaryon_bounds += ',' + aux_onebaryon_bounds
-    # Check that the same part of the one body will be optimized
+                else:
+                    aux_onebaryon_bounds += ',' + data[theline+6+factor]
+        print_twice('One-%s %s interaction of l=%s will be optimized'% (baryon_names[k],aux_onebaryon_type,aux_onebaryon_l))
+        print_twice('  Seeds: %s; Bounds: %s'% (aux_onebaryon_seed,aux_onebaryon_bounds))
+        #
+        if k == 0:
+            onebaryon_type = [aux_onebaryon_type]
+            onebaryon_l = [aux_onebaryon_l]
+            onebaryon_samev0 = [aux_onebaryon_samev0]
+            onebaryon_seed = aux_onebaryon_seed
+            onebaryon_bounds = aux_onebaryon_bounds
+        else:
+            onebaryon_type.append(aux_onebaryon_type)
+            onebaryon_l.append(aux_onebaryon_l)
+            onebaryon_samev0.append(aux_onebaryon_samev0)
+            if same_corrective_factor.upper() == 'NO':
+                onebaryon_seed += aux_onebaryon_seed
+                onebaryon_bounds += ',' + aux_onebaryon_bounds
+# Check that the same part of the one body will be optimized
+if opt_onebaryon == 1:
     aux = all(x == onebaryon_type[0] for x in onebaryon_type)
     if aux == False:
         print_twice('For OB, the same part of the interaction should be optimized on every baryon')
@@ -371,7 +371,7 @@ for i in range(0,numberofstates):
     state_read.append( '%s(%s)'% (jpi_read[i],index_read[i]) )
     expene_read[i] = float(data[theline+4+factor])
     stweig_read[i] = float(data[theline+5+factor])
-    print_twice('%s(%s) : E = %10.6f, Weight = %3.1f'% (jpi_read[i],index_read[i],expene_read[i],stweig_read[i]) )
+    print_twice('  %s(%s) : E = %10.6f, Weight = %3.1f'% (jpi_read[i],index_read[i],expene_read[i],stweig_read[i]) )
 # If experimental values are even, check if the separation energy should be optimized instead of the energy
 opt_separation_energy = 0
 if numberofstates%2 == 0:
