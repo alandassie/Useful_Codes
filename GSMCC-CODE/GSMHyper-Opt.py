@@ -362,6 +362,8 @@ if theline != None:
             yn_bounds += data[theline+5+factor]
         else:
             yn_bounds += ',' + data[theline+5+factor]
+        print_twice('Two-baryon interaction %s will be optimized'% (yn_names[i]))
+        print_twice('  Seed: %s; Bounds: %s'% (yn_seed[i],data[theline+5+factor]))
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
