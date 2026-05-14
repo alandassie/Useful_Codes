@@ -127,7 +127,10 @@ def f(x):
         for i in range(0,yn_n):
             yn_line = yn_lines[i]
             aux1 = inputfile_lines_start[yn_line].split()
-            aux2 = str(x[start_value+i]*float(aux1[0]))
+            if same_corrective_factor_tb.upper() == 'YES':
+                aux2 = str(x[start_value]*float(aux1[0]))
+            else:
+                aux2 = str(x[start_value+i]*float(aux1[0]))
             inputfile_lines[yn_line] = "  " + aux2 + "  " + aux1[1]
     # Print input array
     print_twice('\n All the interaction corrective factors strenghts:')
@@ -342,18 +345,23 @@ opt_yn = 0
 yn_bounds = ''
 theline = searchline(readfilename,"YNOPTIMIZATION:")
 if theline != None:
+    print_twice('Two-baryon interaction will be optimized') 
     opt_yn = 1
     yn_n = int(data[theline+1])
     yn_names = []
     yn_seed = yn_n*[0]
+    same_corrective_factor_tb = data[theline+2]
+    if same_corrective_factor_tb.upper() == 'YES':
+        seeds_size = 1
+        print_twice('Same corrective factor for all optimized two-baryon interactions')
     for i in range(0,yn_n):
         factor = i*3
-        yn_names.append(data[theline+2+factor])
-        yn_seed[i] = float(data[theline+3+factor])
+        yn_names.append(data[theline+3+factor])
+        yn_seed[i] = float(data[theline+4+factor])
         if i == 0:
-            yn_bounds += data[theline+4+factor]
+            yn_bounds += data[theline+5+factor]
         else:
-            yn_bounds += ',' + data[theline+4+factor]
+            yn_bounds += ',' + data[theline+5+factor]
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
@@ -449,6 +457,11 @@ if opt_onebaryon == 1:
             exit()
     seeds += onebaryon_seed
 if opt_yn == 1:
+    # Check sizes
+    if same_corrective_factor_tb.upper() == 'YES':
+        if len(yn_seed) > 1:
+            print_twice('The seed size should be one if you are going to use the same corrective factor for all tb interactions!')
+            exit()
     seeds += yn_seed
 #
 if method == 'NEWTON':
@@ -516,8 +529,9 @@ print_twice("\n\nAll calculations lasted: ", time_main, "s")
     1
     (0.9,1.2)
 
-    YNOPTIMIZATION: 1- Number of YN interaction; for each YN interaction -> 2 - NAME; 3 - SEED; 4 - DEFINE BOUNDS IN A FORM (MIN,MAX)
+    YNOPTIMIZATION: 1- Number of YN interaction, 2 - SAME CORRECTIVE FACTOR; for each YN interaction -> 3 - NAME; 4 - SEED; 5 - DEFINE BOUNDS IN A FORM (MIN,MAX)
     2
+    YES
     V8a.SU3.f
     -0.2
     (-1,1)
