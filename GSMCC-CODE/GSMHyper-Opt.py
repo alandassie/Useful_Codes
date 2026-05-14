@@ -441,10 +441,10 @@ if opt_onebaryon == 1:
 # Lines with the YN interactions
 if opt_yn == 1:
     theline = searchline(readfilename_GSM,"Hamiltonian.interaction")
-    aux = [x.strip(' ') for x in inputfile_lines_start[theline:theline+20]]
+    aux = [x.strip(' ') for x in inputfile_lines_start[theline:theline+40]]
     yn_lines = []
     for i in range(0,yn_n):
-        for j in range(20):
+        for j in range(40):
             if yn_names[i] in aux[j]:
                 shift = j
                 break
