@@ -352,18 +352,23 @@ if theline != None:
     yn_seed = yn_n*[0]
     same_corrective_factor_tb = data[theline+2]
     if same_corrective_factor_tb.upper() == 'YES':
-        seeds_size = 1
+        yn_seed = [0]
         print_twice('Same corrective factor for all optimized two-baryon interactions')
     for i in range(0,yn_n):
         factor = i*3
         yn_names.append(data[theline+3+factor])
-        yn_seed[i] = float(data[theline+4+factor])
-        if i == 0:
-            yn_bounds += data[theline+5+factor]
-        else:
-            yn_bounds += ',' + data[theline+5+factor]
         print_twice('Two-baryon interaction %s will be optimized'% (yn_names[i]))
-        print_twice('  Seed: %s; Bounds: %s'% (yn_seed[i],data[theline+5+factor]))
+        if same_corrective_factor_tb.upper() == 'YES' and i == 0:
+            yn_seed[0] = float(data[theline+4+factor])
+            yn_bounds = data[theline+5+factor]
+            print_twice('  Seed: %s; Bounds: %s'% (yn_seed[i],data[theline+5+factor]))
+        elif same_corrective_factor_tb.upper() == 'NO':
+            yn_seed[i] = float(data[theline+4+factor])
+            if i == 0:
+                yn_bounds += data[theline+5+factor]
+            else:
+                yn_bounds += ',' + data[theline+5+factor]
+            print_twice('  Seed: %s; Bounds: %s'% (yn_seed[i],data[theline+5+factor]))
 #
 # Reading experimental data
 theline = searchline(readfilename,"EXPERIMENTALVALUES:")
@@ -407,7 +412,7 @@ if numberofstates%2 == 0:
             ene_1 = expene_read[state_read.index(pair_state1[i])]
             ene_2 = expene_read[state_read.index(pair_state2[i])]
             pair_separation_energy[i] = abs(ene_1 - ene_2)
-            print_twice('Pair experimental separation energy: %10.6f', pair_separation_energy[i])
+            print_twice('Pair experimental separation energy: %10.6f'% pair_separation_energy[i])
 #
 # Executable GSM file
 theline = searchline(readfilename,"GSM-exe:")
